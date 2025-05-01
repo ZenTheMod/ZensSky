@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent;
 using ZensSky.Common.DataStructures;
 
@@ -6,6 +7,36 @@ namespace ZensSky.Common.Utilities;
 
 public static class DrawingUtils
 {
+    #region Pixelated SpriteBatch
+
+    public static Matrix HalfScale => Matrix.CreateScale(0.5f);
+
+        // This is pretty bad shorthand.
+            // TODO: Fix this.
+    public static void BeginToggledHalfScale(this SpriteBatch spriteBatch, SpriteSortMode sortMode, BlendState blendState, bool usingHalf)
+    {
+        if (usingHalf)
+            spriteBatch.BeginHalfScale(sortMode, blendState);
+        else
+            spriteBatch.Begin(sortMode, blendState);
+    }
+
+    public static void BeginToggledHalfScale(this SpriteBatch spriteBatch, SpriteSortMode sortMode, BlendState blendState, SamplerState samplerState, bool usingHalf)
+    {
+        if (usingHalf)
+            spriteBatch.BeginHalfScale(sortMode, blendState, samplerState);
+        else
+            spriteBatch.Begin(sortMode, blendState, samplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise);
+    }
+
+    public static void BeginHalfScale(this SpriteBatch spriteBatch, SpriteSortMode sortMode, BlendState blendState) =>
+        spriteBatch.Begin(sortMode, blendState, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, HalfScale);
+
+    public static void BeginHalfScale(this SpriteBatch spriteBatch, SpriteSortMode sortMode, BlendState blendState, SamplerState samplerState) =>
+        spriteBatch.Begin(sortMode, blendState, samplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, HalfScale);
+
+    #endregion
+
     #region SpriteBatchSnapshot
 
     /// <summary>

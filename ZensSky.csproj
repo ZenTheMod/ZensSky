@@ -33,6 +33,11 @@
 	<ItemGroup>
 		<EffectFiles Include="**/*.fx" />
 	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="Assets\Textures\MagicPixel.png" />
+	  <None Remove="Assets\Textures\NotSoMagicPixel.png" />
+	  <None Remove="Assets\Textures\UI\LockedSettingsToggle.png" />
+	</ItemGroup>
 
 	<!-- Locate FXC (My shader compiler of choice) -->
 	<PropertyGroup>

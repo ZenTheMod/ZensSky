@@ -1,2 +1,40 @@
-# This file will automatically update with entries for new content after a build and reload.
+Configs: {
+	SkyConfig: {
+		DisplayName: Sky Config
 
+		MinimizeRenderTargetUsage: {
+			Label: Minimize Render Target Usage
+			Tooltip: ""
+		}
+
+		Headers: {
+			SunMoon: Sun Moon Header
+			Stars: Stars Header
+		}
+
+		SunAndMoonRework: {
+			Label: Sun And Moon Rework
+			Tooltip: ""
+		}
+
+		PixelatedSunAndMoon: {
+			Label: Pixelated Sun And Moon
+			Tooltip: ""
+		}
+
+		TransparentMoonShadow: {
+			Label: Transparent Moon Shadow
+			Tooltip: ""
+		}
+
+		PixelatedStars: {
+			Label: Pixelated Stars
+			Tooltip: ""
+		}
+
+		VanillaStyleStars: {
+			Label: Vanilla Style Stars
+			Tooltip: ""
+		}
+	}
+}
