@@ -14,6 +14,7 @@ My attempt at a more accurate sky.
 [h3]This mod is [u]required on all clients and the server to work[/u] due to me wanting it to be as accurate as possible for all players.[/h3]
 This is also because I plan to use this mod as part of a larger content heavy mod in the future.
 
-Report any issues to this mod's [url=WhateverLink.bleh]GitHub page[/url] or send me a DM on Discord: [b]@z_e_n_.[/b]
+Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url] or send me a DM on Discord: [b]@z_e_n_.[/b]
 
 [h2]✦ For Mod Developers ✦[/h2]
+

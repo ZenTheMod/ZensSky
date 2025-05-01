@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
@@ -8,9 +8,41 @@
 		
 	</PropertyGroup>
 
-	<!-- References -->
+	<!-- Hide this pesky warning -->
+	<PropertyGroup>
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+	</PropertyGroup>
+
+	<!-- Allow nullable types, used for our SpriteBatchSnapshot implementation -->
+	<PropertyGroup>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<!-- Publicizer -->
 	<ItemGroup>
+		<PackageReference Include="Krafs.Publicizer" PrivateAssets="true" Version="2.2.1" />
+		<!-- Publicize the tModLoader API -->
+		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
+		<!-- Publicize FNA so we can access SpriteBatch's hidden fields for our SpriteBatchSnapshot struct,
+      Alternatively you could cache the FieldInfo manually -->
+		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
+
+	<!-- Locate all effect files -->
+	<ItemGroup>
+		<EffectFiles Include="**/*.fx" />
+	</ItemGroup>
+
+	<!-- Locate FXC (My shader compiler of choice) -->
+	<PropertyGroup>
+		<FxcCompilerPath>./Assets/Effects/Compiler/fxc.exe</FxcCompilerPath>
+	</PropertyGroup>
+
+	<!-- Effect File Compilation -->
+	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
+		<!-- Echo here so it logs which file is being compiled -->
+		<Exec Command="@(EffectFiles->'echo &quot;-----Compiling effect %(RecursiveDir)%(FileName)%(Extension)-----&quot; &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+	</Target>
 
 </Project>
