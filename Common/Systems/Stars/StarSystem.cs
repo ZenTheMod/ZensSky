@@ -21,12 +21,8 @@ public enum SupernovaProgress : byte
 
 public sealed class StarSystem : ModSystem
 {
-    public static bool CanDrawStars { get; private set; }
-    public const int StarCount = 900;
-    public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
-    public static readonly byte[] Supernovae = new byte[StarCount];
-    public static float StarRotation { get; private set; }
-    public static float StarAlpha { get; private set; }
+    #region Private Fields
+
     private const string SupernovaeTagKey = "Supernovae";
     private const string RotationTagKey = "StarRotation";
     private const float DawnTime = 6700f;
@@ -39,6 +35,25 @@ public sealed class StarSystem : ModSystem
     private const int DefaultStarGenerationSeed = 100;
     private static int StarGenerationSeed;
 
+    #endregion
+
+    #region Public Fields
+
+    public static float TemporaryStarAlpha { get; set; }
+
+    public static bool CanDrawStars { get; private set; }
+    public const int StarCount = 1200;
+
+    public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
+    public static readonly byte[] Supernovae = new byte[StarCount];
+
+    public static float StarRotation { get; private set; }
+    public static float StarAlpha { get; private set; }
+
+    #endregion
+
+    #region Loading
+
     public override void Load()
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
@@ -47,6 +62,13 @@ public sealed class StarSystem : ModSystem
     }
 
     public override void Unload() => On_Star.UpdateStars -= UpdateStarFields;
+
+    public override void PostSetupContent() => CanDrawStars = true;
+
+    #endregion
+
+        // TODO: Supernovae updating.
+    #region Updating
 
     private void UpdateStarFields(On_Star.orig_UpdateStars orig)
     {
@@ -59,12 +81,19 @@ public sealed class StarSystem : ModSystem
         float dayRateDivisor = Main.gameMenu ? MainMenuDayRateDivisor : GameDayRateDivisor;
         StarRotation += (float)(Main.dayRate / dayRateDivisor);
 
-        StarAlpha = CalculateStarAlpha();
+        if (TemporaryStarAlpha != -1)
+            StarAlpha = TemporaryStarAlpha;
+        else
+            StarAlpha = CalculateStarAlpha();
+
+        TemporaryStarAlpha = -1;
 
             // ShootingStarSystem.Update();
     }
 
-    public override void PostSetupContent() => CanDrawStars = true;
+    #endregion
+
+    #region Saving and Syncing
 
     public override void OnWorldLoad()
     {
@@ -103,6 +132,10 @@ public sealed class StarSystem : ModSystem
 
     public override void NetSend(BinaryWriter writer)
     {
+            // Because this mod uses 'side = NoSync' in the build.txt file we have to account for it.
+        if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
+            return;
+
         writer.Write(Supernovae);
         writer.Write(StarRotation);
     }
@@ -124,7 +157,9 @@ public sealed class StarSystem : ModSystem
         }
     }
 
-    private static void GenerateStars()
+    #endregion
+
+    public static void GenerateStars()
     {
         UnifiedRandom rand = new(StarGenerationSeed);
 
