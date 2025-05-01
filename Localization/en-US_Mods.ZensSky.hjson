@@ -2,39 +2,52 @@ Configs: {
 	SkyConfig: {
 		DisplayName: Sky Config
 
-		MinimizeRenderTargetUsage: {
-			Label: Minimize Render Target Usage
-			Tooltip: ""
+		Headers: {
+			SunMoon: Sun and Moon
+			Stars: Stars
 		}
 
-		Headers: {
-			SunMoon: Sun Moon Header
-			Stars: Stars Header
+		MinimizeRenderTargetUsage: {
+			Label: "[i:751] Sky Optimizations"
+			Tooltip:
+			'''
+			Trades quality for performance. Often runs faster on lower-end machines.
+			[c/FF0000:Disables sky pixelation.]
+			'''
 		}
 
 		SunAndMoonRework: {
-			Label: Sun And Moon Rework
-			Tooltip: ""
+			Label: "[i:237] Sun And Moon Overhaul"
+			Tooltip: If the visual overhaul of the sun and moon is enabled or not.
 		}
 
 		PixelatedSunAndMoon: {
-			Label: Pixelated Sun And Moon
-			Tooltip: ""
+			Label: "[i:75] Pixelated Sun and Moon"
+			Tooltip:
+				'''
+				If the sun/moon is pixelated when drawn. 
+				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
+				'''
 		}
 
 		TransparentMoonShadow: {
-			Label: Transparent Moon Shadow
-			Tooltip: ""
+			Label: "[i:485] Transparent Moon Shadow"
+			Tooltip:
+				'''
+				If the moons shadow is transparent to replicate the look of the current terraria moon sprites. 
+				(sorry if you've just learnt about this now) 
+				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
+				'''
 		}
 
 		PixelatedStars: {
-			Label: Pixelated Stars
-			Tooltip: ""
+			Label: "[i:184] Pixelated Stars"
+			Tooltip: If stars are pixelated when drawn.
 		}
 
 		VanillaStyleStars: {
-			Label: Vanilla Style Stars
-			Tooltip: ""
+			Label: "[i:184] Vanilla Styled Stars"
+			Tooltip: If stars are drawn with vanillas textures.
 		}
 	}
 }

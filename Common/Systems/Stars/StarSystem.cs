@@ -8,6 +8,8 @@ using Terraria.Utilities;
 using Terraria;
 using ZensSky.Common.DataStructures;
 using static ZensSky.Common.DataStructures.InteractableStar;
+using Terraria.UI.Chat;
+using Terraria.Chat;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -153,7 +155,8 @@ public sealed class StarSystem : ModSystem
         }
         catch (Exception ex)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error($"error: {ex.Message}");
+            Main.NewText($"Failed to sync stars: {ex.Message}", Color.Red);
+            ModContent.GetInstance<ZensSky>().Logger.Error($"Failed to sync stars: {ex.Message}");
         }
     }
 
