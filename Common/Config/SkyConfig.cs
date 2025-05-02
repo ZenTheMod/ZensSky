@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
+using ZensSky.Common.Config.Elements;
 
 namespace ZensSky.Common.Config;
 
@@ -27,6 +28,10 @@ public class SkyConfig : ModConfig
     [DefaultValue(false)]
     [CustomModConfigItem(typeof(PixelatedSunAndMoonLockedBoolElement))]
     public bool PixelatedSunAndMoon;
+    
+    [DefaultValue(true)]
+    [CustomModConfigItem(typeof(EclipseLocalizedBoolElement))]
+    public bool EclipseMode;
 
     [DefaultValue(false)]
     [CustomModConfigItem(typeof(TransparentMoonShadowLockedBoolElement))]

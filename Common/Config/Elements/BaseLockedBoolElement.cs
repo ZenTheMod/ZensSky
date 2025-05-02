@@ -53,7 +53,7 @@ public abstract class BaseLockedBoolElement : ConfigElement<bool>
         string text = Value ? Lang.menu[126].Value : Lang.menu[124].Value; // On / Off
 
         if (Locked)
-            text += " " + Language.GetTextValue("Mods.WizenkleBoss.Configs.Locked");
+            text += " " + Language.GetTextValue("Mods.ZensSky.Configs.Locked");
 
         float offset = Locked ? LockedOffset : UnlockedOffset;
 

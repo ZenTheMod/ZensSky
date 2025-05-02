@@ -30,6 +30,17 @@ Configs: {
 				'''
 		}
 
+		EclipseMode: {
+			Label: "[i:2767] Eclipse Visual"
+			Tooltip:
+				'''
+				Controls which visual is used for eclipses.
+				Right click to swap to the Eclipse menu style to preview.
+				'''
+			NameTrue: Veins
+			NameFalse: Moon
+		}
+
 		TransparentMoonShadow: {
 			Label: "[i:485] Transparent Moon Shadow"
 			Tooltip:
@@ -50,6 +61,8 @@ Configs: {
 			Tooltip: If stars are drawn with vanillas textures.
 		}
 	}
+
+	Locked: - Locked
 }
 
 MenuStyles.Eclipse: Eclipse

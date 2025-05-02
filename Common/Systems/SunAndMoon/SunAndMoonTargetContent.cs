@@ -20,14 +20,8 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
 
     private const int SunTopBuffer = 50;
 
-    private const float PrimaryFlareScaleLength = 6f;
-    private const float PrimaryFlareScaleWidth = 0.02f;
-    private const float PrimaryFlareScaleOpacity = 0.6f;
-    private const float SecondaryFlareScaleLength = 3.3f;
-    private const float SecondaryFlareScaleWidth = 0.09f;
-    private const float SecondaryFlareScaleOpacity = 0.3f;
-    private const float InnerFlareScaleLength = 2f;
-    private const float InnerFlareScaleWidth = 0.06f;
+    private static readonly Vector2[] FlareScales = [new(6f, 0.02f), new(3.3f, 0.09f), new(2f, 0.06f)];
+    private static readonly float[] FlareOpacities = [0.6f, 0.3f, 1f];
 
     private const float FlareEdgeFallOffStart = 1f;
     private const float FlareEdgeFallOffEnd = 1.11f;
@@ -37,13 +31,10 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
     private const float SunInnerGlowScale = 0.23f;
     private const float SunInnerGlowOpacityMultiplier = 4f;
 
-    private const float PrimaryEclipseScale = 0.4f;
-    private const float SecondaryEclipseScale = 0.3f;
-    private const float TertiaryEclipseScale = 0.25f;
+    private static readonly float[] EclipseBloomScales = [0.36f, 0.27f, 0.2f];
+    private static readonly float[] EclipseColorMultipliers = [0.2f, 1f, 1.6f];
 
-    private const float EclipseTendrilsScale = 0.2f;
-    private const float EclipseTendrilsMin = -0.7f;
-    private const float EclipseTendrilsMax = 1f;
+    private const float EclipseTendrilsScale = 0.16f;
 
     private const float SunglassesScale = 0.3f;
 
@@ -70,11 +61,6 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
     private static readonly Vector2 Moon8ExtraLowerPosition = new(34);
     private const float Moon8ExtraUpperScale = 0.3f;
     private const float Moon8ExtraLowerScale = 0.45f;
-
-    private const float ShootingStarTrailLength = 5f;
-    private const float ShootingStarTrailWidth = 0.01f;
-    private const float ShootingStarBrightnessDivisor = 20f;
-    private const float ShootingStarLifetimeMultiplier = 0.5f;
 
     #endregion
 
@@ -125,30 +111,32 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
         moonColor.A = 255;
 
         if (Main.dayTime)
-            DrawSun(spriteBatch, position, color, scale, distanceFromCenter, distanceFromTop, device);
+            DrawSun(spriteBatch, position, color, rotation, scale, distanceFromCenter, distanceFromTop, device);
         else
             DrawMoon(spriteBatch, position, color, rotation, scale, moonColor, moonShadowColor, device);
     }
 
     #region Sun Drawing
 
-    public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
+    public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
     {
         if (Main.eclipse)
         {
-            DrawEclipse(spriteBatch, position, color, scale, device);
+            DrawEclipse(spriteBatch, position, color, rotation, scale, device);
             return;
         }
+
+        color.A = 0;
 
         #region Bloom
 
         Texture2D bloom = SunBloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
-        Color outerGlowColor = (color * SunOuterGlowOpacity) with { A = 0 };
+        Color outerGlowColor = color * SunOuterGlowOpacity;
         spriteBatch.Draw(bloom, position, null, outerGlowColor, 0, bloomOrigin, SunOuterGlowScale * scale, SpriteEffects.None, 0f);
 
-        Color innerColor = (color * (1 + (distanceFromCenter * SunInnerGlowOpacityMultiplier))) with { A = 0 };
+        Color innerColor = color * (1 + (distanceFromCenter * SunInnerGlowOpacityMultiplier));
         spriteBatch.Draw(bloom, position, null, innerColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
 
         #endregion
@@ -158,16 +146,12 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
             // This draws a similar effect to that seen in 1.4.5 leaks.
         float flareWidth = distanceFromCenter * distanceFromTop * Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
 
-        Vector2 primaryFlareScale = new(PrimaryFlareScaleLength * flareWidth, PrimaryFlareScaleWidth);
-        Color primaryFlareColor = (color * PrimaryFlareScaleOpacity) with { A = 0 };
-        spriteBatch.Draw(bloom, position, null, primaryFlareColor, 0, bloomOrigin, primaryFlareScale * scale, SpriteEffects.None, 0f);
-
-        Vector2 secondaryFlareScale = new(SecondaryFlareScaleLength * flareWidth, SecondaryFlareScaleWidth);
-        Color secondaryFlareColor = (color * SecondaryFlareScaleOpacity) with { A = 0 };
-        spriteBatch.Draw(bloom, position, null, secondaryFlareColor, 0, bloomOrigin, secondaryFlareScale * scale, SpriteEffects.None, 0f);
-
-        Vector2 innerFlareScale = new(InnerFlareScaleLength * flareWidth, InnerFlareScaleWidth);
-        spriteBatch.Draw(bloom, position, null, color with { A = 0 }, 0, bloomOrigin, innerFlareScale * scale, SpriteEffects.None, 0f);
+        for (int i = 0; i < FlareScales.Length; i++)
+        {
+            Vector2 flareScale = new(FlareScales[i].X * flareWidth, FlareScales[i].Y);
+            Color flareColor = color * FlareOpacities[i];
+            spriteBatch.Draw(bloom, position, null, flareColor, 0, bloomOrigin, flareScale * scale, SpriteEffects.None, 0f);
+        }
 
         #endregion
 
@@ -185,28 +169,30 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
 
     #region Eclipse
 
-    private static void DrawEclipse(SpriteBatch spriteBatch, Vector2 position, Color color, float scale, GraphicsDevice device)
+    private static void DrawEclipse(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, GraphicsDevice device)
     {
         Texture2D bloom = SunBloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
-        // TODO: For loop.
-        spriteBatch.Draw(bloom, position, null, (color * 0.2f) with { A = 0 }, 0, bloomOrigin, scale * PrimaryEclipseScale, SpriteEffects.None, 0f);
+        color.A = 0;
 
-        spriteBatch.Draw(bloom, position, null, color with { A = 0 }, 0, bloomOrigin, scale * SecondaryEclipseScale, SpriteEffects.None, 0f);
+        for (int i = 0; i < EclipseBloomScales.Length; i++)
+            spriteBatch.Draw(bloom, position, null, color * EclipseColorMultipliers[i], 0, bloomOrigin, scale * EclipseBloomScales[i], SpriteEffects.None, 0f);
 
-        spriteBatch.Draw(bloom, position, null, (color * 1.6f) with { A = 0 }, 0, bloomOrigin, scale * TertiaryEclipseScale, SpriteEffects.None, 0f);
+        if (SkyConfig.Instance.EclipseMode) 
+        {
+            Effect coronaries = Eclipse.Value;
 
-        Effect coronaries = Eclipse.Value;
+            if (coronaries is null)
+                return;
 
-        if (coronaries is null)
-            return;
+            coronaries.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            coronaries.CurrentTechnique.Passes[0].Apply();
 
-        coronaries.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly * 1.2f);
-
-        coronaries.CurrentTechnique.Passes[0].Apply();
-
-        spriteBatch.Draw(bloom, position, null, Color.Black, 0, bloomOrigin, scale * EclipseTendrilsScale, SpriteEffects.None, 0f);
+            spriteBatch.Draw(bloom, position, null, Color.Black, 0, bloomOrigin, scale * EclipseTendrilsScale, SpriteEffects.None, 0f);
+        }
+        else
+            DrawMoon(spriteBatch, position, Color.Black, rotation, scale, Color.Black, Color.Black, device);
     }
 
     #endregion

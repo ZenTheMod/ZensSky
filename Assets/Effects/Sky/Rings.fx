@@ -17,7 +17,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     rotatedCoords.x = dot(translatedCoords, rotationMatrix[0].xy);
     rotatedCoords.y = dot(translatedCoords, rotationMatrix[1].xy);
     
-    float4 rings = tex2D(uImage0, saturate(rotatedCoords + center));
+    float4 rings = tex2D(uImage0, saturate(rotatedCoords + center)) * sampleColor;
     
     if (rotatedCoords.y > 0.)
         return rings;
@@ -32,6 +32,6 @@ technique Technique1
 {
     pass AutoloadPass
     {
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        PixelShader = compile ps_2_0 PixelShaderFunction();
     }
 }

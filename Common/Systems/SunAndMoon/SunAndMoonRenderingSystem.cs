@@ -58,7 +58,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             if (SkyConfig.Instance.MinimizeRenderTargetUsage)
                 DrawWithoutRenderTargets();
             else if (_sunAndMoonRenderTarget is not null)
-                Main.spriteBatch.RequestAndDrawRenderTarget(_sunAndMoonRenderTarget);
+                Main.spriteBatch.RequestAndDrawRenderTarget(_sunAndMoonRenderTarget, MiscUtils.ScreenDimensions);
         }
 
         orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
