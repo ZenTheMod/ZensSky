@@ -8,8 +8,6 @@ using Terraria.Utilities;
 using Terraria;
 using ZensSky.Common.DataStructures;
 using static ZensSky.Common.DataStructures.InteractableStar;
-using Terraria.UI.Chat;
-using Terraria.Chat;
 
 namespace ZensSky.Common.Systems.Stars;
 

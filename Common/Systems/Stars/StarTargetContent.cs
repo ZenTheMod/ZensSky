@@ -80,7 +80,7 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
         //     DrawRealisticStars(device, alpha * RealisticStarAlphaMultiplier, renderSize, sunPosition, Matrix.Identity, Main.GlobalTimeWrappedHourly, falloff, true);
         // }
 
-    public static void DrawStars(SpriteBatch spriteBatch, Vector2 center, float alpha, float size = 1f)
+    public static void DrawStars(SpriteBatch spriteBatch, Vector2 center, float alpha)
     {
         Texture2D flareTexture = Textures.Star.Value;
         Vector2 flareOrigin = flareTexture.Size() * 0.5f;
@@ -102,7 +102,7 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
             float twinklePhase = star.Twinkle + Main.GlobalTimeWrappedHourly / TwinkleFrequencyDivisor;
             float twinkle = (MathF.Sin(twinklePhase) * TwinkleAmplitude) + TwinkleBaseMultiplier;
 
-            float scale = star.BaseSize * (1 - star.Compression) * twinkle * size;
+            float scale = star.BaseSize * (1 - star.Compression) * twinkle;
 
             Color color = star.GetColor() * star.BaseSize * alpha;
 

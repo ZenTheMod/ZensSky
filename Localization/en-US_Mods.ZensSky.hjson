@@ -10,10 +10,10 @@ Configs: {
 		MinimizeRenderTargetUsage: {
 			Label: "[i:751] Sky Optimizations"
 			Tooltip:
-			'''
-			Trades quality for performance. Often runs faster on lower-end machines.
-			[c/FF0000:Disables sky pixelation.]
-			'''
+				'''
+				Trades quality for performance. Often runs faster on lower-end machines.
+				[c/FF0000:Disables sky pixelation.]
+				'''
 		}
 
 		SunAndMoonRework: {
@@ -51,3 +51,5 @@ Configs: {
 		}
 	}
 }
+
+MenuStyles.Eclipse: Eclipse
