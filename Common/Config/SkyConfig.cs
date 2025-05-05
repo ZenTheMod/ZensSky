@@ -40,6 +40,7 @@ public class SkyConfig : ModConfig
     [Header("Stars")]
 
     [DefaultValue(false)]
+    [CustomModConfigItem(typeof(PixelatedStarsLockedBoolElement))]
     public bool PixelatedStars;
 
     [DefaultValue(false)]
@@ -48,4 +49,12 @@ public class SkyConfig : ModConfig
         // [DefaultValue(true)]
         // [CustomModConfigItem(typeof(RealisticSkyLockedBoolElement))]
         // public bool DrawRealisticStars;
+
+    [Header("Clouds")]
+
+    [DefaultValue(true)]
+    public bool CloudsEnabled;
+
+    [DefaultValue(false)]
+    public bool CloudsEdgeDetection;
 }

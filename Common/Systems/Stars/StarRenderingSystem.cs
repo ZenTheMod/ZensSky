@@ -68,7 +68,7 @@ public sealed class StarRenderingSystem : ModSystem
         if (SkyConfig.Instance.MinimizeRenderTargetUsage)
             DrawWithoutRenderTargets(spriteBatch, device, MiscUtils.HalfScreenSize, StarSystem.StarAlpha);
         else if (_starRenderTarget is not null)
-            spriteBatch.RequestAndDrawRenderTarget(_starRenderTarget);
+            spriteBatch.RequestAndDrawRenderTarget(_starRenderTarget, MiscUtils.ScreenDimensions);
     }
 
     #endregion

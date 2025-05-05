@@ -12,10 +12,12 @@ public static class Shaders
     private static readonly Lazy<Asset<Effect>> _planet = new(() => Request("Planet"));
     private static readonly Lazy<Asset<Effect>> _rings = new(() => Request("Rings"));
     private static readonly Lazy<Asset<Effect>> _eclipse = new(() => Request("Eclipse"));
+    private static readonly Lazy<Asset<Effect>> _cloud = new(() => Request("CloudLighting"));
 
     public static Asset<Effect> Planet => _planet.Value;
     public static Asset<Effect> Rings => _rings.Value;
     public static Asset<Effect> Eclipse => _eclipse.Value;
+    public static Asset<Effect> Cloud => _cloud.Value;
 
     private static Asset<Effect> Request(string path) => ModContent.Request<Effect>(Prefix + path);
 }
