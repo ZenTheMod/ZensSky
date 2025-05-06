@@ -29,7 +29,9 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
     private const float SunOuterGlowScale = 0.35f;
     private const float SunOuterGlowOpacity = 0.2f;
     private const float SunInnerGlowScale = 0.23f;
-    private const float SunInnerGlowOpacityMultiplier = 4f;
+    private const float SunInnerGlowColorMultiplier = 3.4f;
+    private const float SunHugeGlowScale = 0.7f;
+    private const float SunHugeGlowOpacity = 0.25f;
 
     private static readonly float[] EclipseBloomScales = [0.36f, 0.27f, 0.2f];
     private static readonly float[] EclipseColorMultipliers = [0.2f, 1f, 1.6f];
@@ -138,12 +140,12 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
         Color outerGlowColor = color * SunOuterGlowOpacity;
         spriteBatch.Draw(bloom, position, null, outerGlowColor, 0, bloomOrigin, SunOuterGlowScale * scale, SpriteEffects.None, 0f);
 
-        Color innerColor = color * (1 + (distanceFromCenter * SunInnerGlowOpacityMultiplier));
-        spriteBatch.Draw(bloom, position, null, innerColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
+        Color innerGlowColor = color * (1 + (distanceFromCenter * SunInnerGlowColorMultiplier));
+        spriteBatch.Draw(bloom, position, null, innerGlowColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
 
-        float glowMultiplier = Main.atmo * distanceFromCenter;
-        Color hugeColor = color * 0.25f * offscreenMultiplier * glowMultiplier;
-        spriteBatch.Draw(bloom, position, null, hugeColor, 0, bloomOrigin, 0.7f * glowMultiplier * scale, SpriteEffects.None, 0f);
+        float hugeGlowMultiplier = Main.atmo * distanceFromCenter;
+        Color hugeGlowColor = color * SunHugeGlowOpacity * offscreenMultiplier * hugeGlowMultiplier;
+        spriteBatch.Draw(bloom, position, null, hugeGlowColor, 0, bloomOrigin, SunHugeGlowScale * hugeGlowMultiplier * scale, SpriteEffects.None, 0f);
 
         #endregion
 

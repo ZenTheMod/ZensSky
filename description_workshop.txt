@@ -6,13 +6,13 @@ My attempt at a more accurate sky.
     [*]More dynamic sun in the style of 1.4.5 leaks.
     [*]More accurate moon, works for every vanilla moon style.
     [*]Prettier stars.
+    [*]Dynamic cloud lighting.
     [*]More realistic shooting stars.
     [*]Pixelation config. (Kain asked for this (Blame them))
     [*]RealisticSky compat. (Sorry Lucille)
 [/list]
 
-[h3]This mod is [u]required on all clients and the server to work[/u] due to me wanting it to be as accurate as possible for all players.[/h3]
-This is also because I plan to use this mod as part of a larger content heavy mod in the future.
+[u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 
 Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url] or send me a DM on Discord: [b]@z_e_n_.[/b]
 

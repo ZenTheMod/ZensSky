@@ -170,7 +170,7 @@ public sealed class CloudSystem : ModSystem
             // Add a fadeinout effect so the color doesnt just suddenly pop up.
         color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
             // And lessen it at the lower part of the screen.
-        color *= 1 - position.Y / MiscUtils.ScreenSize.Y;
+        color *= 1 - (position.Y / MiscUtils.ScreenSize.Y);
 
         return color;
     }
