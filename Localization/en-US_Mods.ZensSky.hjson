@@ -66,11 +66,6 @@ Configs: {
 			Label: "[i:751] Fancy Cloud Lighting"
 			Tooltip: If clouds have added lighting.
 		}
-
-		CloudsEdgeDetection: {
-			Label: [i:751] Extra Fancy Cloud Lighting [c/FF0000:(EXPERIMENTAL)]
-			Tooltip: Enabled an edge detection effect on clouds.
-		}
 	}
 
 	Locked: - Locked

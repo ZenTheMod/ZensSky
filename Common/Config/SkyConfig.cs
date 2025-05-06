@@ -54,7 +54,4 @@ public class SkyConfig : ModConfig
 
     [DefaultValue(true)]
     public bool CloudsEnabled;
-
-    [DefaultValue(false)]
-    public bool CloudsEdgeDetection;
 }

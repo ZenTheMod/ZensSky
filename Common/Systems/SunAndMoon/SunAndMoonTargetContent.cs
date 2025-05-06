@@ -128,6 +128,8 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
 
         color.A = 0;
 
+        float offscreenMultiplier = Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
+
         #region Bloom
 
         Texture2D bloom = SunBloom.Value;
@@ -139,12 +141,16 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
         Color innerColor = color * (1 + (distanceFromCenter * SunInnerGlowOpacityMultiplier));
         spriteBatch.Draw(bloom, position, null, innerColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
 
+        float glowMultiplier = Main.atmo * distanceFromCenter;
+        Color hugeColor = color * 0.25f * offscreenMultiplier * glowMultiplier;
+        spriteBatch.Draw(bloom, position, null, hugeColor, 0, bloomOrigin, 0.7f * glowMultiplier * scale, SpriteEffects.None, 0f);
+
         #endregion
 
         #region Flare
 
-            // This draws a similar effect to that seen in 1.4.5 leaks.
-        float flareWidth = distanceFromCenter * distanceFromTop * Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
+        // This draws a similar effect to that seen in 1.4.5 leaks.
+        float flareWidth = distanceFromCenter * distanceFromTop * offscreenMultiplier;
 
         for (int i = 0; i < FlareScales.Length; i++)
         {
