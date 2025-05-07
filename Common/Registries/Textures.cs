@@ -27,6 +27,9 @@ public static class Textures
     private static readonly Lazy<Asset<Texture2D>> _pumpkinMoon = new(() => Request("Sky/Moon_Pumpkin"));
     private static readonly Lazy<Asset<Texture2D>> _snowMoon = new(() => Request("Sky/Moon_Snow"));
 
+    private static readonly Lazy<Asset<Texture2D>> _innerModIcon = new(() => Request("ModIcon/Inner"));
+    private static readonly Lazy<Asset<Texture2D>> _outerModIcon = new(() => Request("ModIcon/Outer"));
+
     public static Asset<Texture2D> Invis => _invis.Value;
     public static Asset<Texture2D> Pixel => _pixel.Value;
     public static Asset<Texture2D> LockedToggle => _lockedToggle.Value;
@@ -40,6 +43,9 @@ public static class Textures
     public static Asset<Texture2D> Moon2Rings => _moon2Rings.Value;
     public static Asset<Texture2D> PumpkinMoon => _pumpkinMoon.Value;
     public static Asset<Texture2D> SnowMoon => _snowMoon.Value;
+
+    public static Asset<Texture2D> InnerModIcon => _innerModIcon.Value;
+    public static Asset<Texture2D> OuterModIcon => _outerModIcon.Value;
 
     private static Asset<Texture2D> Request(string path) => ModContent.Request<Texture2D>(Prefix + path);
 
