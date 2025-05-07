@@ -24,8 +24,8 @@ public static class Textures
         // Probably stupid.
     private static readonly Lazy<Asset<Texture2D>[]> _moon = new(() => RequestArray("Sky/Moon", MoonTextures));
     private static readonly Lazy<Asset<Texture2D>> _moon2Rings = new(() => Request("Sky/Rings"));
-    private static readonly Lazy<Asset<Texture2D>> _pumpkinMoon = new(() => Request("Sky/Moon_Pumpkin"));
-    private static readonly Lazy<Asset<Texture2D>> _snowMoon = new(() => Request("Sky/Moon_Snow"));
+    private static readonly Lazy<Asset<Texture2D>> _pumpkinMoon = new(() => Request("Sky/MoonPumpkin"));
+    private static readonly Lazy<Asset<Texture2D>> _snowMoon = new(() => Request("Sky/MoonSnow"));
 
     private static readonly Lazy<Asset<Texture2D>> _innerModIcon = new(() => Request("ModIcon/Inner"));
     private static readonly Lazy<Asset<Texture2D>> _outerModIcon = new(() => Request("ModIcon/Outer"));
