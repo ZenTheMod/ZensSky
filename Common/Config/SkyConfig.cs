@@ -5,14 +5,14 @@ using ZensSky.Common.Config.Elements;
 
 namespace ZensSky.Common.Config;
 
-internal sealed class PixelatedSunAndMoonLockedBoolElement : BaseLockedBoolElement { public override bool LockToggle => !SkyConfig.Instance.SunAndMoonRework || SkyConfig.Instance.MinimizeRenderTargetUsage; public override bool LockMode => true; }
-internal sealed class TransparentMoonShadowLockedBoolElement : BaseLockedBoolElement { public override bool LockToggle => SkyConfig.Instance.SunAndMoonRework; public override bool LockMode => false; }
-internal sealed class PixelatedStarsLockedBoolElement : BaseLockedBoolElement { public override bool LockToggle => SkyConfig.Instance.MinimizeRenderTargetUsage; public override bool LockMode => true; }
+internal sealed class PixelatedSunAndMoonElement : BaseLockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework || SkyConfig.Instance.MinimizeRenderTargetUsage; }
+internal sealed class TransparentMoonShadowElement : BaseLockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
+internal sealed class PixelatedStarsElement : BaseLockedBoolElement { public override bool IsLocked => SkyConfig.Instance.MinimizeRenderTargetUsage; }
     // internal sealed class RealisticSkyLockedBoolElement : BaseLockedBoolElement { public override bool LockToggle => RealisticSkyCompatSystem.RealisticSkyEnabled; public override bool LockMode => false; }
 
-public class SkyConfig : ModConfig
+public sealed class SkyConfig : ModConfig
 {
-    public static SkyConfig Instance => ModContent.GetInstance<SkyConfig>();
+    public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
@@ -26,7 +26,7 @@ public class SkyConfig : ModConfig
     public bool SunAndMoonRework;
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(PixelatedSunAndMoonLockedBoolElement))]
+    [CustomModConfigItem(typeof(PixelatedSunAndMoonElement))]
     public bool PixelatedSunAndMoon;
     
     [DefaultValue(true)]
@@ -34,13 +34,13 @@ public class SkyConfig : ModConfig
     public bool EclipseMode;
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(TransparentMoonShadowLockedBoolElement))]
+    [CustomModConfigItem(typeof(TransparentMoonShadowElement))]
     public bool TransparentMoonShadow;
 
     [Header("Stars")]
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(PixelatedStarsLockedBoolElement))]
+    [CustomModConfigItem(typeof(PixelatedStarsElement))]
     public bool PixelatedStars;
 
     [DefaultValue(false)]
