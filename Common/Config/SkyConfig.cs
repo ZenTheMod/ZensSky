@@ -12,7 +12,7 @@ internal sealed class PixelatedStarsElement : BaseLockedBoolElement { public ove
 
 public sealed class SkyConfig : ModConfig
 {
-    public static SkyConfig Instance;
+    public static SkyConfig Instance => ModContent.GetInstance<SkyConfig>();
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
