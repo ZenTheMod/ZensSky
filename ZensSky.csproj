@@ -17,6 +17,9 @@
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Assets\Effects\Sky\CloudLighting - Copy.fx" />
+	</ItemGroup>
 
 	<!-- Publicizer -->
 	<ItemGroup>
@@ -29,8 +32,8 @@
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
-	<!-- Locate all effect files -->
-	<ItemGroup>
+	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed.) -->
+	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
 		<EffectFiles Include="**/*.fx" />
 	</ItemGroup>
 
