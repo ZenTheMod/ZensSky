@@ -4,6 +4,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
+using Daybreak.Common.Rendering;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -43,12 +44,11 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
         spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformationMatrix);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
         SunAndMoonTargetContent.DrawSunAndMoon(spriteBatch, device);
 
-        spriteBatch.End();
-        spriteBatch.Begin(in snapshot);
+        spriteBatch.Restart(in snapshot);
     }
 
     private void DrawSunAndMoonTarget(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)

@@ -5,10 +5,11 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
+using Daybreak.Common.Rendering;
+using Daybreak.Common.CIL;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -37,9 +38,8 @@ public sealed class CloudSystem : ModSystem
     {
         ILCursor c = new(il);
 
-            // Add our snapshot as a local.
-        VariableDefinition iHaveTrustIssues = new(il.Import(typeof(SpriteBatchSnapshot)));
-        il.Body.Variables.Add(iHaveTrustIssues);
+        VariableDefinition iHaveTrustIssues = c.AddVariable<SpriteBatchSnapshot>();
+        VariableDefinition lighting = c.AddVariable<Effect>();
 
         #region I Hate Copy Pasting
 
@@ -79,6 +79,34 @@ public sealed class CloudSystem : ModSystem
 
         #endregion
 
+        #region Shader Parameters
+
+            // Setup the shaders parameters.
+        c.EmitLdloca(lighting);
+        c.EmitDelegate((ref Effect lighting) =>
+        {
+            lighting = Shaders.Cloud.Value;
+
+            if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
+                return;
+
+            Viewport viewport = Main.instance.GraphicsDevice.Viewport;
+
+            Vector2 viewportSize = viewport.Bounds.Size();
+            lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
+
+            Vector2 sunPosition = SunAndMoonSystem.SunMoonPosition;
+
+            if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+                sunPosition.Y = viewportSize.Y - sunPosition.Y;
+            lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
+
+            Color color = GetColor();
+            lighting.Parameters["SunColor"]?.SetValue(color.ToVector4());
+        });
+
+        #endregion
+
         #region Various Clouds
 
         for (int i = 0; i < 3; i++)
@@ -89,6 +117,7 @@ public sealed class CloudSystem : ModSystem
 
                 // Apply our shader.
             c.EmitLdloca(iHaveTrustIssues);
+            c.EmitLdloc(lighting);
             c.EmitDelegate(ApplyShader);
 
                 // Match to after the loop.
@@ -109,6 +138,7 @@ public sealed class CloudSystem : ModSystem
 
             // Apply our shader.
         c.EmitLdloca(iHaveTrustIssues);
+        c.EmitLdloc(lighting);
         c.EmitDelegate(ApplyShader);
 
             // Match to after the loop.
@@ -121,31 +151,15 @@ public sealed class CloudSystem : ModSystem
         #endregion
     }
 
-    private void ApplyShader(ref SpriteBatchSnapshot snapshot)
+    private void ApplyShader(ref SpriteBatchSnapshot snapshot, Effect lighting)
     {
-        Effect lighting = Shaders.Cloud.Value;
-
         if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
             return;
-
-        Viewport viewport = Main.instance.GraphicsDevice.Viewport;
-
-        Vector2 viewportSize = viewport.Bounds.Size();
-        lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
-
-        Vector2 sunPosition = SunAndMoonSystem.SunMoonPosition;
-
-        if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
-            sunPosition.Y = viewportSize.Y - sunPosition.Y;
-        lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
-
-        Color color = GetColor();
-        lighting.Parameters["SunColor"]?.SetValue(color.ToVector4());
 
         lighting.CurrentTechnique.Passes[0].Apply();
 
         Main.spriteBatch.End(out snapshot);
-        Main.spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformationMatrix);
+        Main.spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
     }
 
     private void ResetSpritebatch(SpriteBatchSnapshot snapshot)
@@ -153,8 +167,7 @@ public sealed class CloudSystem : ModSystem
         if (!SkyConfig.Instance.CloudsEnabled)
             return;
 
-        Main.spriteBatch.End();
-        Main.spriteBatch.Begin(in snapshot);
+        Main.spriteBatch.Restart(in snapshot);
     }
 
     private static Color GetColor()

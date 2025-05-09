@@ -40,6 +40,7 @@ public sealed class AddPopupSystem : ModSystem
             AddPopupButton = new(updateAndDrawModMenuInner, AddPopup);
 
         IL_Main.DrawMenu += ModifyInteraction;
+        Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
 
         Popup?.Activate();
     }
@@ -48,6 +49,7 @@ public sealed class AddPopupSystem : ModSystem
     {
         AddPopupButton?.Dispose();
         IL_Main.DrawMenu -= ModifyInteraction;
+        Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
     }
 
     #endregion
@@ -138,4 +140,6 @@ public sealed class AddPopupSystem : ModSystem
                 PopupInterface?.Draw(Main.spriteBatch, new GameTime());
         });
     }
+
+    private void CloseMenuOnResolutionChanged(Vector2 obj) => PopupInterface?.SetState(null);
 }

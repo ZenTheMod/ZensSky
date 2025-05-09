@@ -7,6 +7,13 @@
 	<PropertyGroup>
 		
 	</PropertyGroup>
+	
+	<!-- Add the Daybreak Lib as a project reference -->
+	<ItemGroup>
+		<Reference Include="Daybreak">
+			<HintPath>..\ModAssemblies\Daybreak_v1.1.1.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
 	<!-- Hide this pesky warning -->
 	<PropertyGroup>
@@ -17,9 +24,6 @@
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Assets\Effects\Sky\CloudLighting - Copy.fx" />
-	</ItemGroup>
 
 	<!-- Publicizer -->
 	<ItemGroup>
@@ -36,7 +40,7 @@
 	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
 		<EffectFiles Include="**/*.fx" />
 	</ItemGroup>
-
+	
 	<!-- Locate FXC (My shader compiler of choice) -->
 	<PropertyGroup>
 		<FxcCompilerPath>./Assets/Effects/Compiler/fxc.exe</FxcCompilerPath>
