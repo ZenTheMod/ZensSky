@@ -11,8 +11,8 @@ public static class Textures
 
     private const int MoonTextures = 9;
 
-    private static readonly Lazy<Asset<Texture2D>> _invis = new(() => Request("MagicPixel"));
-    private static readonly Lazy<Asset<Texture2D>> _pixel = new(() => Request("NotSoMagicPixel"));
+    private static readonly Lazy<Asset<Texture2D>> _pixel = new(() => Request("Pixel"));
+    private static readonly Lazy<Asset<Texture2D>> _invis = new(() => Request("Invis"));
 
     private static readonly Lazy<Asset<Texture2D>> _lockedToggle = new(() => Request("UI/LockedSettingsToggle"));
 
@@ -27,11 +27,15 @@ public static class Textures
     private static readonly Lazy<Asset<Texture2D>> _pumpkinMoon = new(() => Request("Sky/MoonPumpkin"));
     private static readonly Lazy<Asset<Texture2D>> _snowMoon = new(() => Request("Sky/MoonSnow"));
 
-    private static readonly Lazy<Asset<Texture2D>> _innerModIcon = new(() => Request("ModIcon/Inner"));
-    private static readonly Lazy<Asset<Texture2D>> _outerModIcon = new(() => Request("ModIcon/Outer"));
+    private static readonly Lazy<Asset<Texture2D>> _modDeps = new(() => Request("UI/PanelStyle/ModDeps"));
+    private static readonly Lazy<Asset<Texture2D>> _modConfig = new(() => Request("UI/PanelStyle/ModConfig"));
+    private static readonly Lazy<Asset<Texture2D>> _modInfo = new(() => Request("UI/PanelStyle/ModInfo"));
 
-    public static Asset<Texture2D> Invis => _invis.Value;
+    private static readonly Lazy<Asset<Texture2D>> _panelGradient = new(() => Request("UI/PanelStyle/PanelGradient"));
+
     public static Asset<Texture2D> Pixel => _pixel.Value;
+    public static Asset<Texture2D> Invis => _invis.Value;
+
     public static Asset<Texture2D> LockedToggle => _lockedToggle.Value;
 
     public static Asset<Texture2D> Star => _star.Value;
@@ -44,8 +48,11 @@ public static class Textures
     public static Asset<Texture2D> PumpkinMoon => _pumpkinMoon.Value;
     public static Asset<Texture2D> SnowMoon => _snowMoon.Value;
 
-    public static Asset<Texture2D> InnerModIcon => _innerModIcon.Value;
-    public static Asset<Texture2D> OuterModIcon => _outerModIcon.Value;
+    public static Asset<Texture2D> ModDeps => _modDeps.Value;
+    public static Asset<Texture2D> ModConfig => _modConfig.Value;
+    public static Asset<Texture2D> ModInfo => _modInfo.Value;
+
+    public static Asset<Texture2D> PanelGradient => _panelGradient.Value;
 
     private static Asset<Texture2D> Request(string path) => ModContent.Request<Texture2D>(Prefix + path);
 
