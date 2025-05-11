@@ -10,6 +10,7 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using ZensSky.Common.Registries;
+using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.ModIcon;
 
@@ -90,7 +91,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
         DrawPanel(element, spriteBatch);
 
-        spriteBatch.Restart(snapshot);
+        spriteBatch.Restart(in snapshot);
 
         element.DrawPanel(spriteBatch, element._borderTexture.Value, element.BorderColor);
 
@@ -105,11 +106,20 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
             return;
 
         CalculatedStyle dims = element.GetDimensions();
-        PanelRenderTarget.Size = new(dims.X, dims.Y);
+
+        Vector2 size = Vector2.Transform(new(dims.Width, dims.Height), Main.UIScaleMatrix);
+        Vector2 position = Vector2.Transform(new(dims.X, dims.Y), Main.UIScaleMatrix);
+
+        CalculatedStyle innerDims = element.GetInnerDimensions();
+
+        PanelRenderTarget.Size = new(dims.Width, dims.Height);
+        PanelRenderTarget.InnerDimensions = new((int)innerDims.X - (int)dims.X, (int)innerDims.Y - (int)dims.Y,
+            (int)innerDims.Width, (int)innerDims.Height);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        panel.Parameters["Source"]?.SetValue(new Vector4(dims.Width, dims.Height - 2f, dims.X, dims.Y));
+        panel.Parameters["Source"]?.SetValue(new Vector4(size.X, size.Y, 
+            position.X, position.Y));
 
         panel.CurrentTechnique.Passes[0].Apply();
 
@@ -117,6 +127,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
         device.Textures[1] = PanelRenderTarget.IsReady ? PanelRenderTarget.GetTarget() : TextureAssets.MagicPixel.Value;
 
         device.Textures[2] = Textures.PanelGradient.Value;
+        device.SamplerStates[2] = SamplerState.PointClamp;
 
         element.DrawPanel(spriteBatch, element._backgroundTexture.Value, element.BackgroundColor);
     }
