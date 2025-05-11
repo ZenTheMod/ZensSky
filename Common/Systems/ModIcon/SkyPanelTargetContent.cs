@@ -10,18 +10,24 @@ namespace ZensSky.Common.Systems.ModIcon;
 
 public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
 {
-    private static readonly Color Clear = new(185, 185, 185);
+    #region Private Fields
+
+    private static readonly Color Clear = new(135, 135, 135);
 
     private const float PlanetHorizontalOffset = 15f;
     private const float PlanetScale = 150f;
 
     private const int StarCount = 300;
-
     private const float TimeMultiplier = 0.4f;
-
     private const float MaxPhase = MathHelper.Pi * 8f;
-
     private const float StarScale = 0.25f;
+
+    private const int CreaseCount = 10;
+    private static readonly Vector2 CreaseScale = new(0.01f, 0.6f);
+    private const float CreaseOpacity = 0.15f;
+    private const float CreaseRotation = 0.22f;
+
+    #endregion
 
     public Vector2 Size { get; set; }
     public Rectangle InnerDimensions { get; set; }
@@ -39,17 +45,24 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
 
             // I don't trust clear to work on all devices.
-        spriteBatch.Draw(Textures.Pixel.Value, new Rectangle(0, 0, (int)Size.X, (int)Size.Y), new(135, 135, 135));
+        spriteBatch.Draw(Textures.Pixel.Value, new Rectangle(0, 0, (int)Size.X, (int)Size.Y), Clear);
 
         DrawStars(spriteBatch);
 
         DrawPlanet(spriteBatch);
 
         spriteBatch.End();
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+
+        DrawCreases(spriteBatch);
+
+        spriteBatch.End();
 
         device.SetRenderTarget(null);
         _wasPrepared = true;
     }
+
+    #region Stars
 
     private void DrawStars(SpriteBatch spriteBatch)
     {
@@ -75,12 +88,16 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
 
                 float scale = MathF.Pow(2, 10 * (sinValue - 1));
 
-                Color innerColor = Color.White * sinValue;
-                innerColor.A = 0;
-                spriteBatch.Draw(star, starPosition, null, innerColor, 0, starOrigin, scale * StarScale, SpriteEffects.None, 0f);
+                Color color = Color.White * sinValue;
+                color.A = 0;
+                spriteBatch.Draw(star, starPosition, null, color, 0, starOrigin, scale * StarScale, SpriteEffects.None, 0f);
             }
         }
     }
+
+    #endregion
+
+    #region Planet
 
     private void DrawPlanet(SpriteBatch spriteBatch)
     {
@@ -94,7 +111,7 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
         planet.Parameters["planetRotation"]?.SetValue(0f);
         planet.Parameters["shadowRotation"]?.SetValue(Main.GlobalTimeWrappedHourly * TimeMultiplier);
 
-        planet.Parameters["falloffStart"]?.SetValue(0.97f);
+        planet.Parameters["falloffStart"]?.SetValue(0.95f);
         planet.CurrentTechnique.Passes[0].Apply();
 
         Texture2D texture = Textures.Pixel.Value;
@@ -105,4 +122,27 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
 
         spriteBatch.Draw(texture, position, null, Color.White, 0f, origin, PlanetScale, SpriteEffects.None, 0f);
     }
+
+    #endregion
+
+    #region Creases
+
+    private void DrawCreases(SpriteBatch spriteBatch)
+    {
+        UnifiedRandom rand = new("Ebon will never steal my code.".GetHashCode());
+
+        Texture2D crease = Textures.SunBloom.Value;
+        Vector2 creaseOrigin = crease.Size() * 0.5f;
+
+        Color color = (Color.White * CreaseOpacity) with { A = 0 };
+
+        for (int i = 0; i < CreaseCount; i++)
+        {
+            Vector2 creasePosition = new(rand.NextFloat(Size.X), rand.NextFloat(Size.Y));
+
+            spriteBatch.Draw(crease, creasePosition, null, color, CreaseRotation, creaseOrigin, CreaseScale, SpriteEffects.None, 0f);
+        }
+    }
+
+    #endregion
 }
