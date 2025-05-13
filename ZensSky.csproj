@@ -8,9 +8,11 @@
 		
 	</PropertyGroup>
 	
-	<!-- Make sure Ebon's shitpost doesn't bloat the file size -->	  
-	<None Remove="I%27m not sorry about this mod%27s code, dataminer.mp4" />
-
+	<!-- Make sure Ebon's shitpost doesn't bloat the file size -->
+	<ItemGroup>
+		<None Remove="I%27m not sorry about this mod%27s code, dataminer.mp4" />
+	</ItemGroup>
+	
 	<!-- Add the Daybreak Lib as a project reference -->
 	<ItemGroup>
 		<Reference Include="Daybreak">
