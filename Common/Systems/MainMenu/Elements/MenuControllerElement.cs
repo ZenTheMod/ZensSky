@@ -12,7 +12,13 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
 
     public abstract string Name { get; }
 
-    public void Load(Mod mod) => MenuControllerSystem.Controllers.Add(this);
+    public virtual void OnLoad() { }
+
+    public void Load(Mod mod) 
+    { 
+        MenuControllerSystem.Controllers.Add(this); 
+        OnLoad();
+    }
 
     public void Unload() { }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria;
+using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
@@ -22,6 +23,17 @@ public sealed class CloudDensitySlider : MenuControllerElement
         Append(Slider);
     }
 
+    public override void OnLoad()
+    {
+        if (MenuConfig.Instance.UseCloudDensity)
+        {
+            float density = MenuConfig.Instance.CloudDensity;
+            Main.numClouds = (int)(density * Main.maxClouds);
+
+            Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
+        }
+    }
+
     public override void Update(GameTime gameTime)
     {
         base.Update(gameTime);
@@ -30,10 +42,15 @@ public sealed class CloudDensitySlider : MenuControllerElement
         {
             if (Slider.IsHeld)
             {
-                int prior = Main.numClouds;
-                Main.numClouds = (int)(Slider.Ratio * Main.maxClouds);
+                float density = Slider.Ratio;
 
-                Main.cloudBGActive = Utils.Remap(Slider.Ratio, 0.75f, 1f, 0f, 1f);
+                MenuConfig.Instance.UseCloudDensity = true;
+                MenuConfig.Instance.CloudDensity = density;
+
+                int prior = Main.numClouds;
+                Main.numClouds = (int)(density * Main.maxClouds);
+
+                Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
 
                 if (Main.numClouds != prior)
                     Cloud.resetClouds();

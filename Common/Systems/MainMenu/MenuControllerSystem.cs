@@ -10,8 +10,10 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.UI;
 using Terraria.UI.Chat;
+using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
 
 namespace ZensSky.Common.Systems.MainMenu;
@@ -99,6 +101,9 @@ public sealed class MenuControllerSystem : ModSystem
 
             if (hovering && Main.mouseLeft && Main.mouseLeftRelease)
             {
+                if (InUI)
+                    ConfigManager.Save(MenuConfig.Instance);
+
                 MenuControllerInterface?.SetState(InUI ? null : MenuController);
                 MenuController.Bottom = new(popupRect.Center.X, position.Y);
 
@@ -121,7 +126,10 @@ public sealed class MenuControllerSystem : ModSystem
             if (Main.menuMode == 0)
                 MenuControllerInterface?.Update(gameTime);
             else
+            {
                 MenuControllerInterface?.SetState(null);
+                ConfigManager.Save(MenuConfig.Instance);
+            }
         }
 
         orig(gameTime);
@@ -156,7 +164,11 @@ public sealed class MenuControllerSystem : ModSystem
         });
     }
 
-    private void CloseMenuOnResolutionChanged(Vector2 obj) => MenuControllerInterface?.SetState(null);
+    private void CloseMenuOnResolutionChanged(Vector2 obj) 
+    {
+        MenuControllerInterface?.SetState(null);
+        ConfigManager.Save(MenuConfig.Instance);
+    }
 
     #endregion
 }
