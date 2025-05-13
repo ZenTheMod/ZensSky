@@ -5,7 +5,6 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.UI.Chat;
 using Terraria.UI;
 using Terraria.ModLoader;
-using ZensSky.Common.MenuStyles;
 using Terraria;
 
 namespace ZensSky.Common.Config.Elements;
@@ -22,10 +21,11 @@ public sealed class EclipseLocalizedBoolElement : ConfigElement<bool>
         {
             Value = !Value;
         };
+            // FIX
         OnRightClick += delegate
         {
-            if (Main.gameMenu)
-                MenuLoader.switchToMenu = ModContent.GetInstance<Eclipse>();
+                // if (Main.gameMenu)
+                    // MenuLoader.switchToMenu = ModContent.GetInstance<Eclipse>();
         };
     }
 
