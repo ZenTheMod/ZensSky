@@ -31,8 +31,7 @@
 		<!-- Publicize the tModLoader API -->
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
-		<!-- Publicize FNA so we can access SpriteBatch's hidden fields for our SpriteBatchSnapshot struct,
-      Alternatively you could cache the FieldInfo manually -->
+		<!-- Irrelevant due to Daybreak's SpriteBatchSnapshot impl -->
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 

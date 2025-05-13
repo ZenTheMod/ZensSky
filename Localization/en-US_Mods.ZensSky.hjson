@@ -72,3 +72,7 @@ Configs: {
 }
 
 MenuStyles.Eclipse: Eclipse
+MenuController: {
+	Header: Menu Config
+	CloudDensity: Cloud Density
+}

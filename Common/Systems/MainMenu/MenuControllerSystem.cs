@@ -113,6 +113,7 @@ public sealed class MenuControllerSystem : ModSystem
 
     #region Updating
 
+        // For whatever reason ModSystem::UpdateUI does not run on the titlescreen ???
     private void UpdateInterface(On_Main.orig_UpdateUIStates orig, GameTime gameTime)
     {
         if (InUI)

@@ -1,4 +1,5 @@
 ﻿using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
@@ -17,7 +18,7 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
 
     public MenuControllerElement()
     {
-        UIName = new(Name)
+        UIName = new(Language.GetText(Name))
         {
             HAlign = 0.5f
         };

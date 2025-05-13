@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Terraria.GameContent.UI.Elements;
+using Terraria.Localization;
 using Terraria.UI;
 using ZensSky.Common.Systems.MainMenu.Elements;
 
@@ -8,6 +9,9 @@ namespace ZensSky.Common.Systems.MainMenu;
 public sealed class MenuControllerUIState : UIState
 {
     private const float VerticalGap = 5f;
+
+    private const string Header = "Mods.ZensSky.MenuController.Header";
+    private const float HeaderHeight = 25f;
 
     public Vector2 Bottom;
 
@@ -36,11 +40,20 @@ public sealed class MenuControllerUIState : UIState
 
         Append(Panel);
 
-            // Setup the controller list.
+        UIText header = new(Language.GetText(Header), 0.5f, true)
+        {
+            HAlign = 0.5f
+        };
+
+        Panel.Append(header);
+
+        // Setup the controller list.
         Controllers = [];
 
         Controllers.Width.Set(-25f, 1f);
-        Controllers.Height.Set(0f, 1f);
+        Controllers.Height.Set(-HeaderHeight, 1f);
+
+        Controllers.Top.Set(HeaderHeight, 0f);
 
         Panel.Append(Controllers);
 
@@ -48,8 +61,10 @@ public sealed class MenuControllerUIState : UIState
         UIScrollbar uIScrollbar = new();
 
         uIScrollbar.SetView(100f, 1000f);   // This seems to be important ?
-        uIScrollbar.Height.Set(0f, 1f);
+        uIScrollbar.Height.Set(-HeaderHeight, 1f);
         uIScrollbar.HAlign = 1f;
+
+        uIScrollbar.Top.Set(HeaderHeight, 0f);
 
         Panel.Append(uIScrollbar);
 

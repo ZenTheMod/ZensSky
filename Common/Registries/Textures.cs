@@ -33,6 +33,9 @@ public static class Textures
 
     private static readonly Lazy<Asset<Texture2D>> _panelGradient = new(() => Request("UI/PanelStyle/PanelGradient"));
 
+    private static readonly Lazy<Asset<Texture2D>> _slider = new(() => Request("UI/Slider"));
+    private static readonly Lazy<Asset<Texture2D>> _sliderHighlight = new(() => Request("UI/SliderHighlight"));
+
     public static Asset<Texture2D> Pixel => _pixel.Value;
     public static Asset<Texture2D> Invis => _invis.Value;
 
@@ -53,6 +56,9 @@ public static class Textures
     public static Asset<Texture2D> ModInfo => _modInfo.Value;
 
     public static Asset<Texture2D> PanelGradient => _panelGradient.Value;
+
+    public static Asset<Texture2D> Slider => _slider.Value;
+    public static Asset<Texture2D> SliderHighlight => _sliderHighlight.Value;
 
     private static Asset<Texture2D> Request(string path) => ModContent.Request<Texture2D>(Prefix + path);
 
