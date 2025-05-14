@@ -4,8 +4,6 @@ using Terraria.Localization;
 using Terraria.ModLoader.Config.UI;
 using Terraria.UI.Chat;
 using Terraria.UI;
-using Terraria.ModLoader;
-using Terraria;
 
 namespace ZensSky.Common.Config.Elements;
 

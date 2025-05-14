@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria.GameContent;
-using ZensSky.Common.DataStructures;
 
 namespace ZensSky.Common.Utilities;
 

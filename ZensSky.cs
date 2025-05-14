@@ -1,4 +1,3 @@
-using Microsoft.Xna.Framework.Graphics.PackedVector;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria.ModLoader;
