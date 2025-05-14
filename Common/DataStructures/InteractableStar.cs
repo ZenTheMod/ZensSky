@@ -7,8 +7,18 @@ using ZensSky.Common.Config;
 
 namespace ZensSky.Common.DataStructures;
 
-public readonly record struct InteractableStar
+public enum SupernovaProgress : byte
 {
+    None = 0,
+    Shrinking = 1,
+    Exploding = 2,
+    Regenerating = 3
+}
+
+public record struct InteractableStar
+{
+    #region Private Fields
+
     private static readonly Color LowestTemperature = new(255, 204, 152);
     private static readonly Color LowTemperature = new(255, 242, 238);
     private static readonly Color HighTemperature = new(236, 238, 255);
@@ -23,13 +33,15 @@ public readonly record struct InteractableStar
     private const float LowTempThreshold = 0.4f;
     private const float HighTempThreshold = 0.6f;
 
+    #endregion
+
     /// <summary>
     /// The position of the star, is not relative to the top left of the screen.
     /// </summary>
     public required Vector2 Position { get; init; }
 
     /// <summary>
-    /// The color of the star, by default is between <see cref="LowestTemperature"/> and <see cref="HighestTemperature"/>.
+    /// The color of the star, by default uses <see cref="GenerateColor"/>.
     /// </summary>
     public required Color Color { get; init; }
 
@@ -38,16 +50,7 @@ public readonly record struct InteractableStar
     /// </summary>
     public required float BaseSize { get; init; }
 
-    /// <summary>
-    /// How 'compressed' the star is; Used to transition to a supernova.
-    /// </summary>
-    public required float Compression { get; init; }
     public required float Rotation { get; init; }
-
-    /// <summary>
-    /// If the star does not rotate with <see cref="StarSystem.StarRotation"/>, useful if you'd want the star to always be visible.
-    /// </summary>
-    public required bool Static { get; init; }
 
     /// <summary>
     /// How frequently the star 'twinkles'.
@@ -59,6 +62,13 @@ public readonly record struct InteractableStar
     /// </summary>
     public required int StarType { get; init; }
 
+    /// <summary>
+    /// Timer used for controlling the supernova visual.
+    /// </summary>
+    public float SupernovaTimer { get; set; }
+
+    public SupernovaProgress SupernovaProgress { get; set; }
+
     public static InteractableStar CreateRandom(UnifiedRandom rand) => new()
     {
         Position = rand.NextUniformVector2Circular(CircularRadius),
@@ -66,9 +76,7 @@ public readonly record struct InteractableStar
         BaseSize = rand.NextFloat(MinSize, MaxSize),
         StarType = rand.Next(0, MaxStarType),
         Rotation = rand.NextFloatDirection(),
-        Static = false,
-        Twinkle = rand.NextFloat(MaxTwinkle),
-        Compression = 0f
+        Twinkle = rand.NextFloat(MaxTwinkle)
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -83,9 +91,8 @@ public readonly record struct InteractableStar
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Color GetColor() => Color.Lerp(Color, Compressed, Compression);
+    public readonly Color GetColor() => SupernovaProgress == SupernovaProgress.Shrinking ? Color.Lerp(Color, Compressed, SupernovaTimer) : Color;
 
-    /// <summary></summary>
-    /// <returns>The star's position rotated by <see cref="StarSystem.StarRotation"/> if its not static.</returns>
-    public Vector2 GetRotatedPosition() => Static ? Position : Position.RotatedBy(StarSystem.StarRotation);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly Vector2 GetRotatedPosition() => Position.RotatedBy(StarSystem.StarRotation);
 }

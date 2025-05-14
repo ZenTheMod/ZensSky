@@ -86,23 +86,22 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
         Vector2 flareOrigin = flareTexture.Size() * 0.5f;
 
         ReadOnlySpan<InteractableStar> starSpan = StarSystem.Stars.AsSpan();
-        ReadOnlySpan<byte> supernovaeSpan = StarSystem.Supernovae.AsSpan();
 
         bool vanillaStyle = SkyConfig.Instance.VanillaStyleStars;
 
         for (int i = 0; i < starSpan.Length; i++)
         {
-            if (supernovaeSpan[i] >= (byte)SupernovaProgress.Exploding)
-                continue;
-
             InteractableStar star = starSpan[i];
+
+            if (star.SupernovaProgress > SupernovaProgress.Shrinking)
+                continue;
 
             Vector2 position = center + star.GetRotatedPosition();
 
             float twinklePhase = star.Twinkle + Main.GlobalTimeWrappedHourly / TwinkleFrequencyDivisor;
             float twinkle = (MathF.Sin(twinklePhase) * TwinkleAmplitude) + TwinkleBaseMultiplier;
 
-            float scale = star.BaseSize * (1 - star.Compression) * twinkle;
+            float scale = star.BaseSize * (1 - star.SupernovaTimer) * twinkle;
 
             Color color = star.GetColor() * star.BaseSize * alpha;
 

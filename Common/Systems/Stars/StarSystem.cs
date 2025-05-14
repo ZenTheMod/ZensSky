@@ -7,24 +7,15 @@ using Terraria.ModLoader;
 using Terraria.Utilities;
 using Terraria;
 using ZensSky.Common.DataStructures;
+using System.Linq;
 using static ZensSky.Common.DataStructures.InteractableStar;
 
 namespace ZensSky.Common.Systems.Stars;
-
-public enum SupernovaProgress : byte
-{
-    None = 0,
-    Shrinking = 1,
-    Exploding = 2,
-    Destroyed = 3
-}
 
 public sealed class StarSystem : ModSystem
 {
     #region Private Fields
 
-    private const string SupernovaeTagKey = "Supernovae";
-    private const string RotationTagKey = "StarRotation";
     private const float DawnTime = 6700f;
     private const float DuskStartTime = 48000f;
     private const float DayLength = 54000f;
@@ -35,6 +26,8 @@ public sealed class StarSystem : ModSystem
     private const int DefaultStarGenerationSeed = 100;
     private static int StarGenerationSeed;
 
+    private const string SupernovaeCount = "SupernovaeCount";
+
     #endregion
 
     #region Public Fields
@@ -42,10 +35,9 @@ public sealed class StarSystem : ModSystem
     public static float TemporaryStarAlpha { get; set; }
 
     public static bool CanDrawStars { get; private set; }
-    public const int StarCount = 1200;
 
+    public const int StarCount = 1200;
     public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
-    public static readonly byte[] Supernovae = new byte[StarCount];
 
     public static float StarRotation { get; private set; }
     public static float StarAlpha { get; private set; }
@@ -115,19 +107,52 @@ public sealed class StarSystem : ModSystem
 
     public override void SaveWorldData(TagCompound tag)
     {
-        tag[SupernovaeTagKey] = Supernovae;
-        tag[RotationTagKey] = StarRotation;
+        tag[nameof(StarRotation)] = StarRotation;
+
+        int count = Stars.Count(s => s.SupernovaProgress > SupernovaProgress.None);
+        tag[SupernovaeCount] = count;
+
+        int index = 0;
+
+        ReadOnlySpan<InteractableStar> starSpan = Stars.AsSpan();
+        for (int i = 0; i < starSpan.Length; i++)
+        {
+            InteractableStar star = starSpan[i];
+
+            if (star.SupernovaProgress == SupernovaProgress.None)
+                continue;
+
+            tag[nameof(Stars) + index] = i;
+            tag[nameof(InteractableStar.SupernovaProgress) + index] = star.SupernovaProgress;
+            tag[nameof(InteractableStar.SupernovaTimer) + index] = star.SupernovaTimer;
+
+            index++;
+        }
     }
 
     public override void LoadWorldData(TagCompound tag)
     {
-        if (tag.TryGet(SupernovaeTagKey, out byte[] supernovaeData) && supernovaeData.Length == StarCount)
-            Array.Copy(supernovaeData, Supernovae, StarCount);
+        try
+        {
+            StarRotation = tag.Get<float>(nameof(StarRotation));
 
-        if (tag.TryGet(RotationTagKey, out float rotation))
-            StarRotation = rotation;
-        else
-            StarRotation = 0f;
+            int count = tag.Get<int>(SupernovaeCount);
+
+            for (int i = 0; i < count; i++)
+            {
+                int index = tag.Get<int>(nameof(Stars) + i);
+
+                InteractableStar star = Stars[index];
+
+                star.SupernovaProgress = tag.Get<SupernovaProgress>(nameof(InteractableStar.SupernovaProgress) + i);
+                star.SupernovaTimer = tag.Get<int>(nameof(InteractableStar.SupernovaTimer) + i);
+            }
+        }
+        catch (Exception ex)
+        {
+            Main.NewText($"Failed to load stars: {ex.Message}", Color.Red);
+            Mod.Logger.Error($"Failed to load stars: {ex.Message}");
+        }
     }
 
     public override void NetSend(BinaryWriter writer)
@@ -136,25 +161,47 @@ public sealed class StarSystem : ModSystem
         if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
             return;
 
-        writer.Write(Supernovae);
         writer.Write(StarRotation);
+
+        int count = Stars.Count(s => s.SupernovaProgress > SupernovaProgress.None);
+        writer.Write7BitEncodedInt(count);
+
+        ReadOnlySpan<InteractableStar> starSpan = Stars.AsSpan();
+        for (int i = 0; i < starSpan.Length; i++)
+        {
+            InteractableStar star = starSpan[i];
+
+            if (star.SupernovaProgress == SupernovaProgress.None)
+                continue;
+
+            writer.Write7BitEncodedInt(i);
+            writer.Write((byte)star.SupernovaProgress);
+            writer.Write(star.SupernovaTimer);
+        }
     }
 
     public override void NetReceive(BinaryReader reader)
     {
         try
         {
-            byte[] supernovaeData = reader.ReadBytes(StarCount);
-
-            if (supernovaeData.Length == StarCount)
-                Array.Copy(supernovaeData, Supernovae, StarCount);
-
             StarRotation = reader.ReadSingle();
+
+            int count = reader.Read7BitEncodedInt();
+
+            for (int i = 0; i < count; i++)
+            {
+                int index = reader.Read7BitEncodedInt();
+
+                InteractableStar star = Stars[index];
+
+                star.SupernovaProgress = (SupernovaProgress)reader.ReadByte();
+                star.SupernovaTimer = reader.ReadSingle();
+            }
         }
         catch (Exception ex)
         {
             Main.NewText($"Failed to sync stars: {ex.Message}", Color.Red);
-            ModContent.GetInstance<ZensSky>().Logger.Error($"Failed to sync stars: {ex.Message}");
+            Mod.Logger.Error($"Failed to sync stars: {ex.Message}");
         }
     }
 
@@ -162,6 +209,12 @@ public sealed class StarSystem : ModSystem
 
     public static void GenerateStars()
     {
+        if (Main.dedServ)
+        {
+            Array.Clear(Stars, 0, Stars.Length);
+            return; 
+        }
+
         UnifiedRandom rand = new(StarGenerationSeed);
 
         ResetSky();
@@ -174,8 +227,14 @@ public sealed class StarSystem : ModSystem
     {
         StarRotation = 0f;
 
-        if (Supernovae != null)
-            Array.Clear(Supernovae, 0, StarCount);
+        if (Stars != null)
+        {
+            for (int i = 0; i < StarCount; i++)
+            {
+                Stars[i].SupernovaProgress = SupernovaProgress.None;
+                Stars[i].SupernovaTimer = 0f;
+            }
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

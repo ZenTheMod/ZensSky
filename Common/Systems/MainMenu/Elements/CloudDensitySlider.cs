@@ -32,6 +32,8 @@ public sealed class CloudDensitySlider : MenuControllerElement
 
             Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
         }
+        else if (Slider is not null)
+            Slider.Ratio = (float)Main.numClouds / Main.maxClouds;
     }
 
     public override void Update(GameTime gameTime)
@@ -56,7 +58,7 @@ public sealed class CloudDensitySlider : MenuControllerElement
                     Cloud.resetClouds();
             }
             else
-                Slider.Ratio = (float)Main.numClouds / Main.maxClouds;
+                Slider.Ratio = MenuConfig.Instance.CloudDensity;
         }
     }
 }
