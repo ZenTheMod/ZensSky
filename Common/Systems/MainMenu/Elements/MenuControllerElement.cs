@@ -14,13 +14,15 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
 
     public virtual void OnLoad() { }
 
+    public virtual void OnUnload() { }
+
     public void Load(Mod mod) 
     { 
         MenuControllerSystem.Controllers.Add(this); 
         OnLoad();
     }
 
-    public void Unload() { }
+    public void Unload() => OnUnload();
 
     public MenuControllerElement()
     {

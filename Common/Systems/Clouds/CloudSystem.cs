@@ -177,7 +177,7 @@ public sealed class CloudSystem : ModSystem
 
         float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
 
-        Color color = SunAndMoonSystem.SunMoonColor * 2f;
+        Color color = SunAndMoonSystem.SunMoonColor;
         color = color.MultiplyRGB(Main.dayTime ? SunMultiplier : MoonMultiplier);
 
             // Add a fadeinout effect so the color doesnt just suddenly pop up.
