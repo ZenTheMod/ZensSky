@@ -1,3 +1,5 @@
+#include "../common.fx"
+
 sampler uImage0 : register(s0);
 
 float uAngle;
@@ -8,14 +10,8 @@ float ShadowSize;
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {
     float2 center = float2(0.5, 0.5);
-    float2 translatedCoords = coords - center;
     
-    float2x2 rotationMatrix = float2x2(cos(uAngle), -sin(uAngle),
-                                       sin(uAngle), cos(uAngle));
-    
-    float2 rotatedCoords;
-    rotatedCoords.x = dot(translatedCoords, rotationMatrix[0].xy);
-    rotatedCoords.y = dot(translatedCoords, rotationMatrix[1].xy);
+    float2 rotatedCoords = rotate(coords, center, uAngle);
     
     float4 rings = tex2D(uImage0, saturate(rotatedCoords + center)) * sampleColor;
     

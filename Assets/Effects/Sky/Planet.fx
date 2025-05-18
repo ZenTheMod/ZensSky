@@ -1,3 +1,5 @@
+#include "../common.fx"
+
 sampler planet : register(s0);
 
 float4 shadowColor;
@@ -10,12 +12,6 @@ const float pi = 3.14159;
 
 const float shadowStart = .22;
 const float shadowEnd = .28;
-
-float map(float value, float start1, float stop1, float start2, float stop2)
-{
-    float clamped = clamp(value, start1, stop1);
-    return start2 + (stop2 - start2) * ((clamped - start1) / (stop1 - start1));
-}
 
 float2 getAngle(float2 d)
 {
@@ -53,7 +49,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     
         // Add subtle falloff.
     float distanceSqr = distance.x * distance.x + distance.y * distance.y;
-    col *= map(distanceSqr, falloffStart, 1, 1, 0); // falloff
+    col *= clampedMap(distanceSqr, falloffStart, 1, 1, 0); // falloff
     return col;
 }
 
