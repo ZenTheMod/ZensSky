@@ -32,28 +32,43 @@ public sealed class SunAndMoonSystem : ModSystem
             ILLabel sunSkipTarget = c.DefineLabel();
             ILLabel moonSkipTarget = c.DefineLabel();
 
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdarg1(),
+                i => i.MatchLdfld<Main.SceneArea>("bgTopY"));
+
+            c.EmitPop();
+            c.EmitLdcI4(-85);
+
             #region Sun
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchNewobj<Vector2>(),
+            int val6 = -1;
+
+            c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
                 i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                 i => i.MatchCall<Vector2>("op_Addition"),
-                i => i.MatchStloc(22));
+                i => i.MatchStloc(out val6));
+
+            c.EmitStloc(val6);
+
+            c.EmitBr(sunSkipTarget);
 
             if (SkipDrawing)
-                c.EmitBr(sunSkipTarget);
+                c.GotoNext(MoveType.Before,
+                    i => i.MatchLdsfld<Main>("dayTime"),
+                    i => i.MatchBrtrue(out _),
+                    i => i.MatchLdcR4(1f));
+            else
+                c.GotoNext(MoveType.After,
+                    i => i.MatchLdarg1(),
+                    i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                    i => i.MatchCall<Vector2>("op_Addition"),
+                    i => i.MatchStloc(val6));
 
-            c.GotoNext(MoveType.Before,
-                i => i.MatchLdsfld<Main>("dayTime"),
-                i => i.MatchBrtrue(out _),
-                i => i.MatchLdcR4(1f));
-
-            if (SkipDrawing)
-                c.MarkLabel(sunSkipTarget);
+            c.MarkLabel(sunSkipTarget);
 
             c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(22); // Position
+            c.EmitLdloc(val6); // Position
             c.EmitLdloc(18); // Color
             c.EmitLdloc(7); // Rotation
             c.EmitLdloc(6); // Scale
@@ -64,26 +79,34 @@ public sealed class SunAndMoonSystem : ModSystem
 
             #region Moon
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchNewobj<Vector2>(),
+            int val7 = -1;
+
+            c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
                 i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                 i => i.MatchCall<Vector2>("op_Addition"),
-                i => i.MatchStloc(25));
+                i => i.MatchStloc(out val7));
+
+            c.EmitStloc(val7);
+
+            c.EmitBr(moonSkipTarget);
 
             if (SkipDrawing)
-                c.EmitBr(moonSkipTarget);
-
-            c.GotoNext(MoveType.Before,
-                i => i.MatchLdsfld<Main>("dayTime"),
-                i => i.MatchBrfalse(out _),
-                i => i.MatchLdloc(4));
-
-            if (SkipDrawing)
-                c.MarkLabel(moonSkipTarget);
+                c.GotoNext(MoveType.Before,
+                    i => i.MatchLdsfld<Main>("dayTime"),
+                    i => i.MatchBrfalse(out _),
+                    i => i.MatchLdloc(4));
+            else
+                c.GotoNext(MoveType.After,
+                    i => i.MatchLdarg1(),
+                    i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                    i => i.MatchCall<Vector2>("op_Addition"),
+                    i => i.MatchStloc(val7));
+            
+            c.MarkLabel(moonSkipTarget);
 
             c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(25); // Position
+            c.EmitLdloc(val7); // Position
             c.EmitLdarg2(); // Color
             c.EmitLdloc(11); // Rotation
             c.EmitLdloc(10); // Scale
