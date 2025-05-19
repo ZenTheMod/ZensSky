@@ -17,7 +17,7 @@ float4 PixelShaderFunction(float2 coords : SV_POSITION, float2 textureCoords : T
     float gray = tex2D(Sky, coords).r;
     
         // I'm inverting it so it the stars look like bits of ink.
-    float3 color = tex2D(Palette, float2(0, 1 - gray));
+    float3 color = tex2D(Palette, float2(0, 1 - gray)).rgb;
     
     float alpha = tex2D(Panel, textureCoords).a;
     return float4(color, alpha);

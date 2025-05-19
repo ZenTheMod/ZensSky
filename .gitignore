@@ -364,6 +364,9 @@ ASALocalRun/
 # Visual Studio History (VSHistory) files
 .vshistory/
 
+# Whatever the fuck this thing is
+TemplateEngineHost/
+
 # BeatPulse healthcheck temp database
 healthchecksdb
 

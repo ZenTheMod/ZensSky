@@ -25,7 +25,7 @@ float2 getAngle(float2 d)
 
 float shadow(float x)
 {
-    float shad = map(abs(frac(x) - .5), shadowStart, shadowEnd, 0., 1.);
+    float shad = clampedMap(abs(frac(x) - .5), shadowStart, shadowEnd, 0., 1.);
     
     return shad * shad * (3.0 - 2.0 * shad);
 }

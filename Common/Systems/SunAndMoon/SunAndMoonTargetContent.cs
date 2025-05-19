@@ -292,7 +292,7 @@ public sealed class SunAndMoonTargetContent : ARenderTargetContentByRequest
         if (rings is null)
             return;
 
-        rings.Parameters["uAngle"]?.SetValue(-Main.moonPhase * SingleMoonPhase * MathHelper.TwoPi);
+        rings.Parameters["uAngle"]?.SetValue(Main.moonPhase * SingleMoonPhase * MathHelper.TwoPi);
 
         rings.Parameters["ShadowColor"]?.SetValue(shadowColor.ToVector4());
         rings.Parameters["ShadowExponent"]?.SetValue(Moon2ExtraShadowExponent);

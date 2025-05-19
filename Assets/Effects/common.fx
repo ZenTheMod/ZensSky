@@ -23,11 +23,11 @@ float2 rotate(float2 coords, float2 center, float angle)
 {
     float2 translatedCoords = coords - center;
     
-    float2x2 rotationMatrix = rotationMatrix(angle);
+    float2x2 rotationMat = rotationMatrix(angle);
     
     float2 rotatedCoords;
-    rotatedCoords.x = dot(translatedCoords, rotationMatrix[0].xy);
-    rotatedCoords.y = dot(translatedCoords, rotationMatrix[1].xy);
+    rotatedCoords.x = dot(translatedCoords, rotationMat[0].xy);
+    rotatedCoords.y = dot(translatedCoords, rotationMat[1].xy);
     
     return rotatedCoords;
 }
@@ -45,12 +45,12 @@ const float3x3 kLMStoCONE = float3x3(
 
 float4 oklabLerp(float4 colA, float4 colB, float h)
 {
-    float3 lmsA = pow(mul(kCONEtoLMS, colA.rgb), float3(1 / 3));
-    float3 lmsB = pow(mul(kCONEtoLMS, colB.rgb), float3(1 / 3));
+    float3 lmsA = pow(mul(kCONEtoLMS, colA.rgb), 0.33333);
+    float3 lmsB = pow(mul(kCONEtoLMS, colB.rgb), 0.33333);
     
     float3 lms = lerp(lmsA, lmsB, h);
     
-    return float4(mul(kLMStoCONE, (lms * lms * lms)), 1);
+    return float4(mul(kLMStoCONE, (lms * lms * lms)), lerp(colA.a, colB.a, h));
 }
 
 #endif

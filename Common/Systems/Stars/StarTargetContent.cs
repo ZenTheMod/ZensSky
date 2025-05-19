@@ -1,17 +1,22 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Drawing;
+using System.Linq;
 using Terraria;
 using Terraria.GameContent;
 using ZensSky.Common.Config;
-using ZensSky.Common.Utilities;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
+using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
 
 public sealed class StarTargetContent : ARenderTargetContentByRequest
 {
     #region Private Fields
+
+    private const float VanillaStarsOpacity = 0.85f;
 
     private const float TwinkleFrequencyDivisor = 12f;
     private const float TwinkleAmplitude = 0.2f;
@@ -23,10 +28,22 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
     private const float SecondaryFlareOpacity = 0.6f;
     private const float SecondaryFlareScaleDivisor = 6f;
 
+    private static readonly Vector2 SupernovaFlare = new(0.2f, 0.01f);
+
         // private const float GalaxyScaleMultiplier = 0.6f;
         // private const float RealisticStarAlphaMultiplier = 0.6f;
         // private const float EclipseFalloff = 0.05f;
         // private const float NormalFalloff = 0.3f;
+
+        // Use Vector4s rather than colors to allow us to go over the byte limit of 255.
+    private static readonly Vector4 DustStart = new(3.5f, 2.1f, 3.3f, 1f);
+    private static readonly Vector4 DustEnd = new(1.5f, 0.8f, 1f, .5f);
+
+    private static readonly Vector4 Background = new(0, 0, 0, 0);
+
+    private const float QuickTimeMultiplier = 7f;
+    private const float ExpandTimeMultiplier = 5f;
+    private const float RingTimeMultiplier = 2.3f;
 
     #endregion
 
@@ -53,55 +70,45 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
         if (alpha > 0)
             DrawStars(spriteBatch, screenCenter, alpha);
 
-            // if (RealisticSkyCompatSystem.RealisticSkyEnabled)
-            //    DrawRealisticSky(spriteBatch, device, screenSize, renderSize, isPixelated, alpha);
-            // else
+            // Only draw supernovae if theres any as to prevent sb restarts.
+        if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
+        {
+            spriteBatch.End();
+            spriteBatch.BeginToggledHalfScale(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, isPixelated);
+
+            DrawSupernovae(spriteBatch, screenCenter, alpha);
+        }
+
         spriteBatch.End();
 
         device.SetRenderTarget(null);
         _wasPrepared = true;
     }
 
-        // private static void DrawRealisticSky(SpriteBatch spriteBatch, GraphicsDevice device, Vector2 screenSize, Vector2 renderSize, bool isPixelated, float alpha)
-        // {
-        //     DrawRealisticGalaxy(screenSize * GalaxyScaleMultiplier, screenSize.X);
-        // 
-        //     Vector2 sunPosition = SunAndMoonSystem.SunMoonPosition;
-        //     float falloff = Main.eclipse ? EclipseFalloff : NormalFalloff;
-        //
-        //     if (isPixelated)
-        //     {
-        //         sunPosition *= 0.5f;
-        //         falloff *= 0.5f;
-        //     }
-        //
-        //     spriteBatch.End();
-        // 
-        //     DrawRealisticStars(device, alpha * RealisticStarAlphaMultiplier, renderSize, sunPosition, Matrix.Identity, Main.GlobalTimeWrappedHourly, falloff, true);
-        // }
+    #region Stars
 
     public static void DrawStars(SpriteBatch spriteBatch, Vector2 center, float alpha)
     {
         Texture2D flareTexture = Textures.Star.Value;
         Vector2 flareOrigin = flareTexture.Size() * 0.5f;
 
-        ReadOnlySpan<InteractableStar> starSpan = StarSystem.Stars.AsSpan();
+        Texture2D bloomTexture = Textures.SunBloom.Value;
+        Vector2 bloomOrigin = bloomTexture.Size() * 0.5f;
 
         bool vanillaStyle = SkyConfig.Instance.VanillaStyleStars;
 
-        for (int i = 0; i < starSpan.Length; i++)
+            // Feels way too bright without this.
+        if (vanillaStyle)
+            alpha *= 0.7f;
+
+        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress <= SupernovaProgress.Shrinking))
         {
-            InteractableStar star = starSpan[i];
-
-            if (star.SupernovaProgress > SupernovaProgress.Shrinking)
-                continue;
-
             Vector2 position = center + star.GetRotatedPosition();
 
             float twinklePhase = star.Twinkle + Main.GlobalTimeWrappedHourly / TwinkleFrequencyDivisor;
             float twinkle = (MathF.Sin(twinklePhase) * TwinkleAmplitude) + TwinkleBaseMultiplier;
 
-            float scale = star.BaseSize * (1 - star.SupernovaTimer) * twinkle;
+            float scale = star.BaseSize * (1 - MathF.Pow(star.SupernovaTimer, 3)) * twinkle;
 
             Color color = star.GetColor() * star.BaseSize * alpha;
 
@@ -122,6 +129,55 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
             }
         }
     }
+
+    #endregion
+
+    #region Supernovae
+
+    public static void DrawSupernovae(SpriteBatch spriteBatch, Vector2 center, float alpha)
+    {
+        Effect supernova = Shaders.Supernova.Value;
+
+        if (supernova is null)
+            return;
+
+            // Set all of the generic color info.
+        supernova.Parameters["ringStartColor"]?.SetValue(DustStart);
+        supernova.Parameters["ringEndColor"]?.SetValue(DustEnd);
+        supernova.Parameters["background"]?.SetValue(Background);
+
+        Texture2D texture = Textures.SupernovaNoise.Value;
+
+        Vector2 origin = texture.Size() * 0.5f;
+
+        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
+        {
+            float time = star.SupernovaTimer / star.BaseSize;
+            Vector2 position = center + star.GetRotatedPosition();
+
+            supernova.Parameters["noisePosition"]?.SetValue(position / MiscUtils.ScreenSize);
+
+                // Multiply the Vector4 and not the Color to give values past 1.
+            supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * 1.4f);
+            supernova.Parameters["endColor"]?.SetValue(star.Color.ToVector4() * 0.4f);
+
+                // Where is my saturate method.
+            supernova.Parameters["quickTime"]?.SetValue(MathF.Min(time * QuickTimeMultiplier, 1f));
+            supernova.Parameters["expandTime"]?.SetValue(MathF.Min(time * ExpandTimeMultiplier, 1f));
+            supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
+            supernova.Parameters["longTime"]?.SetValue(time);
+
+            supernova.CurrentTechnique.Passes[0].Apply();
+
+            float opacity = alpha + (0.6f / star.BaseSize);
+
+            float rotation = star.Rotation;
+
+            spriteBatch.Draw(texture, position, null, Color.White * opacity, rotation, origin, 0.26f * star.BaseSize, SpriteEffects.None, 0f);
+        }
+    }
+
+    #endregion
 
     #endregion
 }

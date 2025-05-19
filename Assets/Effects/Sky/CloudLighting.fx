@@ -21,14 +21,12 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     float shadows = 1 - clouds.r;
     
         // Combine the distance with the dark parts to make it look as if light is bleeding through.
-    float glow = distsun * ((shadows * 2.3) + (clouds.r * 0.45));
+    float glow = distsun * ((shadows * 3.3) + (clouds.r * 0.65));
     
     float4 color = clouds * sampleColor;
     
         // Mashy Mashy.
-            // return color + (SunColor * sampleColor.a * distsun * (max(dirsun, 0) + glow) * center.a);
-    float alpha = clouds.a * (1 - pow(1 - color.a, 4));
-    return color + (SunColor * alpha * distsun * glow);
+    return color + (SunColor * 2. * color.a * distsun * glow);
 }
 
 technique Technique1

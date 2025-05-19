@@ -50,19 +50,18 @@ public sealed class StarSystem : ModSystem
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
-        On_Star.UpdateStars += UpdateStarFields;
+        On_Star.UpdateStars += UpdateStars;
     }
 
-    public override void Unload() => On_Star.UpdateStars -= UpdateStarFields;
+    public override void Unload() => On_Star.UpdateStars -= UpdateStars;
 
     public override void PostSetupContent() => CanDrawStars = true;
 
     #endregion
 
-        // TODO: Supernovae updating.
     #region Updating
 
-    private void UpdateStarFields(On_Star.orig_UpdateStars orig)
+    private void UpdateStars(On_Star.orig_UpdateStars orig)
     {
         if (!CanDrawStars)
         {
@@ -80,7 +79,55 @@ public sealed class StarSystem : ModSystem
 
         TemporaryStarAlpha = -1;
 
+        UpdateSupernovae();
+
             // ShootingStarSystem.Update();
+    }
+
+    private static void UpdateSupernovae()
+    {
+        if (!Stars.Any(s => s.SupernovaProgress > SupernovaProgress.None))
+            return;
+
+        for (int i = 0; i < StarCount; i++)
+        {
+            InteractableStar star = Stars[i];
+
+            if (star.SupernovaProgress == SupernovaProgress.None)
+                continue;
+
+            switch (star.SupernovaProgress)
+            {
+                case SupernovaProgress.Shrinking:
+                    {
+                        Stars[i].SupernovaTimer += 0.002f;
+
+                        if (Stars[i].SupernovaTimer >= 1f)
+                        {
+                            Stars[i].SupernovaTimer = 0f;
+                            Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
+                        }
+
+                        break;
+                    }
+                case SupernovaProgress.Exploding:
+                    {
+                        Stars[i].SupernovaTimer += 0.00006f;
+
+                        if (Stars[i].SupernovaTimer >= 1f)
+                        {
+                            Stars[i].SupernovaTimer = 0f;
+                            Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
+                        }
+
+                        break;
+                    }
+                case SupernovaProgress.Regenerating:
+                    break;  // TODO: Logic for this.
+                default:
+                    break;
+            }
+        }
     }
 
     #endregion
@@ -123,7 +170,7 @@ public sealed class StarSystem : ModSystem
                 continue;
 
             tag[nameof(Stars) + index] = i;
-            tag[nameof(InteractableStar.SupernovaProgress) + index] = star.SupernovaProgress;
+            tag[nameof(InteractableStar.SupernovaProgress) + index] = (byte)star.SupernovaProgress;
             tag[nameof(InteractableStar.SupernovaTimer) + index] = star.SupernovaTimer;
 
             index++;
@@ -142,15 +189,12 @@ public sealed class StarSystem : ModSystem
             {
                 int index = tag.Get<int>(nameof(Stars) + i);
 
-                InteractableStar star = Stars[index];
-
-                star.SupernovaProgress = tag.Get<SupernovaProgress>(nameof(InteractableStar.SupernovaProgress) + i);
-                star.SupernovaTimer = tag.Get<int>(nameof(InteractableStar.SupernovaTimer) + i);
+                Stars[index].SupernovaProgress = (SupernovaProgress)tag.Get<byte>(nameof(InteractableStar.SupernovaProgress) + i);
+                Stars[index].SupernovaTimer = tag.Get<float>(nameof(InteractableStar.SupernovaTimer) + i);
             }
         }
         catch (Exception ex)
         {
-            Main.NewText($"Failed to load stars: {ex.Message}", Color.Red);
             Mod.Logger.Error($"Failed to load stars: {ex.Message}");
         }
     }
@@ -192,10 +236,8 @@ public sealed class StarSystem : ModSystem
             {
                 int index = reader.Read7BitEncodedInt();
 
-                InteractableStar star = Stars[index];
-
-                star.SupernovaProgress = (SupernovaProgress)reader.ReadByte();
-                star.SupernovaTimer = reader.ReadSingle();
+                Stars[index].SupernovaProgress = (SupernovaProgress)reader.ReadByte();
+                Stars[index].SupernovaTimer = reader.ReadSingle();
             }
         }
         catch (Exception ex)
@@ -206,6 +248,9 @@ public sealed class StarSystem : ModSystem
     }
 
     #endregion
+
+    public static void ExplodeStar(int index) => 
+        Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
 
     public static void GenerateStars()
     {

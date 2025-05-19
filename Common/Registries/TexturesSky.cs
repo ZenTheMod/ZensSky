@@ -9,6 +9,7 @@ public static partial class Textures
     private const int MoonTextures = 9;
 
     private static readonly Lazy<Asset<Texture2D>> _star = new(() => Request("Sky/Star"));
+    private static readonly Lazy<Asset<Texture2D>> _supernovaNoise = new(() => Request("Sky/Supernova"));
 
     private static readonly Lazy<Asset<Texture2D>> _sunBloom = new(() => Request("Sky/SunBloom"));
     private static readonly Lazy<Asset<Texture2D>> _sunglasses = new(() => Request("Sky/Sunglasses"));
@@ -20,6 +21,7 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _snowMoon = new(() => Request("Sky/MoonSnow"));
 
     public static Asset<Texture2D> Star => _star.Value;
+    public static Asset<Texture2D> SupernovaNoise => _supernovaNoise.Value;
 
     public static Asset<Texture2D> SunBloom => _sunBloom.Value;
     public static Asset<Texture2D> Sunglasses => _sunglasses.Value;

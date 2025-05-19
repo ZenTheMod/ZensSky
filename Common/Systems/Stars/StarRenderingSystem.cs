@@ -1,7 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework.Graphics;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
@@ -39,6 +42,16 @@ public sealed class StarRenderingSystem : ModSystem
     {
         if (alpha > 0)
             StarTargetContent.DrawStars(spriteBatch, screenCenter, alpha);
+
+        if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
+        {
+            spriteBatch.End(out var snapshot);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+
+            StarTargetContent.DrawSupernovae(spriteBatch, screenCenter, alpha);
+
+            spriteBatch.Restart(in snapshot);
+        }
 
             // if (RealisticSkyCompatSystem.RealisticSkyEnabled)
             // {

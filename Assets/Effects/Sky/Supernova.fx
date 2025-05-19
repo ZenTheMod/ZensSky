@@ -9,6 +9,8 @@ float4 endColor;
 float4 ringStartColor;
 float4 ringEndColor;
 
+float2 noisePosition;
+
 float quickTime;
 float expandTime;
 float ringTime;
@@ -31,7 +33,7 @@ float inOutCubic(float t)
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {
-    float n = tex2D(noise, coords + longTime);
+    float n = tex2D(noise, coords + noisePosition);
 
     float dist = length(.5 - coords) * 2;
     
