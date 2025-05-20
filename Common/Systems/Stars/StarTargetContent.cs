@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Drawing;
 using System.Linq;
 using Terraria;
 using Terraria.GameContent;
@@ -28,21 +27,21 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
     private const float SecondaryFlareOpacity = 0.6f;
     private const float SecondaryFlareScaleDivisor = 6f;
 
-    private static readonly Vector2 SupernovaFlare = new(0.2f, 0.01f);
-
         // private const float GalaxyScaleMultiplier = 0.6f;
         // private const float RealisticStarAlphaMultiplier = 0.6f;
         // private const float EclipseFalloff = 0.05f;
         // private const float NormalFalloff = 0.3f;
 
         // Use Vector4s rather than colors to allow us to go over the byte limit of 255.
-    private static readonly Vector4 DustStart = new(3.5f, 2.1f, 3.3f, 1f);
-    private static readonly Vector4 DustEnd = new(1.5f, 0.8f, 1f, .5f);
+    private static readonly Vector4 ExplosionStart = new(1.5f, 2.5f, 4f, 1f);
+    private static readonly Vector4 ExplosionEnd = new(2.4f, 1.25f, 3.2f, .7f);
+    private static readonly Vector4 RingStart = new(3.5f, 2.9f, 1f, 1f);
+    private static readonly Vector4 RingEnd = new(7.5f, 1.8f, .5f, .5f);
 
     private static readonly Vector4 Background = new(0, 0, 0, 0);
 
     private const float QuickTimeMultiplier = 7f;
-    private const float ExpandTimeMultiplier = 5f;
+    private const float ExpandTimeMultiplier = 6f;
     private const float RingTimeMultiplier = 2.3f;
 
     #endregion
@@ -142,9 +141,10 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
             return;
 
             // Set all of the generic color info.
-        supernova.Parameters["ringStartColor"]?.SetValue(DustStart);
-        supernova.Parameters["ringEndColor"]?.SetValue(DustEnd);
         supernova.Parameters["background"]?.SetValue(Background);
+
+        supernova.Parameters["ringStartColor"]?.SetValue(RingStart);
+        supernova.Parameters["ringEndColor"]?.SetValue(new Vector4(5.5f, 1.8f, .5f, .5f));
 
         Texture2D texture = Textures.SupernovaNoise.Value;
 
@@ -158,8 +158,9 @@ public sealed class StarTargetContent : ARenderTargetContentByRequest
             supernova.Parameters["noisePosition"]?.SetValue(position / MiscUtils.ScreenSize);
 
                 // Multiply the Vector4 and not the Color to give values past 1.
-            supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * 1.4f);
-            supernova.Parameters["endColor"]?.SetValue(star.Color.ToVector4() * 0.4f);
+
+            supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * ExplosionStart * 0.1f);
+            supernova.Parameters["endColor"]?.SetValue(star.Color.ToVector4() * ExplosionEnd);
 
                 // Where is my saturate method.
             supernova.Parameters["quickTime"]?.SetValue(MathF.Min(time * QuickTimeMultiplier, 1f));

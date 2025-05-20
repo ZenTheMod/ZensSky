@@ -41,14 +41,16 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     float radius = outCubic(expandTime) + n * (1 - dist) * quickTime;
 	
     float interpolator = saturate(radius - dist - longTime);
+    
+    float4 explosionColor = oklabLerp(startColor, endColor, quickTime);
 	
-    float4 bluecolor = lerp(startColor, endColor, expandTime) * (5 - inOutCubic(quickTime) * 4.75);
+    float4 bluecolor = explosionColor * (5 - inOutCubic(quickTime) * 4.75);
 	
     float4 color = lerp(background, bluecolor, interpolator);
     
         // Add an sort of expanding ring.
-    float expandingRing = max(clampedMap(interpolator, .5, .55, 1, 0), 0);
-    color += frac(expandingRing) * .2 * startColor * (1 - expandTime);
+    float expandingRing = clampedMap(abs(0.4 - interpolator), 0, .03, 1, 0);
+    color += frac(expandingRing) * .6 * explosionColor * (1 - expandTime);
     
     color *= 1.9;
     

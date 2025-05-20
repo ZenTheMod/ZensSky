@@ -28,6 +28,10 @@ public sealed class StarSystem : ModSystem
 
     private const string SupernovaeCount = "SupernovaeCount";
 
+    private const float CompressionIncrement = 0.002f;
+
+    private const float ExplosionIncrement = 0.00004f;
+
     #endregion
 
     #region Public Fields
@@ -100,7 +104,7 @@ public sealed class StarSystem : ModSystem
             {
                 case SupernovaProgress.Shrinking:
                     {
-                        Stars[i].SupernovaTimer += 0.002f;
+                        Stars[i].SupernovaTimer += CompressionIncrement;
 
                         if (Stars[i].SupernovaTimer >= 1f)
                         {
@@ -112,7 +116,7 @@ public sealed class StarSystem : ModSystem
                     }
                 case SupernovaProgress.Exploding:
                     {
-                        Stars[i].SupernovaTimer += 0.00006f;
+                        Stars[i].SupernovaTimer += ExplosionIncrement;
 
                         if (Stars[i].SupernovaTimer >= 1f)
                         {
