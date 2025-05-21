@@ -106,11 +106,11 @@ public sealed class StarSystem : ModSystem
                     {
                         Stars[i].SupernovaTimer += CompressionIncrement;
 
-                        if (Stars[i].SupernovaTimer >= 1f)
-                        {
-                            Stars[i].SupernovaTimer = 0f;
-                            Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
-                        }
+                        if (Stars[i].SupernovaTimer < 1f)
+                            break;
+
+                        Stars[i].SupernovaTimer = 0f;
+                        Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
 
                         break;
                     }
@@ -118,11 +118,11 @@ public sealed class StarSystem : ModSystem
                     {
                         Stars[i].SupernovaTimer += ExplosionIncrement;
 
-                        if (Stars[i].SupernovaTimer >= 1f)
-                        {
-                            Stars[i].SupernovaTimer = 0f;
-                            Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
-                        }
+                        if (Stars[i].SupernovaTimer < 1f)
+                            break;
+
+                        Stars[i].SupernovaTimer = 0f;
+                        Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
 
                         break;
                     }

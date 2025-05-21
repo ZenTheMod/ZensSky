@@ -6,6 +6,7 @@ Configs: {
 			SunMoon: Sun and Moon
 			Stars: Stars
 			Clouds: Clouds
+			Ambient: Ambient Header
 		}
 
 		MinimizeRenderTargetUsage: {
@@ -65,6 +66,11 @@ Configs: {
 		CloudsEnabled: {
 			Label: "[i:751] Fancy Cloud Lighting"
 			Tooltip: If clouds have added lighting.
+		}
+
+		WindParticles: {
+			Label: "[i:751] Wind Particles"
+			Tooltip: Enables small wind trail particles.
 		}
 	}
 

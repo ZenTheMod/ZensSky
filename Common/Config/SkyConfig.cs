@@ -16,7 +16,7 @@ public sealed class SkyConfig : ModConfig
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
-    [DefaultValue(false)]
+    [DefaultValue(true)]
     public bool MinimizeRenderTargetUsage;
 
     [Header("SunMoon")]
@@ -54,4 +54,9 @@ public sealed class SkyConfig : ModConfig
 
     [DefaultValue(true)]
     public bool CloudsEnabled;
+
+    [Header("Ambient")]
+
+    [DefaultValue(true)]
+    public bool WindParticles;
 }

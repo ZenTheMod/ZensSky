@@ -35,38 +35,13 @@ public record struct InteractableStar
 
     #endregion
 
-    /// <summary>
-    /// The position of the star, is not relative to the top left of the screen.
-    /// </summary>
     public required Vector2 Position { get; init; }
-
-    /// <summary>
-    /// The color of the star, by default uses <see cref="GenerateColor"/>.
-    /// </summary>
     public required Color Color { get; init; }
-
-    /// <summary>
-    /// The base scale of the star despite compression.
-    /// </summary>
     public required float BaseSize { get; init; }
-
     public required float Rotation { get; init; }
-
-    /// <summary>
-    /// How frequently the star 'twinkles'.
-    /// </summary>
     public required float Twinkle { get; init; }
-
-    /// <summary>
-    /// Which one of vanillas star textures the star uses when drawn while <see cref="SkyConfig.VanillaStyleStars"/> is true.
-    /// </summary>
     public required int StarType { get; init; }
-
-    /// <summary>
-    /// Timer used for controlling the supernova visual.
-    /// </summary>
     public float SupernovaTimer { get; set; }
-
     public SupernovaProgress SupernovaProgress { get; set; }
 
     public static InteractableStar CreateRandom(UnifiedRandom rand) => new()
