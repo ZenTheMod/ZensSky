@@ -8,6 +8,7 @@ using Daybreak.Common.Rendering;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class SunAndMoonRenderingSystem : ModSystem
 {
     private static SunAndMoonTargetContent? _sunAndMoonRenderTarget;

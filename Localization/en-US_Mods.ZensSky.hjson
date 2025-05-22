@@ -6,7 +6,7 @@ Configs: {
 			SunMoon: Sun and Moon
 			Stars: Stars
 			Clouds: Clouds
-			Ambient: Ambient Header
+			Ambient: Ambient Effects
 		}
 
 		MinimizeRenderTargetUsage: {

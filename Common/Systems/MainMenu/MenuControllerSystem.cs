@@ -18,6 +18,7 @@ using ZensSky.Common.Systems.MainMenu.Elements;
 
 namespace ZensSky.Common.Systems.MainMenu;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class MenuControllerSystem : ModSystem
 {
     #region Private Fields

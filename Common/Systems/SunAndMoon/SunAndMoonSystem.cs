@@ -6,6 +6,7 @@ using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class SunAndMoonSystem : ModSystem
 {
     #region Fields

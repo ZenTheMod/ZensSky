@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -11,6 +10,7 @@ using ZensSky.Common.Registries;
 
 namespace ZensSky.Common.Systems.Wind;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class WindRenderingSystem : ModSystem
 {
     #region Private Fields

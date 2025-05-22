@@ -13,6 +13,7 @@ using Daybreak.Common.CIL;
 
 namespace ZensSky.Common.Systems.Clouds;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class CloudSystem : ModSystem
 {
     #region Private Fields
