@@ -8,17 +8,19 @@ public record struct WindParticle
 {
     #region Private Fields
 
-    private const int MaxOldPositions = 12;
+    private const int MaxOldPositions = 32;
 
-    private const float LifeTimeIncrement = 0.01f;
-    private const float MinWind = 0.001f;
+    private const float LifeTimeIncrement = 0.004f;
 
-    private const float SinFrequency = 0.05f;
+    private const float SinLifeTimeFrequency = 7f;
+    private const float SinGlobalTimeFrequency = .6f;
 
-    private const float LoopMin = 0.4f;
-    private const float LoopMax = 0.6f;
+    private const float SinAmplitude = .1f;
 
-    private const float Magnitude = 50f;
+    private const float LoopMin = 0.47f;
+    private const float LoopMax = 0.53f;
+
+    private const float Magnitude = 11f;
 
     #endregion
 
@@ -32,21 +34,22 @@ public record struct WindParticle
     public void Update()
     {
         float wind = Main.WindForVisuals;
-        float increment = 0.005f * MathF.Abs(wind);
+        float increment = LifeTimeIncrement * MathF.Abs(wind);
 
         LifeTime += increment;
         if (LifeTime > 1f)
             IsActive = false;
 
-        Vector2 newVelocity = new(wind, MathF.Sin(((LifeTime * 7) + Main.GlobalTimeWrappedHourly) * .6f) * .1f);
+        Vector2 newVelocity = new(wind, 
+            MathF.Sin((LifeTime * SinLifeTimeFrequency + Main.GlobalTimeWrappedHourly) * SinGlobalTimeFrequency) * SinAmplitude);
 
         if (ShouldLoop)
         {
-            float interpolator = Utils.Remap(LifeTime, 0.45f, 0.55f, 0f, 1f);
+            float interpolator = Utils.Remap(LifeTime, LoopMin, LoopMax, 0f, 1f);
             newVelocity = newVelocity.RotatedBy(MathHelper.TwoPi * interpolator * -MathF.Sign(wind));
         }
 
-        Velocity = newVelocity.SafeNormalize(Vector2.UnitY) * 12f * MathF.Abs(wind);
+        Velocity = newVelocity.SafeNormalize(Vector2.UnitY) * Magnitude * MathF.Abs(wind);
         Position += Velocity;
 
             // Update the old positions.
@@ -58,7 +61,7 @@ public record struct WindParticle
     public static WindParticle CreateActive(Vector2 position, bool shouldLoop) => new()
     {
         Position = position,
-        OldPositions = new Vector2[32],
+        OldPositions = new Vector2[MaxOldPositions],
         Velocity = Vector2.Zero,
         ShouldLoop = shouldLoop,
         LifeTime = 0f,

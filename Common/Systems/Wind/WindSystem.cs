@@ -13,9 +13,9 @@ public sealed class WindSystem : ModSystem
 {
     #region Private Fields
 
-    private const float MinWind = 0.06f;
-    private const float WindSpawnChance = 180f;
-    private const int WindLoopChance = 10;
+    private const float MinWind = 0.25f;
+    private const float WindSpawnChance = 40f;
+    private const int WindLoopChance = 14;
 
     private const int Margin = 100;
 
@@ -27,20 +27,16 @@ public sealed class WindSystem : ModSystem
 
     #region Loading
 
-    public override void Load()
-    {
-        Array.Clear(Winds);
-        On_Main.UpdateWeather += UpdateWind;
-    }
-
-    public override void Unload() => On_Main.UpdateWeather -= UpdateWind;
+    public override void Load() => Array.Clear(Winds);
 
     #endregion
 
-    private void UpdateWind(On_Main.orig_UpdateWeather orig, Main self, GameTime gameTime, int currentDayRateIteration)
-    {
-        orig(self, gameTime, currentDayRateIteration);
+    #region Updating
 
+    public override void PostUpdateDusts() => UpdateWind();
+
+    private static void UpdateWind()
+    {
         if (!SkyConfig.Instance.WindParticles)
             return;
 
@@ -56,7 +52,7 @@ public sealed class WindSystem : ModSystem
 
     private static void SpawnWind()
     {
-        if (!Main.rand.NextBool((int)(50 / MathF.Abs(Main.WindForVisuals))))
+        if (!Main.rand.NextBool((int)(WindSpawnChance / MathF.Abs(Main.WindForVisuals))))
             return;
 
         int index = Array.FindIndex(Winds, w => !w.IsActive);
@@ -66,13 +62,18 @@ public sealed class WindSystem : ModSystem
 
         Vector2 screensize = MiscUtils.ScreenSize;
 
-        Rectangle spawn = new((int)Main.screenPosition.X, (int)Main.screenPosition.Y,
-            (int)(screensize.X - (screensize.X * Main.WindForVisuals)), (int)screensize.Y);
+        Rectangle spawn = new((int)(Main.screenPosition.X - (screensize.X * Main.WindForVisuals * 0.5f)), (int)Main.screenPosition.Y,
+            (int)screensize.X, (int)screensize.Y);
 
         spawn.Inflate(Margin, Margin);
 
         Vector2 position = Main.rand.NextVector2FromRectangle(spawn);
 
+        if (position.Y > Main.worldSurface * 16f || Collision.SolidCollision(position, 1, 1))
+            return;
+
         Winds[index] = WindParticle.CreateActive(position, Main.rand.NextBool(WindLoopChance));
     }
+
+    #endregion
 }
