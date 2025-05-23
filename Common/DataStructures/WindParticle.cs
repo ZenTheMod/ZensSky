@@ -8,7 +8,7 @@ public record struct WindParticle
 {
     #region Private Fields
 
-    private const int MaxOldPositions = 32;
+    private const int MaxOldPositions = 43;
 
     private const float LifeTimeIncrement = 0.004f;
 
@@ -20,7 +20,7 @@ public record struct WindParticle
     private const float LoopMin = 0.47f;
     private const float LoopMax = 0.53f;
 
-    private const float Magnitude = 11f;
+    private const float Magnitude = 13f;
 
     #endregion
 

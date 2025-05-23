@@ -48,7 +48,7 @@ public class ZensSky : Mod
                         args[2] is Vector2 screenCenter &&
                         args[3] is float alpha)
                     {
-                        StarTargetContent.DrawStars(spriteBatch, screenCenter, alpha);
+                        StarRenderingSystem.DrawStars(spriteBatch, screenCenter, alpha);
                         return true;
                     }
                     return false;
@@ -60,7 +60,7 @@ public class ZensSky : Mod
                         args[1] is SpriteBatch spriteBatch &&
                         args[2] is GraphicsDevice device)
                     {
-                        SunAndMoonTargetContent.DrawSunAndMoon(spriteBatch, device);
+                        SunAndMoonRenderingSystem.DrawSunAndMoon(spriteBatch, device);
                         return true;
                     }
                     return false;

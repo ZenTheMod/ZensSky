@@ -9,27 +9,9 @@ Configs: {
 			Ambient: Ambient Effects
 		}
 
-		MinimizeRenderTargetUsage: {
-			Label: "[i:751] Sky Optimizations"
-			Tooltip:
-				'''
-				Trades quality for performance. Often runs faster on lower-end machines.
-				[c/FF0000:Disables sky pixelation.]
-				'''
-		}
-
 		SunAndMoonRework: {
 			Label: "[i:237] Sun And Moon Overhaul"
 			Tooltip: If the visual overhaul of the sun and moon is enabled or not.
-		}
-
-		PixelatedSunAndMoon: {
-			Label: "[i:75] Pixelated Sun and Moon"
-			Tooltip:
-				'''
-				If the sun/moon is pixelated when drawn. 
-				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
-				'''
 		}
 
 		EclipseMode: {
@@ -51,11 +33,6 @@ Configs: {
 				(sorry if you've just learnt about this now) 
 				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
 				'''
-		}
-
-		PixelatedStars: {
-			Label: "[i:184] Pixelated Stars"
-			Tooltip: If stars are pixelated when drawn.
 		}
 
 		VanillaStyleStars: {
