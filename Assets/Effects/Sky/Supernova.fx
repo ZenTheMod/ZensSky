@@ -9,12 +9,14 @@ float4 endColor;
 float4 ringStartColor;
 float4 ringEndColor;
 
-float2 noisePosition;
-
 float quickTime;
 float expandTime;
 float ringTime;
 float longTime;
+
+float globalTime;
+
+float offset;
 
 float inCubic(float t)
 {
@@ -33,7 +35,7 @@ float inOutCubic(float t)
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {
-    float n = tex2D(noise, coords + noisePosition);
+    float n = tex2D(noise, coords * 3 + expandTime + offset);
 
     float dist = length(.5 - coords) * 2;
     
@@ -44,31 +46,40 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     
     float4 explosionColor = oklabLerp(startColor, endColor, quickTime);
 	
-    float4 bluecolor = explosionColor * (5 - inOutCubic(quickTime) * 4.75);
+    float4 explosion = explosionColor * (5 - inOutCubic(quickTime) * 4.75);
 	
-    float4 color = lerp(background, bluecolor, interpolator);
+    float4 color = oklabLerp(background, explosion, interpolator);
     
         // Add an sort of expanding ring.
-    float expandingRing = clampedMap(abs(0.4 - interpolator), 0, .03, 1, 0);
+    float expandingRing = clampedMap(abs(.4 - interpolator), 0, .03, 1, 0);
     color += frac(expandingRing) * .6 * explosionColor * (1 - expandTime);
     
-    color *= 1.9;
+    color *= 1.2;
     
     float shellinterpolator = 1 - abs(.5 - map(interpolator, .65, .9, 1, 0));
+    
+        // Add a small vein-like effect. (Really I'm just mashing shit together.)
+    shellinterpolator *= 1.5 - coronaries(coords * 4 + offset, globalTime * 0.00001);
     
     float4 outer = lerp(ringStartColor, ringEndColor, inCubic(longTime));
     
         // Interpolate using the oklap colorspace for a better transition.
     color = oklabLerp(color, outer, saturate(shellinterpolator - longTime) * outCubic(ringTime) * interpolator);
+        
+        // Add a small glowing "star" at its center
+    color = oklabLerp(color, startColor, (1 - longTime) * quickTime * saturate(inCubic(1 - dist * 7)));
+        
+        // Add a vauge dust cloud.
+    color += endColor * min(outCubic(.2 * interpolator * n) * expandTime, .1);
     
         // Make sure everything actually vanishes.
-    return color * sampleColor * outCubic(1 - longTime);
+    return color * sampleColor * outCubic(1 - longTime) * color.a;
 }
 
 technique Technique1
 {
     pass AutoloadPass
     {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }

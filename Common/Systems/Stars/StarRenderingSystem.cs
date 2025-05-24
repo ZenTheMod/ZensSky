@@ -35,18 +35,20 @@ public sealed class StarRenderingSystem : ModSystem
         // private const float NormalFalloff = 0.3f;
 
         // Use Vector4s rather than colors to allow us to go over the byte limit of 255.
-    private static readonly Vector4 ExplosionStart = new(.15f, .25f, .4f, .1f);
-    private static readonly Vector4 ExplosionEnd = new(2.4f, 1.25f, 3.2f, .7f);
+    private static readonly Vector4 ExplosionStart = new(1.5f, 2.5f, 4f, 1f);
+    private static readonly Vector4 ExplosionEnd = new(1.4f, .25f, 2.2f, .7f);
     private static readonly Vector4 RingStart = new(3.5f, 2.9f, 1f, 1f);
-    private static readonly Vector4 RingEnd = new(5.5f, 1.8f, .5f, .5f);
+    private static readonly Vector4 RingEnd = new(4.5f, 1.8f, .5f, .5f);
 
     private static readonly Vector4 Background = new(0, 0, 0, 0);
 
-    private const float QuickTimeMultiplier = 7f;
-    private const float ExpandTimeMultiplier = 6f;
-    private const float RingTimeMultiplier = 2.3f;
+    private const float QuickTimeMultiplier = 20f;
+    private const float ExpandTimeMultiplier = 13.3f;
+    private const float RingTimeMultiplier = 6.6f;
 
     private const float MinimumSupernovaAlpha = 0.6f;
+
+    private const float SupernovaScale = 0.35f;
 
     #endregion
 
@@ -131,8 +133,6 @@ public sealed class StarRenderingSystem : ModSystem
             float time = star.SupernovaTimer / star.BaseSize;
             Vector2 position = center + star.GetRotatedPosition();
 
-            supernova.Parameters["noisePosition"]?.SetValue(position / MiscUtils.ScreenSize);
-
                 // Multiply the Vector4 and not the Color to give values past 1.
             supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * ExplosionStart);
             supernova.Parameters["endColor"]?.SetValue(star.Color.ToVector4() * ExplosionEnd);
@@ -143,13 +143,17 @@ public sealed class StarRenderingSystem : ModSystem
             supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
             supernova.Parameters["longTime"]?.SetValue(time);
 
+            supernova.Parameters["globalTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            supernova.Parameters["offset"]?.SetValue(position / MiscUtils.ScreenSize);
+
             supernova.CurrentTechnique.Passes[0].Apply();
 
             float opacity = alpha + (MinimumSupernovaAlpha / star.BaseSize);
 
             float rotation = star.Rotation;
 
-            spriteBatch.Draw(texture, position, null, Color.White * opacity, rotation, origin, 0.26f * star.BaseSize, SpriteEffects.None, 0f);
+            spriteBatch.Draw(texture, position, null, Color.White * opacity, rotation, origin, SupernovaScale * star.BaseSize, SpriteEffects.None, 0f);
         }
     }
 

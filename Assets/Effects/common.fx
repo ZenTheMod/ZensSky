@@ -53,4 +53,29 @@ float4 oklabLerp(float4 colA, float4 colB, float h)
     return float4(mul(kLMStoCONE, (lms * lms * lms)), lerp(colA.a, colB.a, h));
 }
 
+    // https://www.shadertoy.com/view/M3dXzB
+const float2x2 coronariesMatrix = float2x2(cos(1 + float4(0, 33, 11, 0)));
+
+float coronaries(float2 uv, float time)
+{
+    float2 a = float2(0, 0);
+    float2 res = float2(0, 0);
+    float s = 12;
+    
+    for (float j = 0; j < 12; j++)
+    {
+        uv = mul(uv, coronariesMatrix);
+        a = mul(a, coronariesMatrix);
+        
+        float2 L = uv * s + j + a - time;
+        a += cos(L);
+        
+        res += (.5 + .5 * sin(L)) / s;
+        
+        s *= 1.2;
+    }
+    
+    return res.x + res.y;
+}
+
 #endif

@@ -6,9 +6,10 @@ My attempt at a more accurate sky.
     [*]More dynamic sun in the style of 1.4.5 leaks.
     [*]More accurate moon, works for every vanilla moon style.
     [*]Prettier stars.
+    [*]Supernovae.
+    [*]Wind Particles.
     [*]Dynamic cloud lighting.
     [*]More realistic shooting stars.
-    [*]Pixelation config. (Kain asked for this (Blame them))
     [*]RealisticSky compat. (Sorry Lucille)
 [/list]
 

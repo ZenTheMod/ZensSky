@@ -30,7 +30,7 @@ public sealed class StarSystem : ModSystem
 
     private const float CompressionIncrement = 0.002f;
 
-    private const float ExplosionIncrement = 0.00004f;
+    private const float ExplosionIncrement = 0.00002f;
 
     #endregion
 
@@ -104,7 +104,7 @@ public sealed class StarSystem : ModSystem
             {
                 case SupernovaProgress.Shrinking:
                     {
-                        Stars[i].SupernovaTimer += CompressionIncrement;
+                        Stars[i].SupernovaTimer += CompressionIncrement * (float)Main.dayRate;
 
                         if (Stars[i].SupernovaTimer < 1f)
                             break;
@@ -116,7 +116,7 @@ public sealed class StarSystem : ModSystem
                     }
                 case SupernovaProgress.Exploding:
                     {
-                        Stars[i].SupernovaTimer += ExplosionIncrement;
+                        Stars[i].SupernovaTimer += ExplosionIncrement * (float)Main.dayRate;
 
                         if (Stars[i].SupernovaTimer < 1f)
                             break;
