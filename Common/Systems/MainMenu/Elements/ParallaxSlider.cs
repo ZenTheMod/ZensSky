@@ -69,8 +69,8 @@ public sealed class ParallaxSlider : MenuControllerElement
             return;
 
         if (Slider.IsHeld)
-            MenuConfig.Instance.Parallax = Utils.Remap(Slider.Ratio, 0, 1, -MaxRange, MaxRange);
+            MenuConfig.Instance.Parallax = Utils.Remap(Slider.Ratio, 0, 1, MaxRange, -MaxRange);
         else
-            Slider.Ratio = Utils.Remap(MenuConfig.Instance.Parallax, -MaxRange, MaxRange, 0, 1);
+            Slider.Ratio = Utils.Remap(MenuConfig.Instance.Parallax, MaxRange, -MaxRange, 0, 1);
     }
 }

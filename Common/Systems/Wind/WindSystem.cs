@@ -43,7 +43,7 @@ public sealed class WindSystem : ModSystem
     {
         orig(self, ref gameTime);
 
-        if (Main.dedServ)
+        if (Main.dedServ || Main.gamePaused)
             return;
 
         if (!SkyConfig.Instance.WindParticles)
@@ -78,7 +78,7 @@ public sealed class WindSystem : ModSystem
 
         Vector2 position = Main.rand.NextVector2FromRectangle(spawn);
 
-        if (position.Y > Main.worldSurface * 16f || Collision.SolidCollision(position, 1, 1))
+        if (!Main.gameMenu && (position.Y > Main.worldSurface * 16f || Collision.SolidCollision(position, 1, 1)))
             return;
 
         Winds[index] = WindParticle.CreateActive(position, Main.rand.NextBool(WindLoopChance));

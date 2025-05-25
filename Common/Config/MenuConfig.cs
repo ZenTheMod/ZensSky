@@ -10,6 +10,13 @@ public sealed class MenuConfig : ModConfig
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
+    [DefaultValue(false)]
+    public bool UseWind;
+
+    [DefaultValue(0f)]
+    [Range(-1f, 1f)]
+    public float Wind;
+
     [DefaultValue(4f)]
     [Range(-5f, 5f)]
     public float Parallax;

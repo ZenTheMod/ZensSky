@@ -16,7 +16,7 @@ public sealed class WindRenderingSystem : ModSystem
     #region Private Fields
 
     private const float WidthAmplitude = 2f;
-    private const float Alpha = 0.7f;
+    private const float Alpha = 0.8f;
 
     #endregion
 
@@ -42,8 +42,10 @@ public sealed class WindRenderingSystem : ModSystem
     {
         orig(self);
 
-        if (Main.gameMenu)
-            DrawWinds();
+        if (!Main.gameMenu)
+            return;
+
+        DrawWinds();
     }
 
     private void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
@@ -62,7 +64,7 @@ public sealed class WindRenderingSystem : ModSystem
         if (!SkyConfig.Instance.WindParticles)
             return;
 
-        GraphicsDevice device = Main.instance.GraphicsDevice;
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         device.Textures[0] = Textures.SunBloom.Value;
 
@@ -79,7 +81,7 @@ public sealed class WindRenderingSystem : ModSystem
 
         VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[(positions.Length - 1) * 2];
 
-        float brightness = MathF.Sin(wind.LifeTime * MathHelper.Pi) * Main.atmo;
+        float brightness = MathF.Sin(wind.LifeTime * MathHelper.Pi) * Main.atmo * MathF.Abs(Main.WindForVisuals);
 
         for (int i = 0; i < positions.Length - 1; i++)
         {
@@ -94,13 +96,12 @@ public sealed class WindRenderingSystem : ModSystem
             Color color = Lighting.GetColor(positions[i].ToTileCoordinates()) * brightness * Alpha;
             color.A = 0;
 
-            vertices[i * 2] = new(new(position + offset, 0), color, new(progress, 0f));
-
-            vertices[i * 2 + 1] = new(new(position - offset, 0), color, new(progress, 1f));
+            vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));
+            vertices[i * 2 + 1] = new(new(position + offset, 0), color, new(progress, 1f));
         }
 
         if (vertices.Length > 3)
-            device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices.ToArray(), 0, vertices.Length - 2);
+            device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, vertices.Length - 2);
     }
 
     #endregion

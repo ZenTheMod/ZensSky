@@ -51,9 +51,8 @@ public sealed class CloudDensitySlider : MenuControllerElement
             MenuConfig.Instance.CloudDensity = density;
 
             int prior = Main.numClouds;
-            Main.numClouds = (int)(density * Main.maxClouds);
 
-            Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
+            Refresh();
 
             if (Main.numClouds != prior)
                 Cloud.resetClouds();
