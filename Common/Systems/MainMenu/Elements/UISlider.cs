@@ -15,7 +15,11 @@ public sealed class UISlider : UIElement
     {
         Width.Set(0, 1f);
         Height.Set(16, 0f);
+
+        InnerColor = Color.Gray;
     }
+
+    public Color InnerColor;
 
     public bool IsHeld;
 
@@ -60,7 +64,7 @@ public sealed class UISlider : UIElement
             DrawBar(spriteBatch, sliderOutline, size, Main.OurFavoriteColor);
 
         size.Inflate(-4, -4);
-        spriteBatch.Draw(Textures.Pixel.Value, size, Color.Gray);
+        spriteBatch.Draw(Textures.Pixel.Value, size, InnerColor);
 
         Texture2D blip = TextureAssets.ColorSlider.Value;
 

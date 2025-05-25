@@ -80,7 +80,7 @@ Configs: {
 
 		Wind: {
 			Label: Wind Direction
-			Tooltip: "The direction/speed of wind on the titlescreen."
+			Tooltip: The direction/speed of wind on the titlescreen.
 		}
 	}
 

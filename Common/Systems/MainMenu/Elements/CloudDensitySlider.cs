@@ -20,6 +20,8 @@ public sealed class CloudDensitySlider : MenuControllerElement
 
         Slider.Top.Set(35f, 0f);
 
+        Slider.InnerColor = Color.LightCyan;
+
         Append(Slider);
     }
 

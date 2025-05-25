@@ -1,30 +1,7 @@
+#include "../common.fx"
+
 sampler doesAnyoneTrulyNeedASampler : register(s0);
 float uTime;
-
-const float2x2 funny = float2x2(cos(1 + float4(0, 33, 11, 0)));
-
-    // Voodoo.
-float coronaries(float2 uv, float time)
-{
-    float2 a = float2(0, 0);
-    float2 res = float2(0, 0);
-    float s = 12;
-    
-    for (float j = 0; j < 12; j++)
-    {
-        uv = mul(uv, funny);
-        a = mul(a, funny);
-        
-        float2 L = uv * s + j + a - time;
-        a += cos(L);
-        
-        res += (.5 + .5 * sin(L)) / s;
-        
-        s *= 1.2;
-    }
-    
-    return res.x + res.y;
-}
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {

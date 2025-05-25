@@ -93,7 +93,7 @@ public sealed class WindRenderingSystem : ModSystem
             float direction = (positions[i] - positions[i + 1]).ToRotation();
             Vector2 offset = new Vector2(width, 0).RotatedBy(direction + MathHelper.PiOver2);
 
-            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()) * brightness * Alpha;
+            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()).MultiplyRGB(Main.ColorOfTheSkies) * brightness * Alpha;
             color.A = 0;
 
             vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));

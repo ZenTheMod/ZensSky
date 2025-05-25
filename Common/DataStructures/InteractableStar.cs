@@ -3,7 +3,6 @@ using Terraria;
 using Terraria.Utilities;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
-using ZensSky.Common.Config;
 
 namespace ZensSky.Common.DataStructures;
 
