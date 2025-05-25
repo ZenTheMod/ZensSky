@@ -71,9 +71,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky;
+    public override void Load() => Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
 
-    public override void Unload() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky;
+    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
 
     #endregion
 

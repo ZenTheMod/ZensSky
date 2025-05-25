@@ -22,22 +22,47 @@ public sealed class WindRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => On_Main.DrawInfernoRings += DrawWind;
+    public override void Load() 
+    {
+        Main.QueueMainThreadAction(() => {
+            On_Main.DrawInfernoRings += InGameDraw;
+            On_Main.DrawBackgroundBlackFill += MenuDraw; 
+        });
+    }
 
-    public override void Unload() => On_Main.DrawInfernoRings -= DrawWind;
+    public override void Unload()
+    {
+        Main.QueueMainThreadAction(() => {
+            On_Main.DrawInfernoRings -= InGameDraw;
+            On_Main.DrawBackgroundBlackFill -= MenuDraw;
+        });
+    }
+
+    private void MenuDraw(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
+    {
+        orig(self);
+
+        if (Main.gameMenu)
+            DrawWinds();
+    }
+
+    private void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
+    {
+        orig(self);
+
+        DrawWinds();
+    }
 
     #endregion
 
     #region Drawing
 
-    private static void DrawWind(On_Main.orig_DrawInfernoRings orig, Main self)
+    private static void DrawWinds()
     {
-        orig(self);
-
         if (!SkyConfig.Instance.WindParticles)
             return;
 
-        GraphicsDevice device = self.GraphicsDevice;
+        GraphicsDevice device = Main.instance.GraphicsDevice;
 
         device.Textures[0] = Textures.SunBloom.Value;
 

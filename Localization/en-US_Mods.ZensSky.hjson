@@ -54,6 +54,15 @@ Configs: {
 	MenuConfig: {
 		DisplayName: Menu Config
 
+		Parallax: {
+			Label: Parallax Direction
+			Tooltip:
+				'''
+				The direction the screen scrolls on the titlescreen.
+				(Defaults to 4)
+				'''
+		}
+
 		UseCloudDensity: {
 			Label: Uses Cloud Density
 			Tooltip: If the below option will be used upon load.
@@ -72,5 +81,7 @@ MenuStyles.Eclipse: Eclipse
 
 MenuController: {
 	Header: Menu Config
+
+	Parallax: Parallax Direction
 	CloudDensity: Cloud Density
 }

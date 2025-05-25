@@ -48,15 +48,15 @@ public sealed class StarRenderingSystem : ModSystem
 
     private const float MinimumSupernovaAlpha = 0.6f;
 
-    private const float SupernovaScale = 0.35f;
+    private const float SupernovaScale = 0.27f;
 
     #endregion
 
     #region Loading
 
-    public override void Load() => On_Main.DrawStarsInBackground += DrawStarsToSky;
+    public override void Load() => Main.QueueMainThreadAction(() => On_Main.DrawStarsInBackground += DrawStarsToSky);
 
-    public override void Unload() => On_Main.DrawStarsInBackground -= DrawStarsToSky;
+    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DrawStarsInBackground -= DrawStarsToSky);
 
     #endregion
 
@@ -124,6 +124,8 @@ public sealed class StarRenderingSystem : ModSystem
         supernova.Parameters["ringStartColor"]?.SetValue(RingStart);
         supernova.Parameters["ringEndColor"]?.SetValue(RingEnd);
 
+        supernova.Parameters["globalTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
         Texture2D texture = Textures.SupernovaNoise.Value;
 
         Vector2 origin = texture.Size() * 0.5f;
@@ -142,8 +144,6 @@ public sealed class StarRenderingSystem : ModSystem
             supernova.Parameters["expandTime"]?.SetValue(MathF.Min(time * ExpandTimeMultiplier, 1f));
             supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
             supernova.Parameters["longTime"]?.SetValue(time);
-
-            supernova.Parameters["globalTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
 
             supernova.Parameters["offset"]?.SetValue(position / MiscUtils.ScreenSize);
 

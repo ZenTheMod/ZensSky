@@ -28,9 +28,9 @@ public sealed class CloudSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => IL_Main.DrawSurfaceBG += ApplyCloudShader;
+    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG += ApplyCloudShader);
 
-    public override void Unload() => IL_Main.DrawSurfaceBG -= ApplyCloudShader;
+    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG -= ApplyCloudShader);
 
     #endregion
 

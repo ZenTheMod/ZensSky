@@ -22,8 +22,8 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #endregion
 
-    public override void Load() => IL_Main.DrawSunAndMoon += ModifyDrawing;
-    public override void Unload() => IL_Main.DrawSunAndMoon -= ModifyDrawing;
+    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
+    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
 
     private void ModifyDrawing(ILContext il)
     {

@@ -6,11 +6,11 @@ namespace ZensSky.Common.Systems.MainMenu.Elements;
 
 public sealed class CloudDensitySlider : MenuControllerElement
 {
+    private readonly UISlider? Slider;
+
     public override int Index => 1;
 
     public override string Name => "Mods.ZensSky.MenuController.CloudDensity";
-
-    private readonly UISlider? Slider;
 
     public CloudDensitySlider() : base()
     {
@@ -23,7 +23,7 @@ public sealed class CloudDensitySlider : MenuControllerElement
         Append(Slider);
     }
 
-    public override void OnLoad()
+    public override void Refresh()
     {
         if (MenuConfig.Instance.UseCloudDensity)
         {
@@ -40,25 +40,26 @@ public sealed class CloudDensitySlider : MenuControllerElement
     {
         base.Update(gameTime);
 
-        if (Slider is not null)
+        if (Slider is null)
+            return;
+
+        if (Slider.IsHeld)
         {
-            if (Slider.IsHeld)
-            {
-                float density = Slider.Ratio;
+            float density = Slider.Ratio;
 
-                MenuConfig.Instance.UseCloudDensity = true;
-                MenuConfig.Instance.CloudDensity = density;
+            MenuConfig.Instance.UseCloudDensity = true;
+            MenuConfig.Instance.CloudDensity = density;
 
-                int prior = Main.numClouds;
-                Main.numClouds = (int)(density * Main.maxClouds);
+            int prior = Main.numClouds;
+            Main.numClouds = (int)(density * Main.maxClouds);
 
-                Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
+            Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
 
-                if (Main.numClouds != prior)
-                    Cloud.resetClouds();
-            }
-            else
-                Slider.Ratio = MenuConfig.Instance.CloudDensity;
+            if (Main.numClouds != prior)
+                Cloud.resetClouds();
         }
+        else
+            Slider.Ratio = MenuConfig.Instance.CloudDensity;
+
     }
 }

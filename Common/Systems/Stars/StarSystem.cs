@@ -30,7 +30,7 @@ public sealed class StarSystem : ModSystem
 
     private const float CompressionIncrement = 0.002f;
 
-    private const float ExplosionIncrement = 0.00002f;
+    private const float ExplosionIncrement = 0.00001f;
 
     #endregion
 
@@ -54,10 +54,10 @@ public sealed class StarSystem : ModSystem
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
-        On_Star.UpdateStars += UpdateStars;
+        Main.QueueMainThreadAction(() => On_Star.UpdateStars += UpdateStars);
     }
 
-    public override void Unload() => On_Star.UpdateStars -= UpdateStars;
+    public override void Unload() => Main.QueueMainThreadAction(() => On_Star.UpdateStars -= UpdateStars);
 
     public override void PostSetupContent() => CanDrawStars = true;
 

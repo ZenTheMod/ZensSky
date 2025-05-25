@@ -27,16 +27,25 @@ public sealed class WindSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => Array.Clear(Winds);
+    public override void Load() 
+    { 
+        Array.Clear(Winds);
+        Main.QueueMainThreadAction(() => On_Main.DoUpdate += UpdateWind);
+    }
+
+    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DoUpdate -= UpdateWind);
 
     #endregion
 
     #region Updating
 
-    public override void PostUpdateDusts() => UpdateWind();
-
-    private static void UpdateWind()
+    private void UpdateWind(On_Main.orig_DoUpdate orig, Main self, ref GameTime gameTime)
     {
+        orig(self, ref gameTime);
+
+        if (Main.dedServ)
+            return;
+
         if (!SkyConfig.Instance.WindParticles)
             return;
 

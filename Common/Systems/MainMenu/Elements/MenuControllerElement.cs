@@ -4,6 +4,7 @@ using Terraria.ModLoader;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
+[Autoload(Side = ModSide.Client)]
 public abstract class MenuControllerElement : UIPanel, ILoadable
 {
     public UIText? UIName;
@@ -20,9 +21,12 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
     { 
         MenuControllerSystem.Controllers.Add(this); 
         OnLoad();
+        Refresh();
     }
 
     public void Unload() => OnUnload();
+
+    public virtual void Refresh() { }
 
     public MenuControllerElement()
     {

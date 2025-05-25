@@ -46,9 +46,12 @@ public sealed class MenuControllerSystem : ModSystem
         if (updateAndDrawModMenuInner is not null)
             AddMenuControllerToggle = new(updateAndDrawModMenuInner, AddToggle);
 
-        IL_Main.DrawMenu += ModifyInteraction;
-        On_Main.UpdateUIStates += UpdateInterface;
-        Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
+        Main.QueueMainThreadAction(() =>
+        {
+            IL_Main.DrawMenu += ModifyInteraction;
+            On_Main.UpdateUIStates += UpdateInterface;
+            Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
+        });
 
         MenuController?.Activate();
     }
@@ -56,10 +59,12 @@ public sealed class MenuControllerSystem : ModSystem
     public override void Unload()
     {
         AddMenuControllerToggle?.Dispose();
-
-        IL_Main.DrawMenu -= ModifyInteraction;
-        On_Main.UpdateUIStates -= UpdateInterface;
-        Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
+        Main.QueueMainThreadAction(() =>
+        {
+            IL_Main.DrawMenu -= ModifyInteraction;
+            On_Main.UpdateUIStates -= UpdateInterface;
+            Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
+        });
     }
 
     #endregion
@@ -78,7 +83,7 @@ public sealed class MenuControllerSystem : ModSystem
             throw new ILPatchFailureException(Mod, il, null);
 
         c.EmitLdarg0(); // SpriteBatch.
-        c.EmitLdloc(6); // Rectangle of the menu button.
+        c.EmitLdloc(6); // Rectangle of the menu switcher.
 
             // Add our own 'popup' menu button.
         c.EmitDelegate((SpriteBatch spriteBatch, Rectangle switchTextRect) =>
@@ -134,6 +139,12 @@ public sealed class MenuControllerSystem : ModSystem
         }
 
         orig(gameTime);
+    }
+
+    public override void OnWorldUnload()
+    {
+        for (int i = 0; i < Controllers.Count; i++)
+            Controllers[i].Refresh();
     }
 
     private void ModifyInteraction(ILContext il)
