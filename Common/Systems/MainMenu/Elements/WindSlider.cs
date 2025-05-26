@@ -8,7 +8,7 @@ public sealed class WindSlider : MenuControllerElement
 {
     #region Fields
 
-    private const float MaxRange = 1f;
+    private const float MaxRange = 0.9f;
 
     private readonly UISlider? Slider;
 
@@ -31,8 +31,11 @@ public sealed class WindSlider : MenuControllerElement
 
     public override void Refresh() 
     {
-        if (MenuConfig.Instance.UseWind)
-            Main.windSpeedCurrent = MenuConfig.Instance.Wind; 
+        if (!MenuConfig.Instance.UseWind)
+            return;
+
+        Main.windSpeedCurrent = MenuConfig.Instance.Wind;
+        Main.windSpeedTarget = MenuConfig.Instance.Wind;
     }
 
     public override void Update(GameTime gameTime)

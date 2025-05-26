@@ -11,6 +11,11 @@ public sealed class SunAndMoonSystem : ModSystem
 {
     #region Fields
 
+    private const int SunMoonY = -80;
+
+    private const float MinSunBrightness = 0.82f;
+    private const float MinMoonBrightness = 0.35f;
+
     public static Vector2 SunMoonPosition { get; private set; }
     public static Color SunMoonColor { get; private set; }
     public static float SunMoonRotation { get; private set; }
@@ -38,19 +43,47 @@ public sealed class SunAndMoonSystem : ModSystem
                 i => i.MatchLdfld<Main.SceneArea>("bgTopY"));
 
             c.EmitPop();
-            c.EmitLdcI4(-85);
+            c.EmitLdcI4(SunMoonY);
 
             #region Sun
 
-            int val6 = -1;
+                // Force a constant brightness of the sun.
+            int sunAlpha = -1;
 
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.atmo)),
+                i => i.MatchMul(),
+                i => i.MatchSub(),
+                i => i.MatchStloc(out sunAlpha));
+
+            c.EmitLdloc(sunAlpha);
+            c.EmitDelegate((float mult) => MathF.Max(mult, MinSunBrightness));
+            c.EmitStloc(sunAlpha);
+
+            int sunPosition = -1;
+            int sunColor = -1;
+            int sunRotation = -1;
+            int sunScale = -1;
+
+                // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
                 i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                 i => i.MatchCall<Vector2>("op_Addition"),
-                i => i.MatchStloc(out val6));
+                i => i.MatchStloc(out sunPosition),
+                i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
+                i => i.MatchLdloc0(),
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdloca(out _),
+                i => i.MatchInitobj<Rectangle?>(),
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdloc(out sunColor),
+                i => i.MatchLdloc(out sunRotation),
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdloc(out sunScale),
+                i => i.MatchLdcI4(0));
 
-            c.EmitStloc(val6);
+            c.EmitStloc(sunPosition);
 
             c.EmitBr(sunSkipTarget);
 
@@ -64,15 +97,15 @@ public sealed class SunAndMoonSystem : ModSystem
                     i => i.MatchLdarg1(),
                     i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                     i => i.MatchCall<Vector2>("op_Addition"),
-                    i => i.MatchStloc(val6));
+                    i => i.MatchStloc(sunPosition));
 
             c.MarkLabel(sunSkipTarget);
 
             c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(val6); // Position
-            c.EmitLdloc(18); // Color
-            c.EmitLdloc(7); // Rotation
-            c.EmitLdloc(6); // Scale
+            c.EmitLdloc(sunPosition); // Position
+            c.EmitLdloc(sunColor); // Color
+            c.EmitLdloc(sunRotation); // Rotation
+            c.EmitLdloc(sunScale); // Scale
 
             c.EmitDelegate(FetchInfo);
 
@@ -80,37 +113,62 @@ public sealed class SunAndMoonSystem : ModSystem
 
             #region Moon
 
-            int val7 = -1;
+                // Force a constant brightness of the moon.
+            int moonAlpha = -1;
 
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.atmo)),
+                i => i.MatchMul(),
+                i => i.MatchSub(),
+                i => i.MatchStloc(out moonAlpha));
+
+            c.EmitLdloc(moonAlpha);
+            c.EmitDelegate((float mult) => MathF.Max(mult, MinMoonBrightness));
+            c.EmitStloc(moonAlpha);
+
+            int moonPosition = -1;
+            int moonRotation = -1;
+            int moonScale = -1;
+
+                // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
-                i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                 i => i.MatchCall<Vector2>("op_Addition"),
-                i => i.MatchStloc(out val7));
+                i => i.MatchStloc(out moonPosition));
 
-            c.EmitStloc(val7);
+            c.EmitStloc(moonPosition);
 
             c.EmitBr(moonSkipTarget);
 
+                // Fetch IDs from the Draw call.
+            c.GotoNext(i => i.MatchNewobj<Rectangle?>(),
+                i => i.MatchLdarg2(),
+                i => i.MatchLdloc(out moonRotation));
+            c.GotoNext(i => i.MatchDiv(),
+                i => i.MatchConvR4(),
+                i => i.MatchNewobj<Vector2>(),
+                i => i.MatchLdloc(out moonScale));
+
             if (SkipDrawing)
                 c.GotoNext(MoveType.Before,
-                    i => i.MatchLdsfld<Main>("dayTime"),
+                    i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
                     i => i.MatchBrfalse(out _),
-                    i => i.MatchLdloc(4));
+                    i => i.MatchLdloc(out _));
             else
-                c.GotoNext(MoveType.After,
+                c.GotoPrev(MoveType.After, // Prev because of the local ID fetching.
                     i => i.MatchLdarg1(),
-                    i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                    i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                     i => i.MatchCall<Vector2>("op_Addition"),
-                    i => i.MatchStloc(val7));
+                    i => i.MatchStloc(moonPosition));
             
             c.MarkLabel(moonSkipTarget);
 
             c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(val7); // Position
+            c.EmitLdloc(moonPosition); // Position
             c.EmitLdarg2(); // Color
-            c.EmitLdloc(11); // Rotation
-            c.EmitLdloc(10); // Scale
+            c.EmitLdloc(moonRotation); // Rotation
+            c.EmitLdloc(moonScale); // Scale
 
             c.EmitDelegate(FetchInfo);
 

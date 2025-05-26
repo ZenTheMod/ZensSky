@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 
 namespace ZensSky.Common.Systems.RainAndSnow;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class RainAndSnowSystem : ModSystem
 {
     #region Private Fields
@@ -21,14 +22,17 @@ public sealed class RainAndSnowSystem : ModSystem
     {
         Main.QueueMainThreadAction(() => {
             IL_Main.DoUpdate += SpawnMenuRain;
+            IL_Main.DoDraw += DontDegradeRain;
+            IL_Main.UpdateAudio += RainWindAmbience;
             On_Main.DrawBackgroundBlackFill += DrawMenuRain;
         });
     }
-
     public override void Unload()
     {
         Main.QueueMainThreadAction(() => {
             IL_Main.DoUpdate -= SpawnMenuRain;
+            IL_Main.DoDraw -= DontDegradeRain;
+            IL_Main.UpdateAudio -= RainWindAmbience;
             On_Main.DrawBackgroundBlackFill -= DrawMenuRain;
         });
     }
@@ -49,13 +53,10 @@ public sealed class RainAndSnowSystem : ModSystem
 
             c.EmitDelegate(() =>
             {
-                    // Main.cloudAlpha = 1f;
-
                 if (Main.cloudAlpha <= 0)
                     return;
 
                 float num = Main.screenWidth / MagicScreenWidth;
-                num *= 25f;
                 num *= 0.25f + 1f * Main.cloudAlpha;
 
                 Vector2 position = Main.screenPosition;
@@ -80,7 +81,66 @@ public sealed class RainAndSnowSystem : ModSystem
         }
     }
 
+    private void DontDegradeRain(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)),
+                i => i.MatchBrfalse(out _),
+                i => i.MatchLdloc2(),
+                i => i.MatchLdcR4(20));
+
+            c.EmitPop();
+
+            c.EmitLdcR4(0f);
+        }
+        catch (Exception e)
+        {
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DoDraw\".");
+
+            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+        }
+    }
+
     #endregion
+
+    #region Menu Touchups
+
+    private void RainWindAmbience(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel? jumpMenuCheck = c.DefineLabel();
+            
+                // Rain.
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)),
+                i => i.MatchBrfalse(out jumpMenuCheck),
+                i => i.MatchLdcR4(0));
+
+            c.EmitBr(jumpMenuCheck);
+
+                // Wind.
+            c.GotoNext(MoveType.After,
+                i => i.MatchStelemR4(),
+                i => i.MatchBr(out _),
+                i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)));
+
+            c.EmitPop();
+            c.EmitLdcI4(0);
+        }
+        catch (Exception e)
+        {
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.UpdateAudio\".");
+
+            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+        }
+    }
 
     private void DrawMenuRain(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
     {
@@ -89,6 +149,9 @@ public sealed class RainAndSnowSystem : ModSystem
         if (!Main.gameMenu)
             return;
 
-        self.DrawRain();
+            // WHY does this exist? It's never used...
+        self.DrawRainInMenu();
     }
+
+    #endregion
 }
