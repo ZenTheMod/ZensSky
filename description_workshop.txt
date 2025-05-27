@@ -1,6 +1,8 @@
 ﻿[h1]✦ Zen's Sky ✦[/h1]
 My attempt at a more accurate sky.
 
+[h2]✦ Features ✦[/h2]
+
 [b]Currently adds:[/b]
 [list]
     [*]More dynamic sun in the style of 1.4.5 leaks.
@@ -10,12 +12,26 @@ My attempt at a more accurate sky.
     [*]Wind Particles.
     [*]Dynamic cloud lighting.
     [*]More realistic shooting stars.
-    [*]RealisticSky compat. (Sorry Lucille)
+    [*]Menu configuration via a dropdown.
 [/list]
+
+[b]Compatibility with:[/b]
+'Realistic Sky' by Lucille Karma
+'Red Sun and Realistic Sky' by Waffles22
 
 [u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 
 Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url] or send me a DM on Discord: [b]@z_e_n_.[/b]
 
+[h2]✦ Credits ✦[/h2]
+
+Zen
+Ebon
+Azathoth
+Tuna
+Lion8Cake
+Roton
+
 [h2]✦ For Mod Developers ✦[/h2]
 
+insert modcall guide here

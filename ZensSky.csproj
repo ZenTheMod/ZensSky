@@ -9,6 +9,11 @@
 		<Reference Include="RealisticSky">
 			<HintPath>..\ModAssemblies\RealisticSky_v1.0.24.dll</HintPath>
 		</Reference>
+		
+		<!-- Include Red Sun to make cross-modding easier-->
+		<Reference Include="RedSunAndRealisticSky">
+			<HintPath>..\ModAssemblies\RedSunAndRealisticSky_v1.0.2.dll</HintPath>
+		</Reference>
 
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">

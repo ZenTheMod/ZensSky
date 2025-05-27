@@ -10,6 +10,7 @@ using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
 using Daybreak.Common.Rendering;
 using Daybreak.Common.CIL;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -96,7 +97,7 @@ public sealed class CloudSystem : ModSystem
             Vector2 viewportSize = viewport.Bounds.Size();
             lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
 
-            Vector2 sunPosition = SunAndMoonSystem.SunMoonPosition;
+            Vector2 sunPosition = Main.dayTime ? SunPosition : MoonPosition;
 
             if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
                 sunPosition.Y = viewportSize.Y - sunPosition.Y;
@@ -173,12 +174,13 @@ public sealed class CloudSystem : ModSystem
 
     private static Color GetColor()
     {
-        Vector2 position = SunAndMoonSystem.SunMoonPosition;
+            // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
+        Vector2 position = Main.dayTime ? SunPosition : MoonPosition;
         float centerX = MiscUtils.HalfScreenSize.X;
 
         float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
 
-        Color color = SunAndMoonSystem.SunMoonColor;
+        Color color = Main.dayTime ? SunColor : MoonColor;
         color = color.MultiplyRGB(Main.dayTime ? SunMultiplier : MoonMultiplier);
 
             // Add a fadeinout effect so the color doesnt just suddenly pop up.

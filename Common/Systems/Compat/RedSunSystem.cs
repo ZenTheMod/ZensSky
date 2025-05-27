@@ -1,42 +1,63 @@
-﻿using MonoMod.Cil;
+﻿using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
+using RedSunAndRealisticSky.Graphics;
 using System;
+using System.IO;
+using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Compat;
+using ZensSky.Common.Systems.Stars;
+using ZensSky.Common.Utilities;
+using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
-namespace ZensSky.Common.Systems.SunAndMoon;
+namespace ZensSky.Common.Systems.Compat;
 
-[Autoload(Side = ModSide.Client)]
-public sealed class SunAndMoonSystem : ModSystem
+[JITWhenModsEnabled("RedSunAndRealisticSky")]
+[ExtendsFromMod("RedSunAndRealisticSky")]
+public sealed class RedSunSystem : ModSystem
 {
-    #region Fields
+    #region Private Fields
+
+    private static readonly Color SkyColor = new(128, 168, 248);
+
+    private const int SunTopBuffer = 50;
 
     private const int SunMoonY = -80;
+
+    private const float MoonBrightness = 16f;
 
     private const float MinSunBrightness = 0.82f;
     private const float MinMoonBrightness = 0.35f;
 
-        // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
-    public static Vector2 SunPosition { get; private set; }
-    public static Color SunColor { get; private set; }
-    public static float SunRotation { get; private set; }
-    public static float SunScale { get; private set; }
+    private static ILHook? SunAndMoonDrawing;
 
-    public static Vector2 MoonPosition { get; private set; }
-    public static Color MoonColor { get; private set; }
-    public static float MoonRotation { get; private set; }
-    public static float MoonScale { get; private set; }
-
-    public static Vector2 SceneAreaSize { get; private set; }
-
-    // This is fine because this is ONLY changed on load.
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
 
     #endregion
 
-    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
+    public static bool IsEnabled { get; private set; }
+
+    #region Loading
+
+    public override void Load()
+    {
+        IsEnabled = true;
+
+        MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod("ChangePositionAndDrawDayMoon", NonPublic | Instance);
+
+        if (changePositionAndDrawDayMoon is not null)
+            SunAndMoonDrawing = new(changePositionAndDrawDayMoon,
+                ModifyDrawing);
+    }
+
+    public override void Unload() => SunAndMoonDrawing?.Dispose();
+
+    #endregion
 
     private void ModifyDrawing(ILContext il)
     {
@@ -46,8 +67,16 @@ public sealed class SunAndMoonSystem : ModSystem
             ILLabel sunSkipTarget = c.DefineLabel();
             ILLabel moonSkipTarget = c.DefineLabel();
 
+            c.EmitDelegate(() =>
+            {
+                if (!StarSystem.CanDrawStars)
+                    return;
+
+                Draw();
+            });
+
             c.GotoNext(MoveType.After,
-                i => i.MatchLdarg1(),
+                i => i.MatchLdarg3(),
                 i => i.MatchLdfld<Main.SceneArea>("bgTopY"));
 
             c.EmitPop();
@@ -55,7 +84,6 @@ public sealed class SunAndMoonSystem : ModSystem
 
             #region Sun
 
-                // Force a constant brightness of the sun.
             int sunAlpha = -1;
 
             c.GotoNext(MoveType.After,
@@ -72,19 +100,17 @@ public sealed class SunAndMoonSystem : ModSystem
             int sunRotation = -1;
             int sunScale = -1;
 
-
-                // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
-                i => i.MatchLdarg1(),
+                i => i.MatchLdarg3(),
                 i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                 i => i.MatchCall<Vector2>("op_Addition"),
                 i => i.MatchStloc(out sunPosition));
 
-                // This is just to fetch the local IDs.
-                    // These hooks can apply at varied times -- due to QueueMainThreadAction -- so I have to account for them with safer edits.
-            c.FindNext(out _,
-                i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
-                i => i.MatchLdloc0(),
+            c.EmitStloc(sunPosition);
+            c.EmitBr(sunSkipTarget);
+
+                // This is just to find the index of various locals.
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdloc(sunPosition),
                 i => i.MatchLdloca(out _),
                 i => i.MatchInitobj<Rectangle?>(),
@@ -92,40 +118,42 @@ public sealed class SunAndMoonSystem : ModSystem
                 i => i.MatchLdloc(out sunColor),
                 i => i.MatchLdloc(out sunRotation),
                 i => i.MatchLdloc(out _),
-                i => i.MatchLdloc(out sunScale),
-                i => i.MatchLdcI4(0));
-
-            c.EmitStloc(sunPosition);
-
-            c.EmitBr(sunSkipTarget);
+                i => i.MatchLdloc(out sunScale));
 
             if (SkipDrawing)
-                c.GotoNext(MoveType.Before,
-                    i => i.MatchLdsfld<Main>("dayTime"),
-                    i => i.MatchBrtrue(out _),
-                    i => i.MatchLdcR4(1f));
-            else
                 c.GotoNext(MoveType.After,
-                    i => i.MatchLdarg1(),
+                    i => i.MatchLdloc(sunPosition),
+                    i => i.MatchLdloca(out _),
+                    i => i.MatchInitobj<Rectangle?>(),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdloc(sunRotation),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdloc(sunScale),
+                    i => i.MatchLdcI4(0),
+                    i => i.MatchLdcR4(0f),
+                    i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.Draw)));
+            else
+                c.GotoPrev(MoveType.After,
+                    i => i.MatchLdarg3(),
                     i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                     i => i.MatchCall<Vector2>("op_Addition"),
-                    i => i.MatchStloc(sunPosition));
+                    i => i.MatchStloc(out sunPosition));
 
             c.MarkLabel(sunSkipTarget);
 
-            c.EmitLdarg1(); // SceneArea
+            c.EmitLdarg3(); // SceneArea
             c.EmitLdloc(sunPosition); // Position
             c.EmitLdloc(sunColor); // Color
             c.EmitLdloc(sunRotation); // Rotation
             c.EmitLdloc(sunScale); // Scale
 
-            c.EmitDelegate(FetchInfo);
+            c.EmitDelegate(FetchSunInfo);
 
             #endregion
 
             #region Moon
 
-                // Force a constant brightness of the moon.
             int moonAlpha = -1;
 
             c.GotoNext(MoveType.After,
@@ -138,12 +166,13 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitDelegate((ref float mult) => { MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
+            int moonColor = -1;
             int moonRotation = -1;
             int moonScale = -1;
 
                 // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
-                i => i.MatchLdarg1(),
+                i => i.MatchLdarg3(),
                 i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                 i => i.MatchCall<Vector2>("op_Addition"),
                 i => i.MatchStloc(out moonPosition));
@@ -153,11 +182,12 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitBr(moonSkipTarget);
 
                 // Fetch IDs from the Draw call.
-            c.FindNext(out _, 
+            c.FindNext(out _,
+                i => i.MatchNewobj<Rectangle>(),
                 i => i.MatchNewobj<Rectangle?>(),
-                i => i.MatchLdarg2(),
+                i => i.MatchLdarg(out moonColor),
                 i => i.MatchLdloc(out moonRotation));
-            c.FindNext(out _, 
+            c.FindNext(out _,
                 i => i.MatchDiv(),
                 i => i.MatchConvR4(),
                 i => i.MatchNewobj<Vector2>(),
@@ -170,64 +200,56 @@ public sealed class SunAndMoonSystem : ModSystem
                     i => i.MatchLdloc(out _));
             else
                 c.GotoNext(MoveType.After,
-                    i => i.MatchLdarg1(),
+                    i => i.MatchLdarg3(),
                     i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                     i => i.MatchCall<Vector2>("op_Addition"),
                     i => i.MatchStloc(moonPosition));
-            
+
             c.MarkLabel(moonSkipTarget);
 
-            c.EmitLdarg1(); // SceneArea
+            c.EmitLdarg3(); // SceneArea
             c.EmitLdloc(moonPosition); // Position
-            c.EmitLdarg2(); // Color
+            c.EmitLdarg(moonColor); // Color
             c.EmitLdloc(moonRotation); // Rotation
             c.EmitLdloc(moonScale); // Scale
 
-            c.EmitDelegate(FetchInfo);
+            c.EmitDelegate(FetchMoonInfo);
 
             #endregion
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawSunAndMoon\".");
+            Mod.Logger.Error("Failed to patch \"GeneralLightingIL.ChangePositionAndDrawDayMoon\".");
 
             throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
-    public static void FetchInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
+    private static void Draw()
     {
-        MoonPosition = position;
-        MoonColor = color;
-        MoonRotation = rotation;
-        MoonScale = scale;
+        SpriteBatch spriteBatch = Main.spriteBatch;
+        GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+        spriteBatch.End(out var snapshot);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(position);
-    }
+        float centerX = MiscUtils.HalfScreenSize.X;
+        float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
 
-    public static void FetchSunInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
-    {
-        SunPosition = position;
-        SunColor = color;
-        SunRotation = rotation;
-        SunScale = scale;
+        float distanceFromTop = (SunPosition.Y + SunTopBuffer) / SceneAreaSize.Y;
 
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+        Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
 
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(position);
-    }
+        Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
+        Color moonColor = MoonColor * MoonBrightness * MoonScale;
+        moonColor.A = 255;
 
-    public static void FetchMoonInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
-    {
-        MoonPosition = position;
-        MoonColor = color;
-        MoonRotation = rotation;
-        MoonScale = scale;
+        if (Main.dayTime)
+            DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
 
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+        // Draw the moon regardless due to this mod.
+        DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+
+        spriteBatch.Restart(in snapshot);
     }
 }

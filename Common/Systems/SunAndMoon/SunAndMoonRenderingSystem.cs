@@ -8,6 +8,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
+using ZensSky.Common.Systems.Compat;
 using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Registries.Shaders;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -81,26 +82,21 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawSunAndMoon(SpriteBatch spriteBatch, GraphicsDevice device)
     {
-        Vector2 position = SunMoonPosition;
-        Color color = SunMoonColor;
-        float rotation = SunMoonRotation;
-        float scale = SunMoonScale;
-
         float centerX = MiscUtils.HalfScreenSize.X;
-        float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
+        float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
 
-        float distanceFromTop = (position.Y + SunTopBuffer) / SceneAreaSize.Y;
+        float distanceFromTop = (SunPosition.Y + SunTopBuffer) / SceneAreaSize.Y;
 
         Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
 
         Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = color * MoonBrightness * scale;
+        Color moonColor = MoonColor * MoonBrightness * MoonScale;
         moonColor.A = 255;
 
         if (Main.dayTime)
-            DrawSun(spriteBatch, position, color, rotation, scale, distanceFromCenter, distanceFromTop, device);
+            DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
         else
-            DrawMoon(spriteBatch, position, color, rotation, scale, moonColor, moonShadowColor, device);
+            DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
     }
 
     #region Sun Drawing
@@ -357,7 +353,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
-        if (StarSystem.CanDrawStars)
+        if (StarSystem.CanDrawStars && !RedSunSystem.IsEnabled)
         {
             SpriteBatch spriteBatch = Main.spriteBatch;
             GraphicsDevice device = Main.instance.GraphicsDevice;

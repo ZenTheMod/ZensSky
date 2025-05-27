@@ -12,7 +12,6 @@ using RealisticSky.Content.Sun;
 using System;
 using System.Reflection;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
@@ -292,7 +291,7 @@ public sealed class RealisticSkySystem : ModSystem
 
         star.Parameters["screenSize"]?.SetValue(MiscUtils.ScreenSize);
         star.Parameters["distanceFadeoff"]?.SetValue(Main.eclipse ? 0.11f : 1f);
-        star.Parameters["sunPosition"]?.SetValue(Main.dayTime ? SunAndMoonSystem.SunMoonPosition : (Vector2.One * 50000f));
+        star.Parameters["sunPosition"]?.SetValue(Main.dayTime ? SunAndMoonSystem.SunPosition : (Vector2.One * 50000f));
 
         if (AtmosphereTarget?.IsReady is true)
             Main.instance.GraphicsDevice.Textures[1] = AtmosphereTarget.GetTarget() ?? Textures.Invis.Value;
