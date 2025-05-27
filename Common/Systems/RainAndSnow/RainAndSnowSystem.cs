@@ -150,7 +150,7 @@ public sealed class RainAndSnowSystem : ModSystem
             return;
 
             // WHY does this exist? It's never used...
-        self.DrawRainInMenu();
+        self.DrawRain();
     }
 
     #endregion

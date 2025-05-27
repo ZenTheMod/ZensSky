@@ -38,7 +38,7 @@ public sealed class ParallaxSlider : MenuControllerElement
 
     public override void OnLoad() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu += ChangeParallaxDirection);
 
-    public override void OnUnload() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu += ChangeParallaxDirection);
+    public override void OnUnload() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu -= ChangeParallaxDirection);
 
     private void ChangeParallaxDirection(ILContext il)
     {

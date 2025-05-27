@@ -1,15 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+	
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
 
-	<!-- General -->
-	<PropertyGroup>
-		
-	</PropertyGroup>
-	
-	<!-- Add the Daybreak Lib as a project reference -->
+	<!-- References -->
 	<ItemGroup>
+		<!-- Include Realistic Sky to make cross-modding easier -->
+		<Reference Include="RealisticSky">
+			<HintPath>..\ModAssemblies\RealisticSky_v1.0.24.dll</HintPath>
+		</Reference>
+
+		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
 			<HintPath>..\ModAssemblies\Daybreak_v1.1.1.dll</HintPath>
 		</Reference>
@@ -20,7 +21,7 @@
 		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
 	</PropertyGroup>
 
-	<!-- Allow nullable types, used for our SpriteBatchSnapshot implementation -->
+	<!-- Enable nullable types -->
 	<PropertyGroup>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
@@ -28,6 +29,7 @@
 	<!-- Publicizer -->
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" PrivateAssets="true" Version="2.2.1" />
+
 		<!-- Publicize the tModLoader API -->
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
@@ -39,7 +41,7 @@
 	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
 		<EffectFiles Include="**/*.fx" />
 	</ItemGroup>
-	
+
 	<!-- Locate FXC (My shader compiler of choice) -->
 	<PropertyGroup>
 		<FxcCompilerPath>./Assets/Effects/Compiler/fxc.exe</FxcCompilerPath>
@@ -48,7 +50,7 @@
 	<!-- Effect File Compilation -->
 	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
 		<!-- Echo here so it logs which file is being compiled -->
-		<Exec Command="@(EffectFiles->'echo &quot;----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) -----&quot; &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+		<Exec Command="@(EffectFiles->'echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
 	</Target>
-
+	
 </Project>

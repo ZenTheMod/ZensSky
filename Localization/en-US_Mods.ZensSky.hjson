@@ -49,6 +49,11 @@ Configs: {
 			Label: "[i:751] Wind Particles"
 			Tooltip: Enables small wind trail particles.
 		}
+
+		RealisticSun: {
+			Label: Realistic Sun
+			Tooltip: ""
+		}
 	}
 
 	MenuConfig: {

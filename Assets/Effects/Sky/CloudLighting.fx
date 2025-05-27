@@ -15,7 +15,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     float4 clouds = tex2D(Clouds, coords);
     
         // Get the actual length.
-    float distsun = saturate(1 - (length(sun - screen) * 3));
+    float distsun = saturate(1 - (length(sun - screen) * 3.3));
     
         // Get the dark parts of the clouds
     float shadows = 1 - clouds.r;

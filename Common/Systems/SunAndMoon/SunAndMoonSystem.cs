@@ -3,6 +3,7 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -34,6 +35,8 @@ public sealed class SunAndMoonSystem : ModSystem
     {
         try
         {
+            MonoModHooks.DumpIL(Mod, il);
+
             ILCursor c = new(il);
             ILLabel sunSkipTarget = c.DefineLabel();
             ILLabel moonSkipTarget = c.DefineLabel();
@@ -65,15 +68,20 @@ public sealed class SunAndMoonSystem : ModSystem
             int sunRotation = -1;
             int sunScale = -1;
 
+
                 // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
                 i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
                 i => i.MatchCall<Vector2>("op_Addition"),
-                i => i.MatchStloc(out sunPosition),
+                i => i.MatchStloc(out sunPosition));
+
+                // This is just to fetch the local IDs.
+                    // These hooks can apply at varied times -- due to QueueMainThreadAction -- so I have to account for them with safer edits.
+            c.FindNext(out _,
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchLdloc0(),
-                i => i.MatchLdloc(out _),
+                i => i.MatchLdloc(sunPosition),
                 i => i.MatchLdloca(out _),
                 i => i.MatchInitobj<Rectangle?>(),
                 i => i.MatchLdloc(out _),
@@ -142,10 +150,12 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitBr(moonSkipTarget);
 
                 // Fetch IDs from the Draw call.
-            c.GotoNext(i => i.MatchNewobj<Rectangle?>(),
+            c.FindNext(out _, 
+                i => i.MatchNewobj<Rectangle?>(),
                 i => i.MatchLdarg2(),
                 i => i.MatchLdloc(out moonRotation));
-            c.GotoNext(i => i.MatchDiv(),
+            c.FindNext(out _, 
+                i => i.MatchDiv(),
                 i => i.MatchConvR4(),
                 i => i.MatchNewobj<Vector2>(),
                 i => i.MatchLdloc(out moonScale));
@@ -156,7 +166,7 @@ public sealed class SunAndMoonSystem : ModSystem
                     i => i.MatchBrfalse(out _),
                     i => i.MatchLdloc(out _));
             else
-                c.GotoPrev(MoveType.After, // Prev because of the local ID fetching.
+                c.GotoNext(MoveType.After,
                     i => i.MatchLdarg1(),
                     i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                     i => i.MatchCall<Vector2>("op_Addition"),
@@ -190,5 +200,8 @@ public sealed class SunAndMoonSystem : ModSystem
         SunMoonScale = scale;
 
         SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.UpdateSunAndMoonPosition(position);
     }
 }

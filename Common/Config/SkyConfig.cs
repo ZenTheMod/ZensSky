@@ -2,11 +2,12 @@
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using ZensSky.Common.Config.Elements;
+using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.Config;
 
-internal sealed class TransparentMoonShadowElement : BaseLockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
-    // internal sealed class RealisticSkyLockedBoolElement : BaseLockedBoolElement { public override bool LockToggle => RealisticSkyCompatSystem.RealisticSkyEnabled; public override bool LockMode => false; }
+internal sealed class SunAndMoonReworkElement : BaseLockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
+internal sealed class RealisticSkyElement : BaseLockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
 
 public sealed class SkyConfig : ModConfig
 {
@@ -25,8 +26,12 @@ public sealed class SkyConfig : ModConfig
     public bool EclipseMode;
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(TransparentMoonShadowElement))]
+    [CustomModConfigItem(typeof(SunAndMoonReworkElement))]
     public bool TransparentMoonShadow;
+
+    [DefaultValue(false)]
+    [CustomModConfigItem(typeof(RealisticSkyElement))]
+    public bool RealisticSun;
 
     [Header("Stars")]
 

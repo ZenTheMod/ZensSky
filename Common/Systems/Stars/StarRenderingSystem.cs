@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
@@ -139,7 +140,6 @@ public sealed class StarRenderingSystem : ModSystem
             supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * ExplosionStart);
             supernova.Parameters["endColor"]?.SetValue(star.Color.ToVector4() * ExplosionEnd);
 
-                // Where is my saturate method.
             supernova.Parameters["quickTime"]?.SetValue(MathF.Min(time * QuickTimeMultiplier, 1f));
             supernova.Parameters["expandTime"]?.SetValue(MathF.Min(time * ExpandTimeMultiplier, 1f));
             supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
@@ -174,18 +174,27 @@ public sealed class StarRenderingSystem : ModSystem
 
         Vector2 screenCenter = MiscUtils.HalfScreenSize;
 
+        spriteBatch.End(out var snapshot);
+
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.DrawStars();
+
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.ApplyStarShader();
+
         if (alpha > 0)
             DrawStars(spriteBatch, screenCenter, alpha);
 
         if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
-        {
-            spriteBatch.End(out var snapshot);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
-
             DrawSupernovae(spriteBatch, screenCenter, alpha);
 
-            spriteBatch.Restart(in snapshot);
-        }
+            // The batches here are a bit fucked but idc.
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.DrawGalaxy();
+
+        spriteBatch.Restart(in snapshot);
     }
 
     #endregion

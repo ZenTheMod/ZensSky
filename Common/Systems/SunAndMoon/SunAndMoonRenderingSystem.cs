@@ -107,6 +107,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
     {
+        if (SkyConfig.Instance.RealisticSun)
+            return;
+
         if (Main.eclipse)
         {
             DrawEclipse(spriteBatch, position, color, rotation, scale, device);
