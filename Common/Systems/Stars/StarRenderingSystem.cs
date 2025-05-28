@@ -10,6 +10,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
@@ -126,6 +127,9 @@ public sealed class StarRenderingSystem : ModSystem
         supernova.Parameters["ringEndColor"]?.SetValue(RingEnd);
 
         supernova.Parameters["globalTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.SetAtmosphereParams(supernova);
 
         Texture2D texture = Textures.SupernovaNoise.Value;
 

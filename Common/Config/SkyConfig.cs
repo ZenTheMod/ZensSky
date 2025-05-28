@@ -38,9 +38,9 @@ public sealed class SkyConfig : ModConfig
     [DefaultValue(false)]
     public bool VanillaStyleStars;
 
-        // [DefaultValue(true)]
-        // [CustomModConfigItem(typeof(RealisticSkyLockedBoolElement))]
-        // public bool DrawRealisticStars;
+    [DefaultValue(true)]
+    [CustomModConfigItem(typeof(RealisticSkyElement))]
+    public bool DrawRealisticStars;
 
     [Header("Clouds")]
 
@@ -51,4 +51,7 @@ public sealed class SkyConfig : ModConfig
 
     [DefaultValue(true)]
     public bool WindParticles;
+
+    [DefaultValue(false)]
+    public bool PitchBlackBackground;
 }

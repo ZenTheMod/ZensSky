@@ -93,7 +93,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out sunAlpha));
 
             c.EmitLdloca(sunAlpha);
-            c.EmitDelegate((ref float mult) => { MathF.Max(mult, MinSunBrightness); });
+            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
 
             int sunPosition = -1;
             int sunColor = -1;
@@ -163,7 +163,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out moonAlpha));
 
             c.EmitLdloca(moonAlpha);
-            c.EmitDelegate((ref float mult) => { MathF.Max(mult, MinMoonBrightness); });
+            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
             int moonColor = -1;

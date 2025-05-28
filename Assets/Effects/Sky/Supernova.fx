@@ -1,6 +1,8 @@
 #include "../common.fx"
+#include "../Compat/realisticSky.fx"
 
 sampler noise : register(s0);
+sampler atmosphere : register(s1);
 
 float4 background;
 
@@ -18,6 +20,12 @@ float globalTime;
 
 float offset;
 
+float2 screenSize;
+float2 sunPosition;
+float distanceFadeoff;
+
+bool usesAtmosphere;
+
 float inCubic(float t)
 {
     return pow(t, 3);
@@ -33,7 +41,7 @@ float inOutCubic(float t)
     return 1 - inCubic((1 - t) * 2) * .5;
 }
 
-float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
+float4 supernova(float2 coords)
 {
     float n = tex2D(noise, coords * 3 + expandTime + offset);
 
@@ -72,8 +80,21 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
         // Add a vauge dust cloud.
     color += endColor * min(outCubic(.2 * interpolator * n) * expandTime, .1);
     
-        // Make sure everything actually vanishes.
-    return color * sampleColor * outCubic(1 - longTime) * color.a;
+    return color * outCubic(1 - longTime) * color.a;
+}
+
+float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 screenPosition : SV_POSITION, float2 coords : TEXCOORD0) : COLOR0
+{
+    float4 color = supernova(coords);
+    
+    float2 screenCoords = screenPosition / screenSize;
+    
+    float opactity = 1;
+    
+    if (usesAtmosphere)
+        opactity = StarOpacity(screenPosition, coords, sunPosition, tex2D(atmosphere, screenCoords).rgb, distanceFadeoff);
+    
+    return color * sampleColor * opactity;
 }
 
 technique Technique1

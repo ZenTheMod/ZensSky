@@ -11,6 +11,7 @@ using ZensSky.Common.Utilities;
 using Daybreak.Common.Rendering;
 using Daybreak.Common.CIL;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -97,14 +98,26 @@ public sealed class CloudSystem : ModSystem
             Vector2 viewportSize = viewport.Bounds.Size();
             lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
 
-            Vector2 sunPosition = Main.dayTime ? SunPosition : MoonPosition;
+            Vector2 sunPosition = SunPosition;
+            Vector2 moonPosition = MoonPosition;
 
             if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+            {
                 sunPosition.Y = viewportSize.Y - sunPosition.Y;
-            lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
+                moonPosition.Y = viewportSize.Y - moonPosition.Y;
+            }
 
-            Color color = GetColor();
-            lighting.Parameters["SunColor"]?.SetValue(color.ToVector4());
+            lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
+            lighting.Parameters["MoonPosition"]?.SetValue(moonPosition);
+
+            Color sunColor = GetColor(true);
+            lighting.Parameters["SunColor"]?.SetValue(sunColor.ToVector4());
+
+            Color moonColor = GetColor(false);
+            lighting.Parameters["MoonColor"]?.SetValue(moonColor.ToVector4());
+
+            lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime);
+            lighting.Parameters["DrawMoon"]?.SetValue(RedSunSystem.IsEnabled || !Main.dayTime);
         });
 
         #endregion
@@ -172,16 +185,16 @@ public sealed class CloudSystem : ModSystem
         Main.spriteBatch.Restart(in snapshot);
     }
 
-    private static Color GetColor()
+    private static Color GetColor(bool day)
     {
             // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
-        Vector2 position = Main.dayTime ? SunPosition : MoonPosition;
+        Vector2 position = day ? SunPosition : MoonPosition;
         float centerX = MiscUtils.HalfScreenSize.X;
 
         float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
 
-        Color color = Main.dayTime ? SunColor : MoonColor;
-        color = color.MultiplyRGB(Main.dayTime ? SunMultiplier : MoonMultiplier);
+        Color color = day ? SunColor : MoonColor;
+        color = color.MultiplyRGB(day ? SunMultiplier : MoonMultiplier);
 
             // Add a fadeinout effect so the color doesnt just suddenly pop up.
         color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);

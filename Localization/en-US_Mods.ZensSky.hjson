@@ -35,9 +35,27 @@ Configs: {
 				'''
 		}
 
+		RealisticSun: {
+			Label: "[i:824] Realistic Sun"
+			Tooltip:
+				'''
+				If the sun from 'Realistic Sky' is drawn instead of the one from this mod.
+				[c/FF0000:Requires 'Realistic Sky' by Lucille Karma to be enabled!]
+				'''
+		}
+
 		VanillaStyleStars: {
 			Label: "[i:184] Vanilla Styled Stars"
 			Tooltip: If stars are drawn with vanillas textures.
+		}
+
+		DrawRealisticStars: {
+			Label: "[i:184] Realistic Stars"
+			Tooltip:
+				'''
+				If stars from 'Realistic Sky' are drawn alongside the stars in this mod.
+				[c/FF0000:Requires 'Realistic Sky' by Lucille Karma to be enabled!]
+				'''
 		}
 
 		CloudsEnabled: {
@@ -50,9 +68,9 @@ Configs: {
 			Tooltip: Enables small wind trail particles.
 		}
 
-		RealisticSun: {
-			Label: Realistic Sun
-			Tooltip: ""
+		PitchBlackBackground: {
+			Label: "[i:237]Pitch Black Background"
+			Tooltip: Makes the background pitch black during night.
 		}
 	}
 

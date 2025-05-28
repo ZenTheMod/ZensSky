@@ -18,6 +18,7 @@ My attempt at a more accurate sky.
 [b]Compatibility with:[/b]
 'Realistic Sky' by Lucille Karma
 'Red Sun and Realistic Sky' by Waffles22
+'Lights And Shadows' by yiyang233
 
 [u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 

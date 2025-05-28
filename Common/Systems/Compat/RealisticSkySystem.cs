@@ -34,9 +34,10 @@ public sealed class RealisticSkySystem : ModSystem
     private static ILHook? StarRotationPatch;
 
     private static ILHook? PatchAtmosphereTarget;
-    private static ILHook? PatchAtmosphereShader;
+        // private static ILHook? PatchAtmosphereShader;
     private static ILHook? PatchCloudsTarget;
     private static ILHook? PatchCloudsShader;
+    private static ILHook? PatchStarShader;
 
     private static ILHook? PatchDrawing;
 
@@ -84,10 +85,12 @@ public sealed class RealisticSkySystem : ModSystem
             PatchAtmosphereTarget = new(handleAtmosphereTargetReqest,
                 CommonRequestsInvertedGravity);
 
-        MethodInfo? drawToAtmosphereTarget = typeof(AtmosphereRenderer).GetMethod("RenderToTarget", Public | Static);
-        if (drawToAtmosphereTarget is not null)
-            PatchAtmosphereShader = new(drawToAtmosphereTarget,
-                CommonShaderInvertedGravity);
+            // Removed due to no longer using a RenderTarget based system.
+
+            // MethodInfo? drawToAtmosphereTarget = typeof(AtmosphereRenderer).GetMethod("RenderToTarget", Public | Static);
+            // if (drawToAtmosphereTarget is not null)
+            //     PatchAtmosphereShader = new(drawToAtmosphereTarget,
+            //         CommonShaderInvertedGravity);
 
         MethodInfo? handleCloudsTargetReqest = typeof(CloudsTargetContent).GetMethod("HandleUseReqest", NonPublic | Instance);
         if (handleCloudsTargetReqest is not null)
@@ -99,6 +102,11 @@ public sealed class RealisticSkySystem : ModSystem
             PatchCloudsShader = new(drawToCloudsTarget,
                 CommonShaderInvertedGravity);
 
+        MethodInfo? renderStars = typeof(StarsRenderer).GetMethod(nameof(StarsRenderer.Render), Public | Static);
+        if (renderStars is not null)
+            PatchStarShader = new(renderStars,
+                ModifySunPosition);
+
         #endregion
 
         MethodInfo? draw = typeof(RealisticSkyManager).GetMethod(nameof(RealisticSkyManager.Draw), Public | Instance);
@@ -107,9 +115,9 @@ public sealed class RealisticSkySystem : ModSystem
                 DrawSky);
 
             // This is done so that when drawing the galaxy manually it'll rotate around the center of the screen, rather than the center of its sprite.
-        MethodInfo? render = typeof(GalaxyRenderer).GetMethod(nameof(GalaxyRenderer.Render), Public | Static);
-        if (render is not null)
-            StaticGalaxy = new(render,
+        MethodInfo? renderGalaxy = typeof(GalaxyRenderer).GetMethod(nameof(GalaxyRenderer.Render), Public | Static);
+        if (renderGalaxy is not null)
+            StaticGalaxy = new(renderGalaxy,
                  ChangeGalaxyRotation);
     }
 
@@ -120,9 +128,10 @@ public sealed class RealisticSkySystem : ModSystem
         StarRotationPatch?.Dispose();
 
         PatchAtmosphereTarget?.Dispose();
-        PatchAtmosphereShader?.Dispose();
+            // PatchAtmosphereShader?.Dispose();
         PatchCloudsTarget?.Dispose();
         PatchCloudsShader?.Dispose();
+        PatchStarShader?.Dispose();
 
         PatchDrawing?.Dispose();
 
@@ -151,11 +160,29 @@ public sealed class RealisticSkySystem : ModSystem
 
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchLdloca(2),
-            i => i.MatchCall<SkyPlayerSnapshot>("get_InvertedGravity")))
+            i => i.MatchCall<SkyPlayerSnapshot>($"get_{nameof(SkyPlayerSnapshot.InvertedGravity)}")))
             throw new ILPatchFailureException(Mod, il, null);
 
         c.EmitPop();
         c.EmitLdcI4(0);
+    }
+
+    private void ModifySunPosition(ILContext il)
+    {
+        ILCursor c = new(il);
+
+        if (!c.TryGotoNext(MoveType.After,
+            i => i.MatchBr(out _),
+            i => i.MatchCall<SunPositionSaver>($"get_{nameof(SunPositionSaver.SunPosition)}")))
+            throw new ILPatchFailureException(Mod, il, null);
+
+        c.EmitDelegate((Vector2 sunPosition) =>
+        {
+            if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+                sunPosition.Y = MiscUtils.ScreenSize.Y - sunPosition.Y;
+
+            return sunPosition;
+        });
     }
 
     #endregion
@@ -170,7 +197,26 @@ public sealed class RealisticSkySystem : ModSystem
 
         c.EmitPop();
         c.EmitDelegate(() => StarSystem.StarRotation);
+
+        if (!c.TryGotoNext(MoveType.After,
+            i => i.MatchLdloc(out _),
+            i => i.MatchLdloc(out _),
+            i => i.MatchCall<Matrix>("op_Multiply"),
+            i => i.MatchLdloc(out _),
+            i => i.MatchCall<Matrix>("op_Multiply")))
+            throw new ILPatchFailureException(Mod, il, null);
+
+        c.EmitDelegate((Matrix mat) =>
+        {
+            bool flip = Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically);
+
+            Vector3 scale = new(1f, flip ? -1f : 1f, 1f);
+
+            return mat * Matrix.CreateScale(scale);
+        });
     }
+
+    #region Patch Draw
 
     private void DrawSky(ILContext il)
     {
@@ -190,7 +236,12 @@ public sealed class RealisticSkySystem : ModSystem
                     i => i.MatchLdloc0());
 
                 c.EmitPop();
-                c.EmitDelegate(() => Main.BackgroundViewMatrix.EffectMatrix);
+
+                    // This is a hack but its the only way I've found to correctly draw the atmosphere target.
+                if (i == 0)
+                    c.EmitDelegate(() => Matrix.Identity);
+                else
+                    c.EmitDelegate(() => Main.BackgroundViewMatrix.EffectMatrix);
             }
 
                 // Bring us back to the top.
@@ -256,6 +307,8 @@ public sealed class RealisticSkySystem : ModSystem
         }
     }
 
+    #endregion
+
     private void ChangeGalaxyRotation(ILContext il)
     {
         try
@@ -289,24 +342,38 @@ public sealed class RealisticSkySystem : ModSystem
         if (star is null)
             return;
 
-        star.Parameters["screenSize"]?.SetValue(MiscUtils.ScreenSize);
-        star.Parameters["distanceFadeoff"]?.SetValue(Main.eclipse ? 0.11f : 1f);
-        star.Parameters["sunPosition"]?.SetValue(Main.dayTime ? SunAndMoonSystem.SunPosition : (Vector2.One * 50000f));
-
-        if (AtmosphereTarget?.IsReady is true)
-            Main.instance.GraphicsDevice.Textures[1] = AtmosphereTarget.GetTarget() ?? Textures.Invis.Value;
+        SetAtmosphereParams(star);
 
         star.CurrentTechnique.Passes[0].Apply();
     }
 
-    public static void DrawStars() => StarsRenderer.Render(StarSystem.StarAlpha, Main.BackgroundViewMatrix.ZoomMatrix);
+    public static void SetAtmosphereParams(Effect shader)
+    {
+        shader.Parameters["usesAtmosphere"]?.SetValue(true);
+
+        shader.Parameters["screenSize"]?.SetValue(MiscUtils.ScreenSize);
+        shader.Parameters["distanceFadeoff"]?.SetValue(Main.eclipse ? 0.11f : 1f);
+
+        Vector2 sunPosition = SunAndMoonSystem.SunPosition;
+
+        if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+            sunPosition.Y = MiscUtils.ScreenSize.Y - sunPosition.Y;
+
+        shader.Parameters["sunPosition"]?.SetValue(Main.dayTime ? sunPosition : (Vector2.One * 50000f));
+
+        if (AtmosphereTarget?.IsReady is true)
+            Main.instance.GraphicsDevice.Textures[1] = AtmosphereTarget.GetTarget() ?? Textures.Invis.Value;
+    }
+
+    public static void DrawStars() => StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity);
 
     private static Matrix GalaxyMatrix()
     {
         Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
         Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
         Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
-        return revoffset * rotation * offset;
+
+        return revoffset * rotation * offset * Main.BackgroundViewMatrix.EffectMatrix;
     }
 
     public static void DrawGalaxy() 
