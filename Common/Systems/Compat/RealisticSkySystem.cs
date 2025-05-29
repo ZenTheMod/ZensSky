@@ -365,7 +365,13 @@ public sealed class RealisticSkySystem : ModSystem
             Main.instance.GraphicsDevice.Textures[1] = AtmosphereTarget.GetTarget() ?? Textures.Invis.Value;
     }
 
-    public static void DrawStars() => StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity);
+    public static void DrawStars() 
+    {
+        if (!SkyConfig.Instance.DrawRealisticStars)
+            return;
+
+        StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity); 
+    }
 
     private static Matrix GalaxyMatrix()
     {
@@ -378,6 +384,9 @@ public sealed class RealisticSkySystem : ModSystem
 
     public static void DrawGalaxy() 
     {
+        if (!SkyConfig.Instance.DrawRealisticStars)
+            return;
+
         Main.spriteBatch.End(out var snapshot);
         Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, null, GalaxyMatrix());
 
