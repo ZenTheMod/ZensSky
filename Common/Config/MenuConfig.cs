@@ -10,6 +10,10 @@ public sealed class MenuConfig : ModConfig
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
+    [DefaultValue(1f)]
+    [Range(0.1f, 20f)]
+    public float TimeMultiplier;
+
     [DefaultValue(0f)]
     [Range(0f, 1f)]
     public float Rain;
