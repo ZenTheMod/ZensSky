@@ -5,16 +5,17 @@
 
 	<!-- References -->
 	<ItemGroup>
-		<!-- Include Realistic Sky to make cross-modding easier -->
+		<!-- Include various mods to make cross-modding easier -->
 		<Reference Include="RealisticSky">
 			<HintPath>..\ModAssemblies\RealisticSky_v1.0.24.dll</HintPath>
 		</Reference>
-		
-		<!-- Include Red Sun to make cross-modding easier-->
 		<Reference Include="RedSunAndRealisticSky">
 			<HintPath>..\ModAssemblies\RedSunAndRealisticSky_v1.0.2.dll</HintPath>
 		</Reference>
-
+		<Reference Include="Lights">
+			<HintPath>..\ModAssemblies\Lights_v1.4.2.dll</HintPath>
+		</Reference>
+		
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
 			<HintPath>..\ModAssemblies\Daybreak_v1.1.1.dll</HintPath>

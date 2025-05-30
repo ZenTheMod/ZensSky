@@ -17,7 +17,8 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _slider = new(() => Request("UI/Slider"));
     private static readonly Lazy<Asset<Texture2D>> _sliderHighlight = new(() => Request("UI/SliderHighlight"));
 
-    private static readonly Lazy<Asset<Texture2D>> _buttonHover = new(() => Request("UI/SunMoonOutline"));
+    private static readonly Lazy<Asset<Texture2D>> _arrowRight = new(() => Request("UI/Buttons/ArrowRight"));
+    private static readonly Lazy<Asset<Texture2D>> _arrowLeft = new(() => Request("UI/Buttons/ArrowLeft"));
 
     public static Asset<Texture2D> LockedToggle => _lockedToggle.Value;
 
@@ -30,5 +31,6 @@ public static partial class Textures
     public static Asset<Texture2D> Slider => _slider.Value;
     public static Asset<Texture2D> SliderHighlight => _sliderHighlight.Value;
 
-    public static Asset<Texture2D> ButtonHover => _buttonHover.Value;
+    public static Asset<Texture2D> ArrowRight => _arrowRight.Value;
+    public static Asset<Texture2D> ArrowLeft => _arrowLeft.Value;
 }

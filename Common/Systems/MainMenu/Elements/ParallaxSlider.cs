@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using MonoMod.Cil;
+﻿using MonoMod.Cil;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -7,32 +6,21 @@ using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
-public sealed class ParallaxSlider : MenuControllerElement
+public sealed class ParallaxSlider : SliderController
 {
-    #region Fields
+    #region Properties
 
-    private const float MaxRange = 5f;
+    public override float MaxRange => 5f;
+    public override float MinRange => -5f;
 
-    private readonly UISlider? Slider;
+    public override Color InnerColor => Color.CornflowerBlue;
+
+    public override ref float Modifying => ref MenuConfig.Instance.Parallax;
 
     public override int Index => 2;
-
     public override string Name => "Mods.ZensSky.MenuController.Parallax";
 
     #endregion
-
-    public ParallaxSlider() : base()
-    {
-        Height.Set(75f, 0f);
-
-        Slider = new();
-
-        Slider.Top.Set(35f, 0f);
-
-        Slider.InnerColor = Color.CornflowerBlue;
-
-        Append(Slider);
-    }
 
     #region Loading
 
@@ -62,17 +50,4 @@ public sealed class ParallaxSlider : MenuControllerElement
     }
 
     #endregion
-
-    public override void Update(GameTime gameTime)
-    {
-        base.Update(gameTime);
-
-        if (Slider is null)
-            return;
-
-        if (Slider.IsHeld)
-            MenuConfig.Instance.Parallax = Utils.Remap(Slider.Ratio, 0, 1, MaxRange, -MaxRange);
-        else
-            Slider.Ratio = Utils.Remap(MenuConfig.Instance.Parallax, MaxRange, -MaxRange, 0, 1);
-    }
 }

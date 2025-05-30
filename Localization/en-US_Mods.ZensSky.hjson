@@ -69,7 +69,7 @@ Configs: {
 		}
 
 		PitchBlackBackground: {
-			Label: "[i:237]Pitch Black Background"
+			Label: "[i:237] Pitch Black Background"
 			Tooltip: Makes the background pitch black during night.
 		}
 	}

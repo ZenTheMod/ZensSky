@@ -15,6 +15,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.MainMenu;
 
@@ -27,6 +28,9 @@ public sealed class MenuControllerSystem : ModSystem
     private const int HorizontalPadding = 4;
 
     private static ILHook? AddMenuControllerToggle;
+
+    private delegate void orig_Save(ModConfig config);
+    private static Hook? SaveConfig;
 
     private static readonly UserInterface MenuControllerInterface = new();
     private static readonly MenuControllerUIState MenuController = new();
@@ -41,13 +45,20 @@ public sealed class MenuControllerSystem : ModSystem
 
     public override void Load()
     {
-        MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod("UpdateAndDrawModMenuInner", BindingFlags.Static | BindingFlags.NonPublic);
-
-        if (updateAndDrawModMenuInner is not null)
-            AddMenuControllerToggle = new(updateAndDrawModMenuInner, AddToggle);
-
         Main.QueueMainThreadAction(() =>
         {
+            MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod("UpdateAndDrawModMenuInner", Static | NonPublic);
+
+            if (updateAndDrawModMenuInner is not null)
+                AddMenuControllerToggle = new(updateAndDrawModMenuInner, 
+                    AddToggle);
+
+            MethodInfo? save = typeof(ConfigManager).GetMethod("Save", Static | NonPublic);
+
+            if (save is not null)
+                SaveConfig = new(save,
+                    RefreshOnSave);
+
             IL_Main.DrawMenu += ModifyInteraction;
             On_Main.UpdateUIStates += UpdateInterface;
             Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
@@ -68,6 +79,8 @@ public sealed class MenuControllerSystem : ModSystem
     }
 
     #endregion
+
+    public static void RefreshAll() => Controllers.ForEach((controller) => { controller.Refresh(); });
 
     #region Toggle Button
 
@@ -123,6 +136,14 @@ public sealed class MenuControllerSystem : ModSystem
     #endregion
 
     #region Updating
+
+    private void RefreshOnSave(orig_Save orig, ModConfig config)
+    {
+        orig(config);
+
+        if (config is MenuConfig)
+            RefreshAll();
+    }
 
         // For whatever reason ModSystem::UpdateUI does not run on the titlescreen ???
     private void UpdateInterface(On_Main.orig_UpdateUIStates orig, GameTime gameTime)

@@ -1,32 +1,29 @@
-﻿using Microsoft.Xna.Framework;
-using Terraria;
+﻿using Terraria;
 using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
-public sealed class CloudDensitySlider : MenuControllerElement
+public sealed class CloudDensitySlider : SliderController
 {
-    private readonly UISlider? Slider;
+    #region Properties
+
+    public override float MaxRange => 1f;
+    public override float MinRange => 0f;
+
+    public override Color InnerColor => Color.LightCyan;
+
+    public override ref float Modifying => ref MenuConfig.Instance.CloudDensity;
 
     public override int Index => 1;
 
     public override string Name => "Mods.ZensSky.MenuController.CloudDensity";
 
-    public CloudDensitySlider() : base()
-    {
-        Height.Set(75f, 0f);
-
-        Slider = new();
-
-        Slider.Top.Set(35f, 0f);
-
-        Slider.InnerColor = Color.LightCyan;
-
-        Append(Slider);
-    }
+    #endregion
 
     public override void Refresh()
     {
+        int prior = Main.numClouds;
+
         if (MenuConfig.Instance.UseCloudDensity)
         {
             float density = MenuConfig.Instance.CloudDensity;
@@ -36,31 +33,10 @@ public sealed class CloudDensitySlider : MenuControllerElement
         }
         else if (Slider is not null)
             Slider.Ratio = (float)Main.numClouds / Main.maxClouds;
+
+        if (Main.numClouds != prior)
+            Cloud.resetClouds();
     }
 
-    public override void Update(GameTime gameTime)
-    {
-        base.Update(gameTime);
-
-        if (Slider is null)
-            return;
-
-        if (Slider.IsHeld)
-        {
-            float density = Slider.Ratio;
-
-            MenuConfig.Instance.UseCloudDensity = true;
-            MenuConfig.Instance.CloudDensity = density;
-
-            int prior = Main.numClouds;
-
-            Refresh();
-
-            if (Main.numClouds != prior)
-                Cloud.resetClouds();
-        }
-        else
-            Slider.Ratio = MenuConfig.Instance.CloudDensity;
-
-    }
+    public override void OnSet() => MenuConfig.Instance.UseCloudDensity = true;
 }

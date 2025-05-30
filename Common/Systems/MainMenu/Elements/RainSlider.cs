@@ -1,14 +1,18 @@
-﻿using Microsoft.Xna.Framework;
-using Terraria;
+﻿using Terraria;
 using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
-public sealed class RainSlider : MenuControllerElement
+public sealed class RainSlider : SliderController
 {
-    #region Fields
+    #region Properties
 
-    private readonly UISlider? Slider;
+    public override float MaxRange => 1f;
+    public override float MinRange => 0f;
+
+    public override Color InnerColor => Color.Blue;
+
+    public override ref float Modifying => ref MenuConfig.Instance.Rain;
 
     public override int Index => 4;
 
@@ -16,39 +20,10 @@ public sealed class RainSlider : MenuControllerElement
 
     #endregion
 
-    public RainSlider() : base()
-    {
-        Height.Set(75f, 0f);
-
-        Slider = new();
-
-        Slider.Top.Set(35f, 0f);
-
-        Slider.InnerColor = Color.Blue;
-
-        Append(Slider);
-    }
-
     public override void Refresh() 
     {
         Main.maxRaining = MenuConfig.Instance.Rain;
 
         Main.cloudAlpha = MenuConfig.Instance.Rain;
-    }
-
-    public override void Update(GameTime gameTime)
-    {
-        base.Update(gameTime);
-
-        if (Slider is null)
-            return;
-
-        if (Slider.IsHeld)
-        {
-            MenuConfig.Instance.Rain = Slider.Ratio;
-            Refresh();
-        }
-        else
-            Slider.Ratio = Main.cloudAlpha;
     }
 }
