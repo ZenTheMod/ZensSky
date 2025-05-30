@@ -69,7 +69,7 @@ public sealed class RedSunSystem : ModSystem
 
             c.EmitDelegate(() =>
             {
-                if (!StarSystem.CanDrawStars)
+                if (!StarSystem.CanDrawStars || !SkipDrawing)
                     return;
 
                 Draw();

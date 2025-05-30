@@ -353,7 +353,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
-        if (StarSystem.CanDrawStars && !RedSunSystem.IsEnabled)
+        if (StarSystem.CanDrawStars && !RedSunSystem.IsEnabled && SkyConfig.Instance.SunAndMoonRework)
         {
             SpriteBatch spriteBatch = Main.spriteBatch;
             GraphicsDevice device = Main.instance.GraphicsDevice;
