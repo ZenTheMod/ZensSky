@@ -119,7 +119,7 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitLdloc(sunRotation); // Rotation
             c.EmitLdloc(sunScale); // Scale
 
-            c.EmitDelegate(FetchInfo);
+            c.EmitDelegate(FetchSunInfo);
 
             #endregion
 
@@ -183,7 +183,7 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitLdloc(moonRotation); // Rotation
             c.EmitLdloc(moonScale); // Scale
 
-            c.EmitDelegate(FetchInfo);
+            c.EmitDelegate(FetchMoonInfo);
 
             #endregion
         }
@@ -193,19 +193,6 @@ public sealed class SunAndMoonSystem : ModSystem
 
             throw new ILPatchFailureException(Mod, il, e);
         }
-    }
-
-    public static void FetchInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
-    {
-        MoonPosition = position;
-        MoonColor = color;
-        MoonRotation = rotation;
-        MoonScale = scale;
-
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
-
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(position);
     }
 
     public static void FetchSunInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)

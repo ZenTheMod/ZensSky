@@ -5,7 +5,8 @@
 
 	<!-- References -->
 	<ItemGroup>
-		<!-- Include various mods to make cross-modding easier -->
+		<!-- Include various mods to make cross-modding easier, 
+			(Also the use of sortBefore in build.txt eleminates the chance of a race condition via cross-mod) -->
 		<Reference Include="RealisticSky">
 			<HintPath>..\ModAssemblies\RealisticSky_v1.0.24.dll</HintPath>
 		</Reference>

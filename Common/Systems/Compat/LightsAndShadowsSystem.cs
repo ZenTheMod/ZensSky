@@ -10,6 +10,7 @@ namespace ZensSky.Common.Systems.Compat;
 
 [JITWhenModsEnabled("Lights")]
 [ExtendsFromMod("Lights")]
+[Autoload(Side = ModSide.Client)]
 public sealed class LightsAndShadowsSystem : ModSystem
 {
     private delegate Vector2 orig_GetSunPos(RenderTarget2D render);

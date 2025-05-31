@@ -9,6 +9,7 @@ using Terraria;
 using ZensSky.Common.DataStructures;
 using System.Linq;
 using static ZensSky.Common.DataStructures.InteractableStar;
+using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -56,10 +57,10 @@ public sealed class StarSystem : ModSystem
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
-        Main.QueueMainThreadAction(() => On_Star.UpdateStars += UpdateStars);
+        MiscUtils.SafeMainThreadAction(() => On_Star.UpdateStars += UpdateStars);
     }
 
-    public override void Unload() => Main.QueueMainThreadAction(() => On_Star.UpdateStars -= UpdateStars);
+    public override void Unload() => MiscUtils.SafeMainThreadAction(() => On_Star.UpdateStars -= UpdateStars);
 
     public override void PostSetupContent() => CanDrawStars = true;
 

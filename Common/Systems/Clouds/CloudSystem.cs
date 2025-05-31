@@ -6,12 +6,11 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
 using Daybreak.Common.Rendering;
 using Daybreak.Common.CIL;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using ZensSky.Common.Systems.Compat;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
 

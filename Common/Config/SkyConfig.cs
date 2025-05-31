@@ -6,8 +6,9 @@ using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.Config;
 
-internal sealed class SunAndMoonReworkElement : BaseLockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
-internal sealed class RealisticSkyElement : BaseLockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
+internal sealed class SunAndMoonReworkElement : LockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
+internal sealed class RealisticSkyElement : LockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
+internal sealed class WindOpacityElement : LockedSliderElement { public override bool IsLocked => !SkyConfig.Instance.WindParticles; }
 
 public sealed class SkyConfig : ModConfig
 {
@@ -51,6 +52,12 @@ public sealed class SkyConfig : ModConfig
 
     [DefaultValue(true)]
     public bool WindParticles;
+
+    [DefaultValue(0.85f)]
+    [CustomModConfigItem(typeof(WindOpacityElement))]
+    [SliderColor(148, 203, 227)]
+    [Range(0f, 1f)]
+    public float WindOpacity;
 
     [DefaultValue(false)]
     public bool PitchBlackBackground;

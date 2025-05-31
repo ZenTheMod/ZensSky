@@ -46,7 +46,7 @@ public sealed class WindSystem : ModSystem
         if (Main.dedServ || Main.gamePaused)
             return;
 
-        if (!SkyConfig.Instance.WindParticles)
+        if (!SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
             return;
 
         for (int i = 0; i < WindCount; i++)

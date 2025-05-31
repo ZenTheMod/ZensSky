@@ -65,4 +65,24 @@ public static class MiscUtils
         File.WriteAllText(text3, il.ToString());
         Logging.tML.Debug($"Dumped ILContext \"{il.Method.FullName}\" to \"{text3}\"");
     }
+
+    /// <summary>
+    /// Safely invokes <paramref name="action"/> with <see cref="Main.QueueMainThreadAction"/> if it is ran on a client; otherwise it is invoked normally.<br/>
+    /// — This is intended to be used for the application of IL edits/Detours;<br/>
+    /// and is irrelevant for client-sided Mods or classes using <see cref="AutoloadAttribute"/> with <see cref="AutoloadAttribute.Side"/> set to <see cref="ModSide.Client"/> —<br/><br/>
+    /// On servers with no clients connected <see cref="Main.QueueMainThreadAction"/> is not ran.<br/>
+    /// The usage of <see cref="Main.QueueMainThreadAction"/> is to prevent a recent obscure MonoMod race condition issue.<br/>
+    /// This seems to be the safest as it avoids hot paths like <see cref="Main.DoUpdate"/> and <see cref="Main.DoDraw"/>.<br/><br/>
+    /// <code>
+    /// System.ArgumentException: Referenced cell no longer exists (Parameter 'cellRef')
+    /// </code>
+    /// </summary>
+    /// <param name="action"></param>
+    public static void SafeMainThreadAction(Action action)
+    {
+        if (Main.dedServ)
+            action?.Invoke();
+        else
+            Main.QueueMainThreadAction(() => action?.Invoke());
+    }
 }

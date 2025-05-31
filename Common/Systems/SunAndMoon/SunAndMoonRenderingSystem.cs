@@ -49,7 +49,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private const float SingleMoonPhase = 0.125f; // = 1/8
     private const float StartingMoonPhase = 0.25f;
 
-    private const int MoonScale = 50;
+    private const int MoonSize = 50;
     private const float MoonFallOff = 0.95f;
     private const float MoonBloomScale = 1.1f;
     private const float MoonBloomFallOff = 0.8f;
@@ -103,7 +103,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
     {
-        if (SkyConfig.Instance.RealisticSun)
+        if (SkyConfig.Instance.RealisticSun && RealisticSkySystem.IsEnabled)
             return;
 
         if (Main.eclipse)
@@ -135,7 +135,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #region Flare
 
-        // This draws a similar effect to that seen in 1.4.5 leaks.
+            // This draws a similar effect to that seen in 1.4.5 leaks.
         float flareWidth = distanceFromCenter * distanceFromTop * offscreenMultiplier;
 
         for (int i = 0; i < FlareScales.Length; i++)
@@ -149,7 +149,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #region Sungls
 
-        // Not ideal to check every frame.
+            // Not ideal to check every frame.
         if (!Main.gameMenu && Main.LocalPlayer.head == 12)
         {
             Texture2D sunglasses = Sunglasses.Value;
@@ -215,7 +215,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         if (planet is null)
             return;
 
-        // This code is kinda soup. 😋
+            // This code is kinda soup. 😋
         if (Main.moonType == 2)
             DrawMoon2Extras(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * 0.5f, scale, moonColor, shadowColor);
 
@@ -224,7 +224,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         if (Main.moonType == 8)
             DrawMoon8Extras(spriteBatch, moon, position, rotation, scale, moonColor);
 
-        Vector2 size = new Vector2(MoonScale * scale) / moon.Size();
+        Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
 
         DrawBloom(spriteBatch, position, rotation, scale * MoonBloomScale, moonColor, planet);
@@ -259,7 +259,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         PlanetSetup(planet, StartingMoonPhase, SingleMoonPhase * 5f, shadowColor, device);
 
-        Vector2 size = new Vector2(MoonScale * scale) / moon.Size();
+        Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation - MathHelper.PiOver2, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
 
         DrawBloom(spriteBatch, position, rotation - MathHelper.PiOver2, scale * MoonBloomScale, moonColor, planet);
@@ -297,7 +297,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Vector2 lowerMoonOffset = Moon8ExtraLowerPosition.RotatedBy(rotation) * scale;
 
         Vector2 origin = texture.Size() * 0.5f;
-        Vector2 size = new Vector2(MoonScale * scale) / texture.Size();
+        Vector2 size = new Vector2(MoonSize * scale) / texture.Size();
 
         spriteBatch.Draw(texture, position + upperMoonOffset, null, moonColor, rotation, origin, size * Moon8ExtraUpperScale, SpriteEffects.None, 0f);
         spriteBatch.Draw(texture, position + lowerMoonOffset, null, moonColor, rotation, origin, size * Moon8ExtraLowerScale, SpriteEffects.None, 0f);
@@ -311,7 +311,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Texture2D texture = Pixel.Value;
 
         Vector2 origin = texture.Size() * 0.5f;
-        Vector2 size = new(MoonScale * scale * MoonBloomScale);
+        Vector2 size = new(MoonSize * scale * MoonBloomScale);
 
         Color bloomColor = (moonColor * MoonBloomOpacity) with { A = 0 };
 
@@ -344,7 +344,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         Texture2D texture = Pixel.Value;
 
-        Vector2 size = new(MoonScale * scale);
+        Vector2 size = new(MoonSize * scale);
 
         spriteBatch.Draw(texture, position, null, (moonColor * MoonBloomOpacity) with { A = 0 }, rotation, texture.Size() * 0.5f, size, SpriteEffects.None, 0f);
     }

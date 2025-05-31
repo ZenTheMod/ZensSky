@@ -24,6 +24,7 @@ namespace ZensSky.Common.Systems.Compat;
 
 [JITWhenModsEnabled("RealisticSky")]
 [ExtendsFromMod("RealisticSky")]
+[Autoload(Side = ModSide.Client)]
 public sealed class RealisticSkySystem : ModSystem
 {
     #region Private Fields

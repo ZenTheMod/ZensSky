@@ -8,11 +8,17 @@ namespace ZensSky.Common.Registries;
 public static partial class Textures
 {
     private const string Prefix = "ZensSky/Assets/Textures/";
+
     private static readonly Lazy<Asset<Texture2D>> _pixel = new(() => Request("Pixel"));
     private static readonly Lazy<Asset<Texture2D>> _invis = new(() => Request("Invis"));
 
+    private static readonly Lazy<Asset<Texture2D>> _gradient = new(() => Request("Gradient"));
+
     public static Asset<Texture2D> Pixel => _pixel.Value;
     public static Asset<Texture2D> Invis => _invis.Value;
+
+    public static Asset<Texture2D> Gradient => _gradient.Value;
+
     private static Asset<Texture2D> Request(string path) => ModContent.Request<Texture2D>(Prefix + path);
 
     private static Asset<Texture2D>[] RequestArray(string TexturePath, int count)

@@ -7,6 +7,7 @@ namespace ZensSky.Common.Registries;
 public static partial class Textures
 {
     private static readonly Lazy<Asset<Texture2D>> _lockedToggle = new(() => Request("UI/LockedSettingsToggle"));
+    private static readonly Lazy<Asset<Texture2D>> _lock = new(() => Request("UI/Lock"));
 
     private static readonly Lazy<Asset<Texture2D>> _modDeps = new(() => Request("UI/PanelStyle/ModDeps"));
     private static readonly Lazy<Asset<Texture2D>> _modConfig = new(() => Request("UI/PanelStyle/ModConfig"));
@@ -21,6 +22,7 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _arrowLeft = new(() => Request("UI/Buttons/ArrowLeft"));
 
     public static Asset<Texture2D> LockedToggle => _lockedToggle.Value;
+    public static Asset<Texture2D> Lock => _lock.Value;
 
     public static Asset<Texture2D> ModDeps => _modDeps.Value;
     public static Asset<Texture2D> ModConfig => _modConfig.Value;

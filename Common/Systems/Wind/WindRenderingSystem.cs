@@ -16,7 +16,6 @@ public sealed class WindRenderingSystem : ModSystem
     #region Private Fields
 
     private const float WidthAmplitude = 2f;
-    private const float Alpha = 0.8f;
 
     #endregion
 
@@ -61,7 +60,7 @@ public sealed class WindRenderingSystem : ModSystem
 
     private static void DrawWinds()
     {
-        if (!SkyConfig.Instance.WindParticles)
+        if (!SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
             return;
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
@@ -83,6 +82,8 @@ public sealed class WindRenderingSystem : ModSystem
 
         float brightness = MathF.Sin(wind.LifeTime * MathHelper.Pi) * Main.atmo * MathF.Abs(Main.WindForVisuals);
 
+        float alpha = SkyConfig.Instance.WindOpacity;
+
         for (int i = 0; i < positions.Length - 1; i++)
         {
             float progress = (float)i / positions.Length;
@@ -93,7 +94,7 @@ public sealed class WindRenderingSystem : ModSystem
             float direction = (positions[i] - positions[i + 1]).ToRotation();
             Vector2 offset = new Vector2(width, 0).RotatedBy(direction + MathHelper.PiOver2);
 
-            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()).MultiplyRGB(Main.ColorOfTheSkies) * brightness * Alpha;
+            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()).MultiplyRGB(Main.ColorOfTheSkies) * brightness * alpha;
             color.A = 0;
 
             vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));

@@ -10,11 +10,11 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.Stars;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class StarRenderingSystem : ModSystem
 {
     #region Private Fields

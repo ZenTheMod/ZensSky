@@ -20,6 +20,7 @@ Configs: {
 				'''
 				Controls which visual is used for eclipses.
 				Right click to swap to the Eclipse menu style to preview.
+				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
 				'''
 			NameTrue: Veins
 			NameFalse: Moon
@@ -65,7 +66,16 @@ Configs: {
 
 		WindParticles: {
 			Label: "[i:751] Wind Particles"
-			Tooltip: Enables small wind trail particles.
+			Tooltip: Enables small wind wisp particles.
+		}
+
+		WindOpacity: {
+			Label: "[i:751] Wind Opacity"
+			Tooltip:
+				'''
+				The alpha of the wisps of wind (1 = Opaque, 0 = Invisible)
+				[c/FF0000:Requires 'Wind Particles' to be enabled!]
+				'''
 		}
 
 		PitchBlackBackground: {
