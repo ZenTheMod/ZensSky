@@ -22,7 +22,7 @@ public record struct InteractableStar
     private static readonly Color LowTemperature = new(255, 242, 238);
     private static readonly Color HighTemperature = new(236, 238, 255);
     private static readonly Color HighestTemperature = new(153, 185, 255);
-    private static readonly Color Compressed = new(255, 96, 136);
+    private static readonly Color Compressed = Color.White;
 
     private const float MinSize = 0.3f;
     private const float MaxSize = 1.2f;
@@ -65,7 +65,7 @@ public record struct InteractableStar
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly Color GetColor() => SupernovaProgress == SupernovaProgress.Shrinking ? Color.Lerp(Color, Compressed, SupernovaTimer) : Color;
+    public readonly Color GetColor() => Color.Lerp(Color, Compressed, SupernovaTimer);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Vector2 GetRotatedPosition() => Position.RotatedBy(StarSystem.StarRotation);

@@ -80,7 +80,7 @@ public sealed class StarRenderingSystem : ModSystem
         if (vanillaStyle)
             alpha *= VanillaStarsOpacity;
 
-        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress <= SupernovaProgress.Shrinking))
+        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress != SupernovaProgress.Exploding))
         {
             Vector2 position = center + star.GetRotatedPosition();
 

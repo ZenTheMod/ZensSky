@@ -32,6 +32,8 @@ public sealed class StarSystem : ModSystem
 
     private const float ExplosionIncrement = 0.00001f;
 
+    private const float RegenerationIncrement = 0.0001f;
+
     #endregion
 
     #region Public Fields
@@ -121,13 +123,23 @@ public sealed class StarSystem : ModSystem
                         if (Stars[i].SupernovaTimer < 1f)
                             break;
 
-                        Stars[i].SupernovaTimer = 0f;
+                        Stars[i].SupernovaTimer = 1f;
                         Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
 
                         break;
                     }
                 case SupernovaProgress.Regenerating:
-                    break;  // TODO: Logic for this.
+                    {
+                        Stars[i].SupernovaTimer -= RegenerationIncrement * (float)Main.dayRate;
+
+                        if (Stars[i].SupernovaTimer > 0f)
+                            break;
+
+                        Stars[i].SupernovaTimer = 1f;
+                        Stars[i].SupernovaProgress = SupernovaProgress.None;
+
+                        break;
+                    }
                 default:
                     break;
             }
