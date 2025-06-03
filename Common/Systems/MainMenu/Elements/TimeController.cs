@@ -60,7 +60,7 @@ public sealed class TimeController : SliderController
                     return;
 
                 if (Main.dayTime)
-                    Main.moonPhase = (Main.moonPhase - 1) % 7;
+                    Main.moonPhase = (Main.moonPhase - 1) % 8;
 
                 Main.time = (Main.dayTime ? Main.nightLength : Main.dayLength) - 1;
                 Main.dayTime = !Main.dayTime;
@@ -87,7 +87,16 @@ public sealed class TimeController : SliderController
                 // No MoveType.BeforeLabels :pensive:.
             c.MoveAfterLabels();
 
+                // Vanilla moon cycles through moon phases 1-7. :agony:
             c.EmitDelegate(() => { Main.moonType = Main.rand.Next(9); });
+
+            c.GotoNext(MoveType.Before,
+                i => i.MatchBlt(out _),
+                i => i.MatchLdcI4(0));
+
+            c.EmitPop();
+
+            c.EmitLdcI4(8);
         }
         catch (Exception e)
         {

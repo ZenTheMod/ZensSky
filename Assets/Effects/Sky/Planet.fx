@@ -1,62 +1,83 @@
 #include "../common.fx"
 
-sampler planet : register(s0);
+sampler tex : register(s0);
+
+float radius;
+float atmosphereRange;
+
+float shadowRotation;
 
 float4 shadowColor;
+float4 atmosphereColor;
+float4 atmosphereShadowColor;
 
-float planetRotation;
-float shadowRotation;
-float falloffStart;
-
-const float pi = 3.14159;
-
-const float shadowStart = .22;
-const float shadowEnd = .28;
-
-float2 getAngle(float2 d)
+float4 sphere(float2 uv, float dist, float radius)
 {
-    float scaleY = sqrt(1 - d.y * d.y);
+    float z = radius * sin(acos(dist / radius));
+    float3 sp = float3(uv, z);
     
-    float angY = .5 + asin(d.y) / pi;
-    float angX = (.5 + asin(d.x / scaleY) / pi) * .5;
+        // mfw the * operator ceases to function correctly
+    float3 sphererot = mul(sp, mul(rotateX(-PIOVER2), rotateZ(PIOVER2)));
     
-    return float2(angX, angY);
+    float shadow = outCubic(dot(sphererot, mul(float3(0, 1, 0), rotateZ(TAU - PIOVER2 + shadowRotation))));
+    
+    shadow = saturate(shadow);
+    
+    return float4(sphererot, shadow);
 }
 
-float shadow(float x)
+float4 planet(float2 uv, float dist)
 {
-    float shad = clampedMap(abs(frac(x) - .5), shadowStart, shadowEnd, 0., 1.);
+    if (dist > radius)
+        return float4(0, 0, 0, 0);
     
-    return shad * shad * (3.0 - 2.0 * shad);
+    float4 sp = sphere(uv, dist, radius);
+    
+    float3 sphererot = sp.xyz;
+    float shadow = sp.w;
+    
+    float2 pt = lonlat(sphererot);
+    
+    float falloff = clampedMap(dist, radius - .03, radius, 1, 0);
+    
+        // Being safe with the texture coords here.
+    return lerp(shadowColor, tex2D(tex, pt), shadow) * falloff;
+}
+
+float4 atmo(float2 uv, float dist)
+{
+    float4 sp = sphere(uv, dist, radius);
+    
+    float3 sphererot = sp.xyz;
+    float shadow = sp.w;
+    
+        // Bullshit.
+    float atmo = inCubic(1 - abs(.5 - clampedMap(dist, radius - atmosphereRange, radius + atmosphereRange, 0, 1)));
+		
+    float4 atmoColor = lerp(atmosphereShadowColor, atmosphereColor, shadow);
+		
+    return atmoColor * atmo;
 }
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 {
-        // First grab the distance from the center.
-    float2 distance = (coords - .5) * 2;
-    float2 angle = getAngle(distance);
+    float2 uv = (coords - .5) * -2;
     
-        // Then create our angles.
-    float textureAngX = angle.x + planetRotation;
-    float shadowAngX = angle.x + shadowRotation;
+    float dist = length(uv);
     
-        // Sample the planet texture.
-    float4 col = tex2D(planet, float2(textureAngX, angle.y));
+    float4 inner = planet(uv, dist);
     
-        // Generate the shadow.
-    float shadowInterpolator = shadow(shadowAngX);
-    col = lerp(col * sampleColor, shadowColor, shadowInterpolator);
+    float4 outer = atmo(uv, dist);
     
-        // Add subtle falloff.
-    float distanceSqr = distance.x * distance.x + distance.y * distance.y;
-    col *= clampedMap(distanceSqr, falloffStart, 1, 1, 0); // falloff
-    return col;
+    float4 color = (inner + outer) * sampleColor;
+    
+    return color * color.a;
 }
 
 technique Technique1
 {
     pass AutoloadPass
     {
-        PixelShader = compile ps_2_0 PixelShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }

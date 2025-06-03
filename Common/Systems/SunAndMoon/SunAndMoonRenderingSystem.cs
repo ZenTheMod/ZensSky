@@ -6,11 +6,11 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
-using ZensSky.Common.Systems.Compat;
-using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Registries.Shaders;
+using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
@@ -46,14 +46,16 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const float MoonBrightness = 16f;
 
-    private const float SingleMoonPhase = 0.125f; // = 1/8
-    private const float StartingMoonPhase = 0.25f;
+    private const float SingleMoonPhase = 0.125f;
 
-    private const int MoonSize = 50;
-    private const float MoonFallOff = 0.95f;
-    private const float MoonBloomScale = 1.1f;
-    private const float MoonBloomFallOff = 0.8f;
-    private const float MoonBloomOpacity = 0.2f;
+    private const int MoonSize = 62;
+
+    private const float MoonRadius = 0.9f;
+    private const float MoonAtmosphere = 0.1f;
+
+    // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
+    private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
+    private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
 
     private static readonly Vector2 SmileyLeftEyePosition = new(-24, -32);
     private static readonly Vector2 SmileyRightEyePosition = new(13, -44);
@@ -61,7 +63,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private static readonly Vector2 Moon2ExtraRingSize = new(0.28f, 0.07f);
     private const float Moon2ExtraRingRotation = 0.13f;
     private const float Moon2ExtraShadowExponent = 15f;
-    private const float Moon2ExtraShadowSize = 5.1f;
+    private const float Moon2ExtraShadowSize = 4.6f;
 
     private static readonly Vector2 Moon8ExtraUpperPosition = new(-30, -26);
     private static readonly Vector2 Moon8ExtraLowerPosition = new(34);
@@ -90,7 +92,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
 
         Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = MoonColor * MoonBrightness * MoonScale;
+        Color moonColor = MoonColor * MoonScale;
         moonColor.A = 255;
 
         if (Main.dayTime)
@@ -195,31 +197,21 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawMoon(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
+        Texture2D moon = MoonTexture();
+
         if (WorldGen.drunkWorldGen)
         {
-            DrawSmiley(spriteBatch, position, color, rotation, scale, moonColor, shadowColor, device);
+            DrawSmiley(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor);
             return;
         }
 
-        Texture2D moon = Moon[Main.moonType].Value;
-
         Texture2D rings = Moon2Rings.Value;
-
-        if (Main.pumpkinMoon)
-            moon = PumpkinMoon.Value;
-        else if (Main.snowMoon)
-            moon = SnowMoon.Value;
-
-        Effect planet = Planet.Value;
-
-        if (planet is null)
-            return;
 
             // This code is kinda soup. 😋
         if (Main.moonType == 2)
-            DrawMoon2Extras(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * 0.5f, scale, moonColor, shadowColor);
+            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * 0.5f, scale, moonColor, shadowColor);
 
-        PlanetSetup(planet, StartingMoonPhase, StartingMoonPhase + (Main.moonPhase * SingleMoonPhase), shadowColor, device);
+        ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
 
         if (Main.moonType == 8)
             DrawMoon8Extras(spriteBatch, moon, position, rotation, scale, moonColor);
@@ -227,20 +219,14 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
 
-        DrawBloom(spriteBatch, position, rotation, scale * MoonBloomScale, moonColor, planet);
-
-        if (Main.moonType == 8)
-            DrawMoon8ExtrasBloom(spriteBatch, position, rotation, scale, moonColor);
-
         if (Main.moonType == 2)
-            DrawMoon2Extras(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * 0.5f, 0f), scale, moonColor, shadowColor);
+            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * 0.5f, 0f), scale, moonColor, shadowColor);
     }
 
     #region GetFixedBoi Moon
 
-    private static void DrawSmiley(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
+    private static void DrawSmiley(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor)
     {
-        Texture2D moon = Moon[0].Value;
         Texture2D star = Textures.Star.Value;
 
         Vector2 starLeftOffset = SmileyLeftEyePosition.RotatedBy(rotation) * scale;
@@ -252,24 +238,17 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
         spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
 
-        Effect planet = Planet.Value;
-
-        if (planet is null)
-            return;
-
-        PlanetSetup(planet, StartingMoonPhase, SingleMoonPhase * 5f, shadowColor, device);
+        ApplyPlanetShader(SingleMoonPhase * 5f, shadowColor);
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation - MathHelper.PiOver2, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
-
-        DrawBloom(spriteBatch, position, rotation - MathHelper.PiOver2, scale * MoonBloomScale, moonColor, planet);
     }
 
     #endregion
 
     #region Rings
 
-    private static void DrawMoon2Extras(SpriteBatch spriteBatch, Texture2D texture, Vector2 position, Rectangle frame, float rotation, Vector2 origin, float scale, Color moonColor, Color shadowColor)
+    private static void DrawMoon2Rings(SpriteBatch spriteBatch, Texture2D texture, Vector2 position, Rectangle frame, float rotation, Vector2 origin, float scale, Color moonColor, Color shadowColor)
     {
         Effect rings = Rings.Value;
 
@@ -303,50 +282,25 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         spriteBatch.Draw(texture, position + lowerMoonOffset, null, moonColor, rotation, origin, size * Moon8ExtraLowerScale, SpriteEffects.None, 0f);
     }
 
-    private static void DrawMoon8ExtrasBloom(SpriteBatch spriteBatch, Vector2 position, float rotation, float scale, Color moonColor)
-    {
-        Vector2 upperMoonOffset = Moon8ExtraUpperPosition.RotatedBy(rotation) * scale;
-        Vector2 lowerMoonOffset = Moon8ExtraLowerPosition.RotatedBy(rotation) * scale;
-
-        Texture2D texture = Pixel.Value;
-
-        Vector2 origin = texture.Size() * 0.5f;
-        Vector2 size = new(MoonSize * scale * MoonBloomScale);
-
-        Color bloomColor = (moonColor * MoonBloomOpacity) with { A = 0 };
-
-        spriteBatch.Draw(texture, position + upperMoonOffset, null, bloomColor, rotation, origin, size * Moon8ExtraUpperScale, SpriteEffects.None, 0f);
-        spriteBatch.Draw(texture, position + lowerMoonOffset, null, bloomColor, rotation, origin, size * Moon8ExtraLowerScale, SpriteEffects.None, 0f);
-    }
-
     #endregion
 
-    private static void PlanetSetup(Effect planet, float baseAngle, float shadowAngle, Color shadowColor, GraphicsDevice device)
+    private static void ApplyPlanetShader(float shadowAngle, Color shadowColor)
     {
+        Effect planet = Planet.Value;
+
+        if (planet is null)
+            return;
+
+        planet.Parameters["radius"]?.SetValue(MoonRadius);
+        planet.Parameters["atmosphereRange"]?.SetValue(MoonAtmosphere);
+
+        planet.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
+
         planet.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
-
-        planet.Parameters["planetRotation"]?.SetValue(baseAngle);
-        planet.Parameters["shadowRotation"]?.SetValue(shadowAngle);
-
-        planet.Parameters["falloffStart"]?.SetValue(MoonFallOff);
+        planet.Parameters["atmosphereColor"]?.SetValue(AtmosphereColor);
+        planet.Parameters["atmosphereShadowColor"]?.SetValue(AtmosphereShadowColor);
 
         planet.CurrentTechnique.Passes[0].Apply();
-
-        device.SamplerStates[0] = SamplerState.LinearWrap;
-    }
-
-    private static void DrawBloom(SpriteBatch spriteBatch, Vector2 position, float rotation, float scale, Color moonColor, Effect planet)
-    {
-        planet.Parameters["shadowColor"]?.SetValue(Color.Transparent.ToVector4());
-        planet.Parameters["falloffStart"]?.SetValue(MoonBloomFallOff);
-
-        planet.CurrentTechnique.Passes[0].Apply();
-
-        Texture2D texture = Pixel.Value;
-
-        Vector2 size = new(MoonSize * scale);
-
-        spriteBatch.Draw(texture, position, null, (moonColor * MoonBloomOpacity) with { A = 0 }, rotation, texture.Size() * 0.5f, size, SpriteEffects.None, 0f);
     }
 
     #endregion
@@ -359,7 +313,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             GraphicsDevice device = Main.instance.GraphicsDevice;
 
             spriteBatch.End(out var snapshot);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
             DrawSunAndMoon(spriteBatch, device);
 
@@ -367,6 +321,21 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         }
 
         orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
+    }
+
+    public static Texture2D MoonTexture()
+    {
+        Texture2D ret = Moon[Main.moonType].Value;
+
+        if (WorldGen.drunkWorldGen)
+            ret = Moon[0].Value;
+
+        if (Main.pumpkinMoon)
+            ret = PumpkinMoon.Value;
+        else if (Main.snowMoon)
+            ret = SnowMoon.Value;
+
+        return ret;
     }
 
     #endregion

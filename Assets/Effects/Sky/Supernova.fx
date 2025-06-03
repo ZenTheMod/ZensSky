@@ -26,21 +26,6 @@ float distanceFadeoff;
 
 bool usesAtmosphere;
 
-float inCubic(float t)
-{
-    return pow(t, 3);
-}
-float outCubic(float t)
-{
-    return 1 - inCubic(1 - t);
-}
-float inOutCubic(float t)
-{
-    if (t < .5) 
-        return inCubic(t * 2) * .5;
-    return 1 - inCubic((1 - t) * 2) * .5;
-}
-
 float4 supernova(float2 coords)
 {
     float n = tex2D(noise, coords * 3 + expandTime + offset);

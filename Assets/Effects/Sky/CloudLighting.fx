@@ -1,4 +1,5 @@
 sampler Clouds : register(s0);
+sampler Moon : register(s1);
 
 float2 ScreenSize;
 
@@ -41,7 +42,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     
     float4 moon = float4(0, 0, 0, 0);
     if (DrawMoon)
-        moon = Lighting(MoonPosition, screenCoords, MoonColor, cloud);
+        moon = Lighting(MoonPosition, screenCoords, MoonColor * tex2D(Moon, .5), cloud);
     
     float4 color = cloud * sampleColor;
     

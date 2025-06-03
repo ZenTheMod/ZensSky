@@ -31,12 +31,6 @@ public sealed class StarRenderingSystem : ModSystem
     private const float SecondaryFlareOpacity = 0.6f;
     private const float SecondaryFlareScaleDivisor = 6f;
 
-        // private const float GalaxyScaleMultiplier = 0.6f;
-        // private const float RealisticStarAlphaMultiplier = 0.6f;
-        // private const float EclipseFalloff = 0.05f;
-        // private const float NormalFalloff = 0.3f;
-
-        // Use Vector4s rather than colors to allow us to go over the byte limit of 255.
     private static readonly Vector4 ExplosionStart = new(1.5f, 2.5f, 4f, 1f);
     private static readonly Vector4 ExplosionEnd = new(1.4f, .25f, 2.2f, .7f);
     private static readonly Vector4 RingStart = new(3.5f, 2.9f, 1f, 1f);

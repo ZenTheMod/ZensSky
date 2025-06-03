@@ -11,6 +11,7 @@ using Daybreak.Common.Rendering;
 using Daybreak.Common.CIL;
 using ZensSky.Common.Systems.Compat;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using ZensSky.Common.Systems.SunAndMoon;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -23,7 +24,7 @@ public sealed class CloudSystem : ModSystem
     private const float FlareEdgeFallOffEnd = 1.11f;
 
     private static readonly Color SunMultiplier = new(255, 245, 225);
-    private static readonly Color MoonMultiplier = new(33, 27, 47);
+    private static readonly Color MoonMultiplier = new(40, 40, 50);
 
     #endregion
 
@@ -174,6 +175,11 @@ public sealed class CloudSystem : ModSystem
 
         Main.spriteBatch.End(out snapshot);
         Main.spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
+
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture();
+        device.SamplerStates[1] = SamplerState.PointWrap;
     }
 
     private void ResetSpritebatch(SpriteBatchSnapshot snapshot)
