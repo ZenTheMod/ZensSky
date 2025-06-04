@@ -65,7 +65,9 @@ public sealed class TimeController : SliderController
                 Main.time = (Main.dayTime ? Main.nightLength : Main.dayLength) - 1;
                 Main.dayTime = !Main.dayTime;
 
-                Main.moonType = Main.rand.Next(9);
+                    // Prevent changing moon type while loading into a world.
+                if (!Main.lockMenuBGChange)
+                    Main.moonType = Main.rand.Next(9);
             });
 
                 // Change the speed of time.
@@ -87,9 +89,14 @@ public sealed class TimeController : SliderController
                 // No MoveType.BeforeLabels :pensive:.
             c.MoveAfterLabels();
 
-                // Vanilla moon cycles through moon phases 1-7. :agony:
-            c.EmitDelegate(() => { Main.moonType = Main.rand.Next(9); });
+            c.EmitDelegate(() => 
+            {
+                    // Prevent changing moon type while loading into a world.
+                if (!Main.lockMenuBGChange) // Don't ask me why it uses this bool.
+                    Main.moonType = Main.rand.Next(9); 
+            });
 
+                // Vanilla moon cycles through moon phases 1-7. :agony:
             c.GotoNext(MoveType.Before,
                 i => i.MatchBlt(out _),
                 i => i.MatchLdcI4(0));

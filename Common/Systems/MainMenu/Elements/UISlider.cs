@@ -27,6 +27,9 @@ public sealed class UISlider : UIElement
 
     public override void LeftMouseDown(UIMouseEvent evt)
     {
+        if (Main.alreadyGrabbingSunOrMoon)
+            return;
+
         base.LeftMouseDown(evt);
         if (evt.Target == this)
             IsHeld = true;
@@ -40,6 +43,9 @@ public sealed class UISlider : UIElement
 
     public override void MouseOver(UIMouseEvent evt)
     {
+        if (Main.alreadyGrabbingSunOrMoon)
+            return;
+
         base.MouseOver(evt);
         SoundEngine.PlaySound(SoundID.MenuTick);
     }
@@ -48,7 +54,8 @@ public sealed class UISlider : UIElement
     {
         CalculatedStyle dims = GetDimensions();
 
-        if (IsHeld)
+            // Dispite how impossible it should be I'm doing this to be extra safe.
+        if (IsHeld && !Main.alreadyGrabbingSunOrMoon)
         {
             float num = UserInterface.ActiveInstance.MousePosition.X - dims.X;
             Ratio = MathHelper.Clamp(num / dims.Width, 0f, 1);

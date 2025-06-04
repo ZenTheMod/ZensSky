@@ -35,9 +35,11 @@ public sealed class MenuControllerSystem : ModSystem
     private static readonly UserInterface MenuControllerInterface = new();
     private static readonly MenuControllerUIState MenuController = new();
 
-    private static bool InUI => MenuControllerInterface?.CurrentState is not null;
-
     #endregion
+
+    public static bool InUI => MenuControllerInterface?.CurrentState is not null;
+
+    public static bool Hovering => InUI && MenuController?.Panel?.IsMouseHovering is true;
 
     public static readonly List<MenuControllerElement> Controllers = [];
 
@@ -72,6 +74,8 @@ public sealed class MenuControllerSystem : ModSystem
         AddMenuControllerToggle?.Dispose();
         Main.QueueMainThreadAction(() =>
         {
+            SaveConfig?.Dispose();
+
             IL_Main.DrawMenu -= ModifyInteraction;
             On_Main.UpdateUIStates -= UpdateInterface;
             Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
@@ -180,7 +184,7 @@ public sealed class MenuControllerSystem : ModSystem
         for (int j = 0; j < names.Length * 2; j++)
         {
             if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
-                c.EmitDelegate((int num98) => InUI && MenuController?.Panel?.IsMouseHovering is true ? -1 : num98);
+                c.EmitDelegate((int num98) => Hovering ? -1 : num98);
         }
 
             // Have our popup draw.

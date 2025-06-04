@@ -6,7 +6,7 @@ using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
-public sealed class ParallaxSlider : SliderController
+public sealed class ParallaxController : SliderController
 {
     #region Properties
 

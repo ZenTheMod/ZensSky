@@ -3,10 +3,10 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 
-namespace ZensSky.Common.Systems.RainAndSnow;
+namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class RainAndSnowSystem : ModSystem
+public sealed class RainSystem : ModSystem
 {
     #region Private Fields
 

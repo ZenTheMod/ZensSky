@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Common.Systems.MainMenu;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -43,8 +44,11 @@ public sealed class SunAndMoonSystem : ModSystem
         try
         {
             ILCursor c = new(il);
+
             ILLabel sunSkipTarget = c.DefineLabel();
             ILLabel moonSkipTarget = c.DefineLabel();
+
+            ILLabel? jumpSunOrMoonGrabbing = c.DefineLabel();
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdarg1(),
@@ -186,6 +190,15 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitDelegate(FetchMoonInfo);
 
             #endregion
+
+                // Make the player unable to grab the sun while hovering the panel.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
+                i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
+
+            c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
+
+            c.EmitBrtrue(jumpSunOrMoonGrabbing);
         }
         catch (Exception e)
         {

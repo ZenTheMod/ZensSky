@@ -7,9 +7,9 @@ using Terraria.Utilities;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 
-namespace ZensSky.Common.Systems.SkyEntities;
+namespace ZensSky.Common.Systems.Ambience;
 
-public sealed class CustomDrawMeteorSkyEntity(Player player, FastRandom random) : AmbientSky.MeteorSkyEntity(player, random)
+public sealed class FancyMeteor(Player player, FastRandom random) : AmbientSky.MeteorSkyEntity(player, random)
 {
     private static Vector4 StartColor = new(.28f, .2f, 1f, 1f);
     private static Vector4 EndColor = new(.9f, .2f, .1f, 1f);

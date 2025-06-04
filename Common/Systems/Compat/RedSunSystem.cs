@@ -9,6 +9,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.MainMenu;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
 using static System.Reflection.BindingFlags;
@@ -65,8 +66,11 @@ public sealed class RedSunSystem : ModSystem
         try
         {
             ILCursor c = new(il);
+
             ILLabel sunSkipTarget = c.DefineLabel();
             ILLabel moonSkipTarget = c.DefineLabel();
+
+            ILLabel? jumpSunOrMoonGrabbing = c.DefineLabel();
 
             c.EmitDelegate(() =>
             {
@@ -217,6 +221,15 @@ public sealed class RedSunSystem : ModSystem
             c.EmitDelegate(FetchMoonInfo);
 
             #endregion
+
+                // Make the player unable to grab the sun while hovering the panel.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
+                i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
+
+            c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
+
+            c.EmitBrtrue(jumpSunOrMoonGrabbing);
         }
         catch (Exception e)
         {

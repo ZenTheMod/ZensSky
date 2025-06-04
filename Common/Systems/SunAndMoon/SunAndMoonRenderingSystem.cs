@@ -44,8 +44,6 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const float SunglassesScale = 0.3f;
 
-    private const float MoonBrightness = 16f;
-
     private const float SingleMoonPhase = 0.125f;
 
     private const int MoonSize = 62;
@@ -53,7 +51,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private const float MoonRadius = 0.9f;
     private const float MoonAtmosphere = 0.1f;
 
-    // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
+        // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
     private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
     private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
 

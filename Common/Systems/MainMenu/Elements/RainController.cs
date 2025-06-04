@@ -3,7 +3,7 @@ using ZensSky.Common.Config;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
-public sealed class RainSlider : SliderController
+public sealed class RainController : SliderController
 {
     #region Properties
 

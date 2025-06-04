@@ -48,6 +48,8 @@ public abstract class SliderController : MenuControllerElement
             Refresh();
         };
 
+        leftButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
+
         UIImageButton rightButton = new(Textures.ArrowRight)
         {
             HAlign = 1f
@@ -67,11 +69,16 @@ public abstract class SliderController : MenuControllerElement
             Refresh();
         };
 
+        rightButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
+
         Append(leftButton);
         Append(rightButton);
 
         Append(Slider);
     }
+
+    private void DisableHoveringWhileGrabbingSunOrMoon(UIMouseEvent evt, UIElement listeningElement) =>
+        listeningElement.IsMouseHovering = !Main.alreadyGrabbingSunOrMoon;
 
     public override void Update(GameTime gameTime)
     {

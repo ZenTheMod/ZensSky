@@ -6,7 +6,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
 
-namespace ZensSky.Common.Systems.Wind;
+namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class WindSystem : ModSystem
@@ -71,7 +71,7 @@ public sealed class WindSystem : ModSystem
 
         Vector2 screensize = MiscUtils.ScreenSize;
 
-        Rectangle spawn = new((int)(Main.screenPosition.X - (screensize.X * Main.WindForVisuals * 0.5f)), (int)Main.screenPosition.Y,
+        Rectangle spawn = new((int)(Main.screenPosition.X - screensize.X * Main.WindForVisuals * 0.5f), (int)Main.screenPosition.Y,
             (int)screensize.X, (int)screensize.Y);
 
         spawn.Inflate(Margin, Margin);

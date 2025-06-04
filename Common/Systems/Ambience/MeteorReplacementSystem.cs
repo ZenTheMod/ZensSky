@@ -5,7 +5,7 @@ using Terraria.GameContent.Skies;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 
-namespace ZensSky.Common.Systems.SkyEntities;
+namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class MeteorReplacementSystem : ModSystem
@@ -31,7 +31,7 @@ public sealed class MeteorReplacementSystem : ModSystem
             c.EmitLdarg(playerIndex);
             c.EmitLdloc(randomIndex);
 
-            c.EmitDelegate((Player player, FastRandom random) => new CustomDrawMeteorSkyEntity(player, random));
+            c.EmitDelegate((Player player, FastRandom random) => new FancyMeteor(player, random));
         }
         catch (Exception e)
         {

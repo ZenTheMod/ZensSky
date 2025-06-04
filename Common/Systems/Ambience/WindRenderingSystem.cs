@@ -8,7 +8,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 
-namespace ZensSky.Common.Systems.Wind;
+namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class WindRenderingSystem : ModSystem
