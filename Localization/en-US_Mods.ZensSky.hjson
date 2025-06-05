@@ -7,6 +7,7 @@ Configs: {
 			Stars: Stars
 			Clouds: Clouds
 			Ambient: Ambient Effects
+			Pixelation: Pixelation
 		}
 
 		SunAndMoonRework: {
@@ -56,6 +57,20 @@ Configs: {
 				'''
 				If stars from 'Realistic Sky' are drawn alongside the stars in this mod.
 				[c/FF0000:Requires 'Realistic Sky' by Lucille Karma to be enabled!]
+				'''
+		}
+
+		PixelatedSky: {
+			Label: "[i:3725] Pixelated Sky"
+			Tooltip: Pixelates the Stars, Sun, and Moon.
+		}
+
+		ColorSteps: {
+			Label: "[i:1067] Color Steps"
+			Tooltip:
+				'''
+				How many colors are used for the pixelation effect.
+				[c/FF0000:Requires 'Pixelated Sky' to be enabled!]
 				'''
 		}
 

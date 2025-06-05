@@ -96,7 +96,7 @@ public sealed class LightningSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"UpdateMenu\".");
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.UpdateMenu\".");
 
             throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
         }

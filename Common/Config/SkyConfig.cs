@@ -18,8 +18,8 @@ public sealed class SkyConfig : ModConfig
 
     [Header("SunMoon")]
 
-    [DefaultValue(true)]
     [ReloadRequired]
+    [DefaultValue(true)]
     public bool SunAndMoonRework;
     
     [DefaultValue(true)]
@@ -42,6 +42,16 @@ public sealed class SkyConfig : ModConfig
     [DefaultValue(true)]
     [CustomModConfigItem(typeof(RealisticSkyElement))]
     public bool DrawRealisticStars;
+
+    [Header("Pixelation")]
+
+    [DefaultValue(false)]
+    public bool PixelatedSky;
+
+    [DefaultValue(16)]
+    [Slider]
+    [Range(8, 255)]
+    public int ColorSteps;
 
     [Header("Clouds")]
 

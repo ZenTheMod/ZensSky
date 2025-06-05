@@ -16,6 +16,8 @@ public static class Shaders
     private static readonly Lazy<Asset<Effect>> _supernova = new(() => Request("Sky/Supernova"));
     private static readonly Lazy<Asset<Effect>> _meteor = new(() => Request("Sky/Meteor"));
 
+    private static readonly Lazy<Asset<Effect>> _pixelateAndQuantize = new(() => Request("Sky/PixelateAndQuantize"));
+
     private static readonly Lazy<Asset<Effect>> _starAtmosphere = new(() => Request("Compat/StarAtmosphere"));
 
     private static readonly Lazy<Asset<Effect>> _panel = new(() => Request("UI/Panel"));
@@ -26,6 +28,8 @@ public static class Shaders
     public static Asset<Effect> Cloud => _cloud.Value;
     public static Asset<Effect> Supernova => _supernova.Value;
     public static Asset<Effect> Meteor => _meteor.Value;
+
+    public static Asset<Effect> PixelateAndQuantize => _pixelateAndQuantize.Value;
 
     public static Asset<Effect> StarAtmosphere => _starAtmosphere.Value;
 
