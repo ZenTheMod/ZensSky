@@ -52,7 +52,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdarg1(),
-                i => i.MatchLdfld<Main.SceneArea>("bgTopY"));
+                i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.bgTopY)));
 
             c.EmitPop();
             c.EmitLdcI4(SunMoonY);
@@ -80,7 +80,7 @@ public sealed class SunAndMoonSystem : ModSystem
                 // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),
-                i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                 i => i.MatchCall<Vector2>("op_Addition"),
                 i => i.MatchStloc(out sunPosition));
 
@@ -105,13 +105,13 @@ public sealed class SunAndMoonSystem : ModSystem
 
             if (SkipDrawing)
                 c.GotoNext(MoveType.Before,
-                    i => i.MatchLdsfld<Main>("dayTime"),
+                    i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
                     i => i.MatchBrtrue(out _),
                     i => i.MatchLdcR4(1f));
             else
                 c.GotoNext(MoveType.After,
                     i => i.MatchLdarg1(),
-                    i => i.MatchLdfld<Main.SceneArea>("SceneLocalScreenPositionOffset"),
+                    i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                     i => i.MatchCall<Vector2>("op_Addition"),
                     i => i.MatchStloc(sunPosition));
 

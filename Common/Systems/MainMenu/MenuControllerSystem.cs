@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using ReLogic.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
@@ -49,13 +50,13 @@ public sealed class MenuControllerSystem : ModSystem
     {
         Main.QueueMainThreadAction(() =>
         {
-            MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod("UpdateAndDrawModMenuInner", Static | NonPublic);
+            MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod(nameof(MenuLoader.UpdateAndDrawModMenuInner), Static | NonPublic);
 
             if (updateAndDrawModMenuInner is not null)
                 AddMenuControllerToggle = new(updateAndDrawModMenuInner, 
                     AddToggle);
 
-            MethodInfo? save = typeof(ConfigManager).GetMethod("Save", Static | NonPublic);
+            MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
 
             if (save is not null)
                 SaveConfig = new(save,
@@ -90,51 +91,59 @@ public sealed class MenuControllerSystem : ModSystem
 
     private void AddToggle(ILContext il)
     {
-        ILCursor c = new(il);
-
-            // Match to before the menu switch text is drawn.
-        if (!c.TryGotoNext(MoveType.After,
-            i => i.MatchCall("Terraria.ModLoader.MenuLoader", "OffsetModMenu"),
-            i => i.MatchLdsfld<Main>("menuMode"),
-            i => i.MatchBrtrue(out _)))
-            throw new ILPatchFailureException(Mod, il, null);
-
-        c.EmitLdarg0(); // SpriteBatch.
-        c.EmitLdloc(6); // Rectangle of the menu switcher.
-
-            // Add our own 'popup' menu button.
-        c.EmitDelegate((SpriteBatch spriteBatch, Rectangle switchTextRect) =>
+        try
         {
-            Vector2 position = switchTextRect.TopRight();
-            position.X += HorizontalPadding;
+            ILCursor c = new(il);
 
-            DynamicSpriteFont font = FontAssets.MouseText.Value;
-            string text = InUI ? "▼" : "▲";
+                // Match to before the menu switch text is drawn.
+            c.GotoNext(MoveType.After,
+                i => i.MatchCall(typeof(MenuLoader).FullName ?? "Terraria.ModLoader.MenuLoader", nameof(MenuLoader.OffsetModMenu)),
+                i => i.MatchLdsfld<Main>(nameof(Main.menuMode)),
+                i => i.MatchBrtrue(out _));
 
-            Vector2 size = ChatManager.GetStringSize(font, text, Vector2.One);
+            c.EmitLdarg0(); // SpriteBatch.
+            c.EmitLdloc(6); // Rectangle of the menu switcher.
 
-            Rectangle popupRect = new((int)position.X, (int)position.Y, 
-                (int)size.X, (int)size.Y);
-
-            bool hovering = popupRect.Contains(Main.mouseX, Main.mouseY) && !Main.alreadyGrabbingSunOrMoon;
-
-            Color color = hovering ? Main.OurFavoriteColor : NotHovered;
-
-            ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, position, color, 0f, Vector2.Zero, Vector2.One);
-
-            if (hovering && Main.mouseLeft && Main.mouseLeftRelease)
+                // Add our own 'popup' menu button.
+            c.EmitDelegate((SpriteBatch spriteBatch, Rectangle switchTextRect) =>
             {
-                if (InUI)
-                    ConfigManager.Save(MenuConfig.Instance);
+                Vector2 position = switchTextRect.TopRight();
+                position.X += HorizontalPadding;
 
-                MenuControllerInterface?.SetState(InUI ? null : MenuController);
-                MenuController.Bottom = new(popupRect.Center.X, position.Y);
+                DynamicSpriteFont font = FontAssets.MouseText.Value;
+                string text = InUI ? "▼" : "▲";
 
-                    // Reinit for easy debugging.
-                MenuController?.OnInitialize();
-                SoundEngine.PlaySound(SoundID.MenuTick);
-            }
-        });
+                Vector2 size = ChatManager.GetStringSize(font, text, Vector2.One);
+
+                Rectangle popupRect = new((int)position.X, (int)position.Y,
+                    (int)size.X, (int)size.Y);
+
+                bool hovering = popupRect.Contains(Main.mouseX, Main.mouseY) && !Main.alreadyGrabbingSunOrMoon;
+
+                Color color = hovering ? Main.OurFavoriteColor : NotHovered;
+
+                ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, position, color, 0f, Vector2.Zero, Vector2.One);
+
+                if (hovering && Main.mouseLeft && Main.mouseLeftRelease)
+                {
+                    if (InUI)
+                        ConfigManager.Save(MenuConfig.Instance);
+
+                    MenuControllerInterface?.SetState(InUI ? null : MenuController);
+                    MenuController.Bottom = new(popupRect.Center.X, position.Y);
+
+                        // Reinit for easy debugging.
+                    MenuController?.OnInitialize();
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"MenuLoader.UpdateAndDrawModMenuInner\".");
+
+            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+        }
     }
 
     #endregion
@@ -166,39 +175,43 @@ public sealed class MenuControllerSystem : ModSystem
         orig(gameTime);
     }
 
-    public override void OnWorldUnload()
-    {
-        for (int i = 0; i < Controllers.Count; i++)
-            Controllers[i].Refresh();
-    }
+    public override void OnWorldUnload() => RefreshAll();
 
     private void ModifyInteraction(ILContext il)
     {
-        ILCursor c = new(il);
-
-        if (!c.TryGotoNext(i => i.MatchLdloc(173)))
-            throw new ILPatchFailureException(Mod, il, null);
-
-            // Genuinely I can't.
-        string[] names = ["focusMenu", "selectedMenu", "selectedMenu2"];
-        for (int j = 0; j < names.Length * 2; j++)
+        try
         {
-            if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
-                c.EmitDelegate((int num98) => Hovering ? -1 : num98);
+            ILCursor c = new(il);
+
+                // TODO: Match for something better.
+            c.GotoNext(i => i.MatchLdloc(173));
+
+                // Genuinely I can't.
+            string[] names = [nameof(Main.focusMenu), nameof(Main.selectedMenu), nameof(Main.selectedMenu2)];
+            for (int j = 0; j < names.Length * 2; j++)
+            {
+                if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
+                    c.EmitDelegate((int hovering) => Hovering ? -1 : hovering);
+            }
+
+                // Have our popup draw.
+            c.TryGotoNext(MoveType.AfterLabel,
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdloc(out _),
+                i => i.MatchCall<Main>(nameof(Main.DrawtModLoaderSocialMediaButtons)));
+
+            c.EmitDelegate(() =>
+            {
+                if (InUI)
+                    MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());
+            });
         }
-
-            // Have our popup draw.
-        if (!c.TryGotoNext(MoveType.AfterLabel, // Rare usage.
-            i => i.MatchLdloc2(),
-            i => i.MatchLdloc(30),
-            i => i.MatchCall<Main>("DrawtModLoaderSocialMediaButtons")))
-            throw new ILPatchFailureException(Mod, il, null);
-
-        c.EmitDelegate(() => 
+        catch (Exception e)
         {
-            if (InUI)
-                MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());
-        });
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DrawMenu\".");
+
+            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+        }
     }
 
     private void CloseMenuOnResolutionChanged(Vector2 obj) 

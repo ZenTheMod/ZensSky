@@ -1,17 +1,18 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Daybreak.Common.CIL;
+using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Utilities;
-using Daybreak.Common.Rendering;
-using Daybreak.Common.CIL;
 using ZensSky.Common.Systems.Compat;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using ZensSky.Common.Systems.SunAndMoon;
+using ZensSky.Common.Utilities;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -39,131 +40,124 @@ public sealed class CloudSystem : ModSystem
         // This is scuffed.
     private void ApplyCloudShader(ILContext il)
     {
-        ILCursor c = new(il);
+        try
+        {
+            ILCursor c = new(il);
 
-        VariableDefinition iHaveTrustIssues = c.AddVariable<SpriteBatchSnapshot>();
-        VariableDefinition lighting = c.AddVariable<Effect>();
+            VariableDefinition iHaveTrustIssues = c.AddVariable<SpriteBatchSnapshot>();
+            VariableDefinition lighting = c.AddVariable<Effect>();
 
-        #region I Hate Copy Pasting
-
-        Func<Instruction, bool>[] cloudLoopStart = [
-            i => i.MatchBr(out _),
-            i => i.MatchLdsfld<Main>("cloud"),
-            i => i.MatchLdloc(out _),
-            i => i.MatchLdelemRef(),
-            i => i.MatchLdfld<Cloud>("active")];
-
-        Func<Instruction, bool>[] cloudLoopEnd = [
-            i => i.MatchLdloc(out _),
-            i => i.MatchLdcI4(1),
-            i => i.MatchAdd(),
-            i => i.MatchStloc(out _),
-            i => i.MatchLdloc(out _),
-            i => i.MatchLdcI4(200),
-            i => i.MatchBlt(out _)];
-
-        Func<Instruction, bool>[] cloudBGLoopStart = [
-            i => i.MatchBr(out _),
-            i => i.MatchLdsfld<Main>("spriteBatch"),
-            i => i.MatchLdsfld("Terraria.GameContent.TextureAssets", "Background"),
-            i => i.MatchLdsfld<Main>("cloudBG"),
-            i => i.MatchLdcI4(0),
-            i => i.MatchLdelemI4()];
-
-        Func<Instruction, bool>[] cloudBGLoopEnd = [
-            i => i.MatchLdloc(22),
-            i => i.MatchLdcI4(1),
-            i => i.MatchAdd(),
-            i => i.MatchStloc(22),
-            i => i.MatchLdloc(22),
-            i => i.MatchLdarg0(),
-            i => i.MatchLdfld<Main>("bgLoops"),
-            i => i.MatchBlt(out _)];
-
-        #endregion
-
-        #region Shader Parameters
+            #region Shader Parameters
 
             // Setup the shaders parameters.
-        c.EmitLdloca(lighting);
-        c.EmitDelegate((ref Effect lighting) =>
-        {
-            lighting = Shaders.Cloud.Value;
-
-            if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
-                return;
-
-            Viewport viewport = Main.instance.GraphicsDevice.Viewport;
-
-            Vector2 viewportSize = viewport.Bounds.Size();
-            lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
-
-            Vector2 sunPosition = SunPosition;
-            Vector2 moonPosition = MoonPosition;
-
-            if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+            c.EmitLdloca(lighting);
+            c.EmitDelegate((ref Effect lighting) =>
             {
-                sunPosition.Y = viewportSize.Y - sunPosition.Y;
-                moonPosition.Y = viewportSize.Y - moonPosition.Y;
+                lighting = Shaders.Cloud.Value;
+
+                if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
+                    return;
+
+                Viewport viewport = Main.instance.GraphicsDevice.Viewport;
+
+                Vector2 viewportSize = viewport.Bounds.Size();
+                lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
+
+                Vector2 sunPosition = SunPosition;
+                Vector2 moonPosition = MoonPosition;
+
+                if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+                {
+                    sunPosition.Y = viewportSize.Y - sunPosition.Y;
+                    moonPosition.Y = viewportSize.Y - moonPosition.Y;
+                }
+
+                lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
+                lighting.Parameters["MoonPosition"]?.SetValue(moonPosition);
+
+                Color sunColor = GetColor(true);
+                lighting.Parameters["SunColor"]?.SetValue(sunColor.ToVector4());
+
+                Color moonColor = GetColor(false);
+                lighting.Parameters["MoonColor"]?.SetValue(moonColor.ToVector4());
+
+                lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime);
+                lighting.Parameters["DrawMoon"]?.SetValue(RedSunSystem.IsEnabled || !Main.dayTime);
+            });
+
+            #endregion
+
+            #region Various Clouds
+
+            for (int i = 0; i < 3; i++)
+            {
+                    // Match to before the loop.
+                c.GotoNext(MoveType.Before, 
+                    i => i.MatchBr(out _),
+                    i => i.MatchLdsfld<Main>(nameof(Main.cloud)),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdelemRef(),
+                    i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
+
+                    // Apply our shader.
+                c.EmitLdloca(iHaveTrustIssues);
+                c.EmitLdloc(lighting);
+                c.EmitDelegate(ApplyShader);
+
+                    // Match to after the loop.
+                c.GotoNext(MoveType.After, 
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdcI4(1),
+                    i => i.MatchAdd(),
+                    i => i.MatchStloc(out _),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdcI4(200),
+                    i => i.MatchBlt(out _));
+
+                c.EmitLdloc(iHaveTrustIssues);
+                c.EmitDelegate(ResetSpritebatch);
             }
 
-            lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
-            lighting.Parameters["MoonPosition"]?.SetValue(moonPosition);
+            #endregion
 
-            Color sunColor = GetColor(true);
-            lighting.Parameters["SunColor"]?.SetValue(sunColor.ToVector4());
+            #region CloudBG
 
-            Color moonColor = GetColor(false);
-            lighting.Parameters["MoonColor"]?.SetValue(moonColor.ToVector4());
-
-            lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime);
-            lighting.Parameters["DrawMoon"]?.SetValue(RedSunSystem.IsEnabled || !Main.dayTime);
-        });
-
-        #endregion
-
-        #region Various Clouds
-
-        for (int i = 0; i < 3; i++)
-        {
                 // Match to before the loop.
-            if (!c.TryGotoNext(MoveType.Before, cloudLoopStart))
-                throw new ILPatchFailureException(Mod, il, null);
+            c.GotoPrev(MoveType.Before,
+                i => i.MatchBr(out _),
+                i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
+                i => i.MatchLdsfld(typeof(TextureAssets).FullName ?? "Terraria.GameContent.TextureAssets", nameof(TextureAssets.Background)),
+                i => i.MatchLdsfld<Main>(nameof(Main.cloudBG)),
+                i => i.MatchLdcI4(0),
+                i => i.MatchLdelemI4());
 
                 // Apply our shader.
             c.EmitLdloca(iHaveTrustIssues);
             c.EmitLdloc(lighting);
             c.EmitDelegate(ApplyShader);
 
-                // Match to after the loop.
-            if (!c.TryGotoNext(MoveType.After, cloudLoopEnd))
-                throw new ILPatchFailureException(Mod, il, null);
+                // Match to after the loop of the other drawn cloud background.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdloc(22), // I dislike this.
+                i => i.MatchLdcI4(1),
+                i => i.MatchAdd(),
+                i => i.MatchStloc(out _),
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdarg(out _),
+                i => i.MatchLdfld<Main>(nameof(Main.bgLoops)),
+                i => i.MatchBlt(out _));
 
             c.EmitLdloc(iHaveTrustIssues);
             c.EmitDelegate(ResetSpritebatch);
+
+            #endregion
         }
+        catch (Exception e)
+        {
+            Mod.Logger.Error("Failed to patch \"Main.DrawSurfaceBG\".");
 
-        #endregion
-
-        #region CloudBG
-
-            // Match to before the loop.
-        if (!c.TryGotoPrev(MoveType.Before, cloudBGLoopStart))
-            throw new ILPatchFailureException(Mod, il, null);
-
-            // Apply our shader.
-        c.EmitLdloca(iHaveTrustIssues);
-        c.EmitLdloc(lighting);
-        c.EmitDelegate(ApplyShader);
-
-            // Match to after the loop.
-        if (!c.TryGotoNext(MoveType.After, cloudBGLoopEnd))
-            throw new ILPatchFailureException(Mod, il, null);
-
-        c.EmitLdloc(iHaveTrustIssues);
-        c.EmitDelegate(ResetSpritebatch);
-
-        #endregion
+            throw new ILPatchFailureException(Mod, il, e);
+        }
     }
 
     private void ApplyShader(ref SpriteBatchSnapshot snapshot, Effect lighting)
