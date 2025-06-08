@@ -71,9 +71,9 @@ public sealed class MenuControllerSystem : ModSystem
 
     public override void Unload()
     {
-        AddMenuControllerToggle?.Dispose();
         Main.QueueMainThreadAction(() =>
         {
+            AddMenuControllerToggle?.Dispose();
             SaveConfig?.Dispose();
 
             IL_Main.DrawMenu -= ModifyInteraction;
