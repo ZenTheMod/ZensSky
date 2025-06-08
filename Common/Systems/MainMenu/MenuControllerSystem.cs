@@ -109,7 +109,7 @@ public sealed class MenuControllerSystem : ModSystem
             position.X += HorizontalPadding;
 
             DynamicSpriteFont font = FontAssets.MouseText.Value;
-            string text = InUI ? "▲" : "▼";
+            string text = InUI ? "▼" : "▲";
 
             Vector2 size = ChatManager.GetStringSize(font, text, Vector2.One);
 
