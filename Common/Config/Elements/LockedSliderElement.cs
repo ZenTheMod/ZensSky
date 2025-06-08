@@ -18,7 +18,7 @@ namespace ZensSky.Common.Config.Elements;
 
     // Pure raw hate.
 [Autoload(Side = ModSide.Client)]
-public abstract class LockedSliderElement : PrimitiveRangeElement<float>, ILoadable
+public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadable where T : IComparable<T>
 {
     #region Private Fields
 
@@ -36,26 +36,9 @@ public abstract class LockedSliderElement : PrimitiveRangeElement<float>, ILoada
 
     #region Properties
 
-    public override int NumberTicks => (int)((Max - Min) / Increment) + 1;
-
-    public override float TickIncrement => Increment / (Max - Min);
-
-    protected override float Proportion
-    {
-        get => (GetValue() - Min) / (Max - Min);
-        set => SetValue((float)Math.Round((value * (Max - Min) + Min) * (1f / Increment)) * Increment);
-    }
-
     public abstract bool IsLocked { get; }
 
     #endregion
-
-    public LockedSliderElement()
-    {
-        Min = 0f;
-        Max = 1f;
-        Increment = 0.01f;
-    }
 
     #region Loading
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Drawing;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Utilities;
@@ -16,9 +17,12 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
 
     private const float PlanetHorizontalOffset = 15f;
     private const float PlanetScale = 150f;
+    private const float PlanetRadius = 0.95f;
+    private const float PlanetAtmosphere = 0.05f;
+    private const float PlanetTimeMultiplier = 0.85f;
 
     private const int StarCount = 300;
-    private const float TimeMultiplier = 0.4f;
+    private const float StarTimeMultiplier = 0.4f;
     private const float MaxPhase = MathHelper.Pi * 8f;
     private const float StarScale = 0.25f;
 
@@ -70,7 +74,7 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
 
         int starCount = StarCount;
 
-        float time = Main.GlobalTimeWrappedHourly * TimeMultiplier;
+        float time = Main.GlobalTimeWrappedHourly * StarTimeMultiplier;
 
         Texture2D star = Textures.Star.Value;
         Vector2 starOrigin = star.Size() * 0.5f;
@@ -106,12 +110,18 @@ public sealed class SkyPanelTargetContent : ARenderTargetContentByRequest
         if (planet is null)
             return;
 
+        planet.Parameters["radius"]?.SetValue(PlanetRadius);
+        planet.Parameters["atmosphereRange"]?.SetValue(PlanetAtmosphere);
+
+        planet.Parameters["shadowRotation"]?.SetValue(Main.GlobalTimeWrappedHourly * PlanetTimeMultiplier);
+
+            // Remember this is inverted.
         planet.Parameters["shadowColor"]?.SetValue(Color.Black.ToVector4());
 
-        planet.Parameters["planetRotation"]?.SetValue(0f);
-        planet.Parameters["shadowRotation"]?.SetValue(Main.GlobalTimeWrappedHourly * TimeMultiplier);
+            // Don't bother with an atmosphere.
+        planet.Parameters["atmosphereColor"]?.SetValue(Color.Transparent.ToVector4());
+        planet.Parameters["atmosphereShadowColor"]?.SetValue(Color.Transparent.ToVector4());
 
-        planet.Parameters["falloffStart"]?.SetValue(0.95f);
         planet.CurrentTechnique.Passes[0].Apply();
 
         Texture2D texture = Textures.Pixel.Value;

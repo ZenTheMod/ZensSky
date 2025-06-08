@@ -8,7 +8,8 @@ namespace ZensSky.Common.Config;
 
 internal sealed class SunAndMoonReworkElement : LockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
 internal sealed class RealisticSkyElement : LockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
-internal sealed class WindOpacityElement : LockedSliderElement { public override bool IsLocked => !SkyConfig.Instance.WindParticles; }
+internal sealed class WindOpacityElement : LockedFloatSlider { public override bool IsLocked => !SkyConfig.Instance.WindParticles; }
+internal sealed class ColorStepsElement : LockedIntSlider { public override bool IsLocked => !SkyConfig.Instance.PixelatedSky; }
 
 public sealed class SkyConfig : ModConfig
 {
@@ -49,7 +50,8 @@ public sealed class SkyConfig : ModConfig
     public bool PixelatedSky;
 
     [DefaultValue(16)]
-    [Slider]
+    [CustomModConfigItem(typeof(ColorStepsElement))]
+    [SliderColor(240, 103, 135)]
     [Range(8, 255)]
     public int ColorSteps;
 

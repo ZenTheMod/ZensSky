@@ -4,7 +4,6 @@ using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using RedSunAndRealisticSky.Graphics;
 using System;
-using System.IO;
 using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
@@ -30,8 +29,6 @@ public sealed class RedSunSystem : ModSystem
     private const int SunTopBuffer = 50;
 
     private const int SunMoonY = -80;
-
-    private const float MoonBrightness = 16f;
 
     private const float MinSunBrightness = 0.82f;
     private const float MinMoonBrightness = 0.35f;
@@ -255,7 +252,7 @@ public sealed class RedSunSystem : ModSystem
         Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
 
         Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = MoonColor * MoonBrightness * MoonScale;
+        Color moonColor = MoonColor * MoonScale;
         moonColor.A = 255;
 
         if (Main.dayTime)
