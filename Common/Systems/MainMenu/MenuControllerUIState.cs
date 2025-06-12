@@ -47,7 +47,7 @@ public sealed class MenuControllerUIState : UIState
 
         Panel.Append(header);
 
-        // Setup the controller list.
+            // Setup the controller list.
         Controllers = [];
 
         Controllers.Width.Set(-25f, 1f);

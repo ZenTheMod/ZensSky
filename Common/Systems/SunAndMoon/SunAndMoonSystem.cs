@@ -76,7 +76,6 @@ public sealed class SunAndMoonSystem : ModSystem
             int sunRotation = -1;
             int sunScale = -1;
 
-
                 // Store sunPosition before SceneLocalScreenPositionOffset is added to it, then jump over the rest.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdarg1(),

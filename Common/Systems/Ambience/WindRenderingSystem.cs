@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
@@ -17,6 +18,8 @@ public sealed class WindRenderingSystem : ModSystem
 
     private const float WidthAmplitude = 2f;
 
+    private static RenderTarget2D? WindTarget;
+
     #endregion
 
     #region Loading
@@ -34,6 +37,8 @@ public sealed class WindRenderingSystem : ModSystem
         Main.QueueMainThreadAction(() => {
             On_Main.DrawInfernoRings -= InGameDraw;
             On_Main.DrawBackgroundBlackFill -= MenuDraw;
+
+            WindTarget?.Dispose();
         });
     }
 
@@ -41,28 +46,76 @@ public sealed class WindRenderingSystem : ModSystem
     {
         orig(self);
 
-        if (!Main.gameMenu)
+        if (!Main.gameMenu || !SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        DrawWinds();
+        if (SkyConfig.Instance.PixelatedSky)
+            DrawPixelated();
+        else
+            DrawWinds();
     }
 
     private void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
     {
         orig(self);
 
-        DrawWinds();
+        if (Main.gameMenu || !SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
+            return;
+
+        if (SkyConfig.Instance.PixelatedSky)
+            DrawPixelated();
+        else
+            DrawWinds();
     }
 
     #endregion
 
     #region Drawing
 
-    private static void DrawWinds()
+        // Surely someone will kill me for this right ?
+    private static void DrawPixelated()
     {
-        if (!SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        Effect pixelate = Shaders.PixelateAndQuantize.Value;
+
+        if (!SkyConfig.Instance.PixelatedSky || pixelate is null || Main.mapFullscreen)
             return;
 
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+        Viewport viewport = device.Viewport;
+
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        spriteBatch.End(out var snapshot);
+
+        using (new RenderTargetSwap(ref WindTarget, viewport.Width, viewport.Height))
+        {
+            device.Clear(Color.Transparent);
+            spriteBatch.Begin(in snapshot);
+
+            DrawWinds();
+
+            spriteBatch.End();
+        }
+
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Matrix.Identity);
+
+        Vector2 screenSize = new(viewport.Width, viewport.Height);
+
+        pixelate.Parameters["screenSize"]?.SetValue(screenSize);
+        pixelate.Parameters["pixelSize"]?.SetValue(new Vector2(2));
+
+        pixelate.Parameters["steps"]?.SetValue(SkyConfig.Instance.ColorSteps);
+
+        pixelate.CurrentTechnique.Passes[0].Apply();
+
+        spriteBatch.Draw(WindTarget, viewport.Bounds, Color.White);
+
+        spriteBatch.Restart(in snapshot);
+    }
+
+    private static void DrawWinds()
+    {
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         device.Textures[0] = Textures.SunBloom.Value;
