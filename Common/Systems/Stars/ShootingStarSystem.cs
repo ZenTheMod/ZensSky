@@ -106,9 +106,6 @@ public sealed class ShootingStarSystem : ModSystem
 
     public static void SpawnShootingStar()
     {
-        if (!Main.rand.NextBool(3))
-            return;
-
         int index = Array.FindIndex(ShootingStars, s => !s.IsActive);
 
         if (index == -1)

@@ -17,7 +17,11 @@ public sealed class ShootingStarRenderingSystem : ModSystem
 {
     #region Private Fields
 
-    private const float WidthAmplitude = 1.4f;
+    private const float WidthAmplitude = 1.3f;
+
+    private const float StarRatio = .15f;
+
+    private const float StarScale = .13f;
 
     #endregion
 
@@ -117,7 +121,9 @@ public sealed class ShootingStarRenderingSystem : ModSystem
         Texture2D starTexture = Textures.Star.Value;
         Vector2 starOrigin = starTexture.Size() * .5f;
 
-        spriteBatch.Draw(starTexture, positions[2], null, color, 0f, starOrigin, .1f, SpriteEffects.None, 0f);
+        Vector2 starPosition = positions[(int)(positions.Length * StarRatio)];
+
+        spriteBatch.Draw(starTexture, starPosition, null, color, 0f, starOrigin, StarScale, SpriteEffects.None, 0f);
     }
 
     #endregion
