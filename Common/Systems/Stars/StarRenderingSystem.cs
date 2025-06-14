@@ -159,7 +159,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     private void DrawStarsToSky(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
-        if (!StarSystem.CanDrawStars || Main.starGame)
+        if (!StarSystem.CanDrawStars)
         {
             orig(self, sceneArea, artificial);
             return;
@@ -177,10 +177,7 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.DrawStars();
 
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
-
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.ApplyStarShader();
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
 
         if (alpha > 0)
             DrawStars(spriteBatch, screenCenter, alpha);

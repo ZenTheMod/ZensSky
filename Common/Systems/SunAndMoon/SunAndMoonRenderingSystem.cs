@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -57,6 +58,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private static readonly Vector2 SmileyLeftEyePosition = new(-24, -32);
     private static readonly Vector2 SmileyRightEyePosition = new(13, -44);
+
+    private const float SmileyPhase = 0.3125f;
 
     private static readonly Vector2 Moon2ExtraRingSize = new(0.28f, 0.07f);
     private const float Moon2ExtraRingRotation = 0.13f;
@@ -236,7 +239,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
         spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
 
-        ApplyPlanetShader(SingleMoonPhase * 5f, shadowColor);
+        ApplyPlanetShader(SmileyPhase, shadowColor);
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation - MathHelper.PiOver2, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);

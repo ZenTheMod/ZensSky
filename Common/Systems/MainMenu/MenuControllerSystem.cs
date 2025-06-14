@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using ReLogic.Graphics;
@@ -12,8 +13,10 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
+using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
+using tModPorter;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
 using static System.Reflection.BindingFlags;
@@ -30,6 +33,8 @@ public sealed class MenuControllerSystem : ModSystem
 
     private static ILHook? AddMenuControllerToggle;
 
+    private static ILHook? HideConfigFromList;
+
     private delegate void orig_Save(ModConfig config);
     private static Hook? SaveConfig;
 
@@ -38,11 +43,19 @@ public sealed class MenuControllerSystem : ModSystem
 
     #endregion
 
+    #region Public Properties
+
     public static bool InUI => MenuControllerInterface?.CurrentState is not null;
 
     public static bool Hovering => InUI && MenuController?.Panel?.IsMouseHovering is true;
 
+    #endregion
+
+    #region Public Fields
+
     public static readonly List<MenuControllerElement> Controllers = [];
+
+    #endregion
 
     #region Loading
 
@@ -55,6 +68,11 @@ public sealed class MenuControllerSystem : ModSystem
             if (updateAndDrawModMenuInner is not null)
                 AddMenuControllerToggle = new(updateAndDrawModMenuInner, 
                     AddToggle);
+
+            MethodInfo? populateConfigs = typeof(UIModConfigList).GetMethod(nameof(UIModConfigList.PopulateConfigs), Instance | NonPublic);
+            if (populateConfigs is not null)
+                HideConfigFromList = new(populateConfigs,
+                    HideMenuConfig);
 
             MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
 
@@ -75,6 +93,8 @@ public sealed class MenuControllerSystem : ModSystem
         Main.QueueMainThreadAction(() =>
         {
             AddMenuControllerToggle?.Dispose();
+            HideConfigFromList?.Dispose();
+
             SaveConfig?.Dispose();
 
             IL_Main.DrawMenu -= ModifyInteraction;
@@ -85,9 +105,13 @@ public sealed class MenuControllerSystem : ModSystem
 
     #endregion
 
+    #region Public Methods
+
     public static void RefreshAll() => Controllers.ForEach((controller) => { controller.Refresh(); });
 
-    #region Toggle Button
+    #endregion
+
+    #region Menu Additions
 
     private void AddToggle(ILContext il)
     {
@@ -140,15 +164,106 @@ public sealed class MenuControllerSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"MenuLoader.UpdateAndDrawModMenuInner\".");
+            Mod.Logger.Error("Failed to patch \"MenuLoader.UpdateAndDrawModMenuInner\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    private void ModifyInteraction(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            // TODO: Match for something better.
+            c.GotoNext(i => i.MatchLdloc(173));
+
+            // Genuinely I can't.
+            string[] names = [nameof(Main.focusMenu), nameof(Main.selectedMenu), nameof(Main.selectedMenu2)];
+            for (int j = 0; j < names.Length * 2; j++)
+            {
+                if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
+                    c.EmitDelegate((int hovering) => Hovering ? -1 : hovering);
+            }
+
+            // Have our popup draw.
+            c.TryGotoNext(MoveType.AfterLabel,
+                i => i.MatchLdloc(out _),
+                i => i.MatchLdloc(out _),
+                i => i.MatchCall<Main>(nameof(Main.DrawtModLoaderSocialMediaButtons)));
+
+            c.EmitDelegate(() =>
+            {
+                if (InUI)
+                    MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());
+            });
+        }
+        catch (Exception e)
+        {
+            Mod.Logger.Error("Failed to patch \"Main.DrawMenu\".");
+
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
     #endregion
 
-    #region Updating
+    #region Config
+
+    private void HideMenuConfig(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel? addConfigSkipTarget = c.DefineLabel();
+
+            int configIndex = -1;
+
+                // I don't want to match for:
+                    // ldfld class Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_0' Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_1'::'CS$<>8__locals1'
+                    // ldfld class Terraria.ModLoader.Config.ModConfig Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_0'::config
+            FieldReference? displayClassLocal = null;
+            FieldReference? displayClassConfig = null;
+
+                // Get the label to the bottom of the loop, this will act as our 'continue' keyword.
+            c.GotoNext(MoveType.After,
+                i => i.MatchCallvirt<List<ModConfig>>(nameof(List<ModConfig>.GetEnumerator)),
+                i => i.MatchStloc(out _),
+                i => i.MatchBr(out addConfigSkipTarget));
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdloc(out configIndex),
+                i => i.MatchLdfld(out displayClassLocal),
+                i => i.MatchLdfld(out displayClassConfig),
+                i => i.MatchCallvirt<ModConfig>($"get_{nameof(ModConfig.DisplayName)}"));
+
+            if (displayClassLocal is null || displayClassConfig is null)
+                throw new NullReferenceException();
+
+            c.GotoPrev(MoveType.After,
+                i => i.MatchStloc(configIndex),
+                i => i.MatchLdloc(configIndex),
+                i => i.MatchLdloc(out _),
+                i => i.MatchStfld(displayClassLocal));
+
+            c.EmitLdloc(configIndex);
+
+            c.EmitLdfld(displayClassLocal);
+            c.EmitLdfld(displayClassConfig);
+
+            c.EmitDelegate((ModConfig config) => config is MenuConfig);
+
+            c.EmitBrtrue(addConfigSkipTarget);
+        }
+        catch (Exception e)
+        {
+            Mod.Logger.Error("Failed to patch \"UIModConfigList.PopulateConfigs\".");
+
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
 
     private void RefreshOnSave(orig_Save orig, ModConfig config)
     {
@@ -175,50 +290,13 @@ public sealed class MenuControllerSystem : ModSystem
         orig(gameTime);
     }
 
-    public override void OnWorldUnload() => RefreshAll();
-
-    private void ModifyInteraction(ILContext il)
-    {
-        try
-        {
-            ILCursor c = new(il);
-
-                // TODO: Match for something better.
-            c.GotoNext(i => i.MatchLdloc(173));
-
-                // Genuinely I can't.
-            string[] names = [nameof(Main.focusMenu), nameof(Main.selectedMenu), nameof(Main.selectedMenu2)];
-            for (int j = 0; j < names.Length * 2; j++)
-            {
-                if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
-                    c.EmitDelegate((int hovering) => Hovering ? -1 : hovering);
-            }
-
-                // Have our popup draw.
-            c.TryGotoNext(MoveType.AfterLabel,
-                i => i.MatchLdloc(out _),
-                i => i.MatchLdloc(out _),
-                i => i.MatchCall<Main>(nameof(Main.DrawtModLoaderSocialMediaButtons)));
-
-            c.EmitDelegate(() =>
-            {
-                if (InUI)
-                    MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());
-            });
-        }
-        catch (Exception e)
-        {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DrawMenu\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
-        }
-    }
-
-    private void CloseMenuOnResolutionChanged(Vector2 obj) 
+    private void CloseMenuOnResolutionChanged(Vector2 obj)
     {
         MenuControllerInterface?.SetState(null);
         ConfigManager.Save(MenuConfig.Instance);
     }
+
+    public override void OnWorldUnload() => RefreshAll();
 
     #endregion
 }

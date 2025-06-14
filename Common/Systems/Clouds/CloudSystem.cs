@@ -31,14 +31,13 @@ public sealed class CloudSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG += ApplyCloudShader);
+    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG += ApplyCloudLighting);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG -= ApplyCloudShader);
+    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG -= ApplyCloudLighting);
 
     #endregion
 
-        // This is scuffed.
-    private void ApplyCloudShader(ILContext il)
+    private void ApplyCloudLighting(ILContext il)
     {
         try
         {

@@ -10,17 +10,15 @@ namespace ZensSky.Common.Utilities;
 
 public static class MiscUtils
 {
+    #region Public Properties
+
     public static Rectangle ScreenDimensions => new(0, 0, Main.screenWidth, Main.screenHeight);
 
-    /// <summary>
-    /// Shorthand for the screens size as a <see cref="Vector2"/>.
-    /// </summary>
     public static Vector2 ScreenSize => new(Main.screenWidth, Main.screenHeight);
 
-    /// <summary>
-    /// Shorthand for half the screens size as a <see cref="Vector2"/>.
-    /// </summary>
     public static Vector2 HalfScreenSize => ScreenSize * 0.5f;
+
+    #endregion
 
     /// <summary>
     /// Generate a <see cref="Vector2"/> uniformly in a circle with <paramref name="radius"/> as the radius.

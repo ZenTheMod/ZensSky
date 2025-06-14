@@ -8,8 +8,8 @@ using Terraria.Utilities;
 using Terraria;
 using ZensSky.Common.DataStructures;
 using System.Linq;
-using static ZensSky.Common.DataStructures.InteractableStar;
 using ZensSky.Common.Utilities;
+using static ZensSky.Common.DataStructures.InteractableStar;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -88,7 +88,7 @@ public sealed class StarSystem : ModSystem
 
         UpdateSupernovae();
 
-            // ShootingStarSystem.Update();
+        ShootingStarSystem.UpdateShootingStars();
     }
 
     private static void UpdateSupernovae()
@@ -266,24 +266,7 @@ public sealed class StarSystem : ModSystem
 
     #endregion
 
-    public static void ExplodeStar(int index) => 
-        Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
-
-    public static void GenerateStars()
-    {
-        if (Main.dedServ)
-        {
-            Array.Clear(Stars, 0, Stars.Length);
-            return; 
-        }
-
-        UnifiedRandom rand = new(StarGenerationSeed);
-
-        ResetSky();
-
-        for (int i = 0; i < StarCount; i++)
-            Stars[i] = CreateRandom(rand);
-    }
+    #region Private Methods
 
     private static void ResetSky()
     {
@@ -326,4 +309,29 @@ public sealed class StarSystem : ModSystem
 
         return MathF.Pow(MathHelper.Clamp(alpha + atmosphericBoost, 0f, 1f), 3f);
     }
+
+    #endregion
+
+    #region Public Methods
+
+    public static void ExplodeStar(int index) => 
+        Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
+
+    public static void GenerateStars()
+    {
+        if (Main.dedServ)
+        {
+            Array.Clear(Stars, 0, Stars.Length);
+            return; 
+        }
+
+        UnifiedRandom rand = new(StarGenerationSeed);
+
+        ResetSky();
+
+        for (int i = 0; i < StarCount; i++)
+            Stars[i] = CreateRandom(rand);
+    }
+
+    #endregion
 }

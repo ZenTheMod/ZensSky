@@ -24,6 +24,7 @@ public sealed class RainSystem : ModSystem
             IL_Main.DoUpdate += SpawnMenuRain;
             IL_Main.DoDraw += DontDegradeRain;
             IL_Main.UpdateAudio += RainWindAmbience;
+
             On_Main.DrawBackgroundBlackFill += DrawMenuRain;
         });
     }
@@ -33,6 +34,7 @@ public sealed class RainSystem : ModSystem
             IL_Main.DoUpdate -= SpawnMenuRain;
             IL_Main.DoDraw -= DontDegradeRain;
             IL_Main.UpdateAudio -= RainWindAmbience;
+
             On_Main.DrawBackgroundBlackFill -= DrawMenuRain;
         });
     }
@@ -75,9 +77,9 @@ public sealed class RainSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DoUpdate\".");
+            Mod.Logger.Error("Failed to patch \"Main.DoUpdate\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
@@ -99,9 +101,9 @@ public sealed class RainSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DoDraw\".");
+            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
@@ -149,7 +151,6 @@ public sealed class RainSystem : ModSystem
         if (!Main.gameMenu)
             return;
 
-            // WHY does this exist? It's never used...
         self.DrawRain();
     }
 

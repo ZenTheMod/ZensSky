@@ -24,12 +24,18 @@ public record struct WindParticle
 
     #endregion
 
+    #region Public Properties
+
     public required Vector2 Position { get; set; }
     public required Vector2[] OldPositions { get; init; }
     public required Vector2 Velocity { get; set; }
     public required bool ShouldLoop { get; init; }
     public required float LifeTime { get; set; }
     public required bool IsActive { get; set; }
+
+    #endregion
+
+    #region Updating
 
     public void Update()
     {
@@ -57,6 +63,8 @@ public record struct WindParticle
             OldPositions[i + 1] = OldPositions[i];
         OldPositions[0] = Position;
     }
+
+    #endregion
 
     public static WindParticle CreateActive(Vector2 position, bool shouldLoop) => new()
     {

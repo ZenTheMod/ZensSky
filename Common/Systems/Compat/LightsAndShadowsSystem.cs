@@ -13,10 +13,18 @@ namespace ZensSky.Common.Systems.Compat;
 [Autoload(Side = ModSide.Client)]
 public sealed class LightsAndShadowsSystem : ModSystem
 {
+    #region Private Fields
+
     private delegate Vector2 orig_GetSunPos(RenderTarget2D render);
     private static Hook? ModifySunPosition;
 
+    #endregion
+
+    #region Public Properties
+
     public static bool IsEnabled { get; private set; }
+
+    #endregion
 
     #region Loading
 

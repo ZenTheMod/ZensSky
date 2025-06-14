@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Stars;
 
-namespace ZensSky.Common.Systems.Background;
+namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class DarkerBackgroundSystem : ModSystem

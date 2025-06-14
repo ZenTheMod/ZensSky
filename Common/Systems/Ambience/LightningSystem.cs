@@ -10,7 +10,11 @@ namespace ZensSky.Common.Systems.Ambience;
 
 public sealed class LightningSystem : ModSystem
 {
+    #region Private Fields
+
     private static bool ShouldBeStormy;
+
+    #endregion
 
     #region Loading
 
@@ -19,6 +23,8 @@ public sealed class LightningSystem : ModSystem
     public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.UpdateMenu -= UpdateLightning);
 
     #endregion
+
+    #region Updating
 
     private void UpdateLightning(ILContext il)
     {
@@ -42,6 +48,7 @@ public sealed class LightningSystem : ModSystem
 
             c.MarkLabel(skipLightningResets);
 
+                // TODO: Simplify this logic if possible.
             c.EmitDelegate(() =>
             {
                 if (MenuConfig.Instance.Rain <= 0)
@@ -58,7 +65,7 @@ public sealed class LightningSystem : ModSystem
                     Main.thunderDelay--;
                 if (Main.thunderDelay == 0)
                 {
-                    // Use the screen position rather than player position as the screen is used to calculate audio volume.
+                        // Use the screen position rather than player position as the screen is used to calculate audio volume.
                     Vector2 position = Main.screenPosition;
 
                     float direction = Main.thunderDistance * 15;
@@ -96,9 +103,11 @@ public sealed class LightningSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.UpdateMenu\".");
+            Mod.Logger.Error("Failed to patch \"Main.UpdateMenu\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
+
+    #endregion
 }

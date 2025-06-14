@@ -1,22 +1,43 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
 using Terraria.Localization;
+using Terraria.ModLoader.Config;
 using Terraria.UI;
+using ZensSky.Common.Config;
+using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.MainMenu.Elements;
 
 namespace ZensSky.Common.Systems.MainMenu;
 
 public sealed class MenuControllerUIState : UIState
 {
+    #region Private Fields
+
     private const float VerticalGap = 5f;
 
     private const string Header = "Mods.ZensSky.MenuController.Header";
-    private const float HeaderHeight = 25f;
+    private const float HeaderHeight = 30f;
+
+    private const string ResetTooltip = "Mods.ZensSky.MenuController.ResetTooltip";
+
+    #endregion
+
+    #region Public Fields
 
     public Vector2 Bottom;
 
     public UIPanel? Panel;
     public UIList? Controllers;
+
+    public UIImageButton? ResetButton;
+
+    #endregion
+
+    #region Initialization
 
     public override void OnInitialize()
     {
@@ -46,6 +67,20 @@ public sealed class MenuControllerUIState : UIState
         };
 
         Panel.Append(header);
+
+            // Add a reset button to quickly reset the config without having to even open it.
+        ResetButton = new(Textures.Reset)
+        {
+            HAlign = 1f
+        };
+
+        ResetButton.Width.Set(24f, 0f);
+        ResetButton.Height.Set(20f, 0f);
+
+        ResetButton.OnLeftMouseDown += ClickReset;
+        ResetButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
+
+        Panel.Append(ResetButton);
 
             // Setup the controller list.
         Controllers = [];
@@ -78,4 +113,36 @@ public sealed class MenuControllerUIState : UIState
             Controllers.Add(controllers[i]);
         }
     }
+
+    #endregion
+
+    #region Updating
+
+    public override void Update(GameTime gameTime)
+    {
+        base.Update(gameTime);
+
+        if (ResetButton?.IsMouseHovering is not true)
+            return;
+
+        string tooltip = Language.GetTextValue(ResetTooltip);
+        Main.instance.MouseText(tooltip);
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private void ClickReset(UIMouseEvent evt, UIElement listeningElement)
+    {
+        ConfigManager.Reset(MenuConfig.Instance);
+        MenuControllerSystem.RefreshAll();
+
+        SoundEngine.PlaySound(SoundID.MenuOpen);
+    }
+
+    private void DisableHoveringWhileGrabbingSunOrMoon(UIMouseEvent evt, UIElement listeningElement) =>
+        listeningElement.IsMouseHovering = !Main.alreadyGrabbingSunOrMoon;
+
+    #endregion
 }

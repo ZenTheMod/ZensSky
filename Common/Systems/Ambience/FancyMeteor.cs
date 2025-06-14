@@ -11,12 +11,16 @@ namespace ZensSky.Common.Systems.Ambience;
 
 public sealed class FancyMeteor(Player player, FastRandom random) : AmbientSky.MeteorSkyEntity(player, random)
 {
-    private static Vector4 StartColor = new(.28f, .2f, 1f, 1f);
-    private static Vector4 EndColor = new(.9f, .2f, .1f, 1f);
+    #region Private Fields
 
-    private static Vector2 Origin = new(.085f, .5f);
+    private static readonly Vector4 StartColor = new(.28f, .2f, 1f, 1f);
+    private static readonly Vector4 EndColor = new(.9f, .2f, .1f, 1f);
 
-    private static Vector2 Scale = new(2.5f, .18f);
+    private static readonly Vector2 Origin = new(.085f, .5f);
+
+    private static readonly Vector2 Scale = new(2.5f, .18f);
+
+    #endregion
 
     public override void Draw(SpriteBatch spriteBatch, float depthScale, float minDepth, float maxDepth)
     {

@@ -12,7 +12,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Utilities;
 
-namespace ZensSky.Common.Systems.Background;
+namespace ZensSky.Common.Systems;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class PixelateSkySystem : ModSystem
@@ -89,9 +89,9 @@ public sealed class PixelateSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DoDraw\".");
+            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
@@ -137,9 +137,9 @@ public sealed class PixelateSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DrawCapture\".");
+            Mod.Logger.Error("Failed to patch \"Main.DrawCapture\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 

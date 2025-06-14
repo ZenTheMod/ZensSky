@@ -149,6 +149,7 @@ MenuStyles.Eclipse: Eclipse
 
 MenuController: {
 	Header: Menu Config
+	ResetTooltip: Reset Configuration
 	Time: Time Multiplier
 	Rain: Rain Intensity
 	Wind: Wind Direction

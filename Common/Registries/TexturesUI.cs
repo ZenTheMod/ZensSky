@@ -21,6 +21,8 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _arrowRight = new(() => Request("UI/Buttons/ArrowRight"));
     private static readonly Lazy<Asset<Texture2D>> _arrowLeft = new(() => Request("UI/Buttons/ArrowLeft"));
 
+    private static readonly Lazy<Asset<Texture2D>> _reset = new(() => Request("UI/Buttons/Reset"));
+
     public static Asset<Texture2D> LockedToggle => _lockedToggle.Value;
     public static Asset<Texture2D> Lock => _lock.Value;
 
@@ -35,4 +37,6 @@ public static partial class Textures
 
     public static Asset<Texture2D> ArrowRight => _arrowRight.Value;
     public static Asset<Texture2D> ArrowLeft => _arrowLeft.Value;
+
+    public static Asset<Texture2D> Reset => _reset.Value;
 }

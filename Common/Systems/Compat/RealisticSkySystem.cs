@@ -34,6 +34,8 @@ public sealed class RealisticSkySystem : ModSystem
 
     private static ILHook? StarRotationPatch;
 
+    private static ILHook? GalaxyRotationPatch;
+
     private static ILHook? PatchAtmosphereTarget;
         // private static ILHook? PatchAtmosphereShader;
     private static ILHook? PatchCloudsTarget;
@@ -41,9 +43,6 @@ public sealed class RealisticSkySystem : ModSystem
     private static ILHook? PatchStarShader;
 
     private static ILHook? PatchDrawing;
-
-    private static ILHook? StaticGalaxy;
-
     private static FieldInfo? AtmosphereTargetInfo;
 
     private static MethodInfo? SetSunPosition;
@@ -53,7 +52,11 @@ public sealed class RealisticSkySystem : ModSystem
 
     #endregion
 
+    #region Public Properties
+
     public static bool IsEnabled { get; private set; }
+
+    #endregion
 
     #region Loading
 
@@ -63,9 +66,8 @@ public sealed class RealisticSkySystem : ModSystem
 
         AtmosphereTargetInfo = typeof(AtmosphereRenderer).GetField("AtmosphereTarget", NonPublic | Static);
 
-            // This is a stupid hack.
-        SetSunPosition = typeof(SunPositionSaver).GetMethod($"set_{nameof(SunPositionSaver.SunPosition)}", NonPublic | Static);
-        SetMoonPosition = typeof(SunPositionSaver).GetMethod($"set_{nameof(SunPositionSaver.MoonPosition)}", NonPublic | Static);
+        SetSunPosition = typeof(SunPositionSaver).GetProperty(nameof(SunPositionSaver.SunPosition), Public | Static)?.GetSetMethod(true);
+        SetMoonPosition = typeof(SunPositionSaver).GetProperty(nameof(SunPositionSaver.MoonPosition), Public | Static)?.GetSetMethod(true);
 
         MethodInfo? verticallyBiasSunAndMoon = typeof(SunPositionSaver).GetMethod(nameof(SunPositionSaver.VerticallyBiasSunAndMoon));
 
@@ -78,6 +80,12 @@ public sealed class RealisticSkySystem : ModSystem
         if (calculatePerspectiveMatrix is not null)
             StarRotationPatch = new(calculatePerspectiveMatrix,
                 StarRotation);
+
+            // This is done so that when drawing the galaxy manually it'll rotate around the center of the screen, rather than the center of its sprite.
+        MethodInfo? renderGalaxy = typeof(GalaxyRenderer).GetMethod(nameof(GalaxyRenderer.Render), Public | Static);
+        if (renderGalaxy is not null)
+            GalaxyRotationPatch = new(renderGalaxy,
+                 GalaxyRotation);
 
         #region Inverted Gravity Patches
 
@@ -98,7 +106,7 @@ public sealed class RealisticSkySystem : ModSystem
             PatchCloudsTarget = new(handleCloudsTargetReqest,
                 CommonRequestsInvertedGravity);
 
-        MethodInfo? drawToCloudsTarget = typeof(CloudsRenderer).GetMethod("RenderToTarget", Public | Static);
+        MethodInfo? drawToCloudsTarget = typeof(CloudsRenderer).GetMethod(nameof(CloudsRenderer.RenderToTarget), Public | Static);
         if (drawToCloudsTarget is not null)
             PatchCloudsShader = new(drawToCloudsTarget,
                 CommonShaderInvertedGravity);
@@ -114,12 +122,6 @@ public sealed class RealisticSkySystem : ModSystem
         if (draw is not null)
             PatchDrawing = new(draw,
                 DrawSky);
-
-            // This is done so that when drawing the galaxy manually it'll rotate around the center of the screen, rather than the center of its sprite.
-        MethodInfo? renderGalaxy = typeof(GalaxyRenderer).GetMethod(nameof(GalaxyRenderer.Render), Public | Static);
-        if (renderGalaxy is not null)
-            StaticGalaxy = new(renderGalaxy,
-                 ChangeGalaxyRotation);
     }
 
     public override void Unload()
@@ -127,6 +129,7 @@ public sealed class RealisticSkySystem : ModSystem
         RemoveBias?.Dispose();
 
         StarRotationPatch?.Dispose();
+        GalaxyRotationPatch?.Dispose();
 
         PatchAtmosphereTarget?.Dispose();
             // PatchAtmosphereShader?.Dispose();
@@ -135,8 +138,6 @@ public sealed class RealisticSkySystem : ModSystem
         PatchStarShader?.Dispose();
 
         PatchDrawing?.Dispose();
-
-        StaticGalaxy?.Dispose();
     }
 
     #endregion
@@ -188,6 +189,8 @@ public sealed class RealisticSkySystem : ModSystem
 
     #endregion
 
+    #region Rotation Patches
+
     private void StarRotation(ILContext il)
     {
         ILCursor c = new(il);
@@ -216,6 +219,32 @@ public sealed class RealisticSkySystem : ModSystem
             return mat * Matrix.CreateScale(scale);
         });
     }
+
+    private void GalaxyRotation(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdcR4(.84f),
+                i => i.MatchMul(),
+                i => i.MatchLdcR4(.23f),
+                i => i.MatchAdd());
+
+            c.EmitPop();
+
+            c.EmitLdcR4(0f);
+        }
+        catch (Exception e)
+        {
+            Mod.Logger.Error("Failed to patch \'GalaxyRenderer.Render\'.");
+
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    #endregion
 
     #region Patch Draw
 
@@ -310,42 +339,36 @@ public sealed class RealisticSkySystem : ModSystem
 
     #endregion
 
-    private void ChangeGalaxyRotation(ILContext il)
+    #region Private Methods
+
+    private static Matrix GalaxyMatrix()
     {
-        try
-        {
-            ILCursor c = new(il);
+        Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
+        Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
+        Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdcR4(.84f),
-                i => i.MatchMul(),
-                i => i.MatchLdcR4(.23f),
-                i => i.MatchAdd());
-
-            c.EmitPop();
-
-            c.EmitLdcR4(0f);
-        }
-        catch (Exception e)
-        {
-            Mod.Logger.Error("Failed to patch \'GalaxyRenderer.Render\'.");
-
-            throw new ILPatchFailureException(Mod, il, e);
-        }
+        return revoffset * rotation * offset * Main.BackgroundViewMatrix.EffectMatrix;
     }
 
-    #region Stars
+    #endregion
 
-    public static void ApplyStarShader()
+    #region Public Methods
+
+    public static Effect? ApplyStarShader()
     {
+        if (!IsEnabled)
+            return null;
+
         Effect star = Shaders.StarAtmosphere.Value;
 
         if (star is null)
-            return;
+            return null;
 
         SetAtmosphereParams(star);
 
         star.CurrentTechnique.Passes[0].Apply();
+
+        return star;
     }
 
     public static void SetAtmosphereParams(Effect shader)
@@ -374,35 +397,24 @@ public sealed class RealisticSkySystem : ModSystem
         StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity); 
     }
 
-    private static Matrix GalaxyMatrix()
-    {
-        Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
-        Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
-        Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
-
-        return revoffset * rotation * offset * Main.BackgroundViewMatrix.EffectMatrix;
-    }
-
     public static void DrawGalaxy() 
     {
         if (!SkyConfig.Instance.DrawRealisticStars)
             return;
 
         Main.spriteBatch.End(out var snapshot);
-        Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, null, GalaxyMatrix());
-
-        ApplyStarShader();
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), GalaxyMatrix());
 
         GalaxyRenderer.Render();
 
-        Main.spriteBatch.Restart(in snapshot);
+            // Main.spriteBatch.Restart(in snapshot);
     }
-
-    #endregion
 
     public static void UpdateSunAndMoonPosition(Vector2 position)
     {
         SetSunPosition?.Invoke(null, [position]);
         SetMoonPosition?.Invoke(null, [position]);
     }
+
+    #endregion
 }

@@ -39,7 +39,11 @@ public sealed class RedSunSystem : ModSystem
 
     #endregion
 
+    #region Public Properties
+
     public static bool IsEnabled { get; private set; }
+
+    #endregion
 
     #region Loading
 
@@ -258,7 +262,7 @@ public sealed class RedSunSystem : ModSystem
         if (Main.dayTime)
             DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
 
-        // Draw the moon regardless due to this mod.
+            // Draw the moon regardless due to this mod.
         DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
 
         spriteBatch.Restart(in snapshot);
