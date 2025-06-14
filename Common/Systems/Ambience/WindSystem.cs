@@ -23,8 +23,7 @@ public sealed class WindSystem : ModSystem
 
     #region Public Fields
 
-        // This should be excessive.
-    public const int WindCount = 40;
+    public const int WindCount = 45;
     public static readonly WindParticle[] Winds = new WindParticle[WindCount];
 
     #endregion

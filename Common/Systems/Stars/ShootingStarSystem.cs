@@ -19,8 +19,7 @@ public sealed class ShootingStarSystem : ModSystem
 
     #region Public Fields
 
-        // This should be excessive.
-    public const int ShootingStarCount = 100;
+    public const int ShootingStarCount = 70;
     public static readonly ShootingStar[] ShootingStars = new ShootingStar[ShootingStarCount];
 
     #endregion

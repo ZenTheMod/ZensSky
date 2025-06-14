@@ -13,11 +13,11 @@ public record struct ShootingStar
 
     private const float LifeTimeIncrement = 0.007f;
 
-    private const float MinVelocity = 2f;
-    private const float MaxVelocity = 4.5f;
+    private const float MinVelocity = 3.1f;
+    private const float MaxVelocity = 6.3f;
 
-    private const float MinSize = 0.7f;
-    private const float MaxSize = 1.1f;
+    private const float MinRotate = -.009f;
+    private const float MaxRotate = .009f;
 
     private const float VelocityDegrade = .97f;
 
@@ -28,7 +28,7 @@ public record struct ShootingStar
     public required Vector2 Position { get; set; }
     public required Vector2[] OldPositions { get; init; }
     public required Vector2 Velocity { get; set; }
-    public required float Size { get; init; }
+    public required float Rotate { get; init; }
     public required float LifeTime { get; set; }
     public required bool IsActive { get; set; }
 
@@ -42,9 +42,12 @@ public record struct ShootingStar
         if (LifeTime <= 0f)
             IsActive = false;
 
+            // This is a really excessive way to lessen the velocity over time.
         float exponentialFade = 1f - MathF.Pow(2f, 10f * (1f - LifeTime - 1f));
-
         Velocity *= MathHelper.Lerp(1f, VelocityDegrade, exponentialFade);
+
+            // Have the shooting star curve slightly
+        Velocity = Velocity.RotatedBy(Rotate);
 
         Position += Velocity;
 
@@ -61,7 +64,7 @@ public record struct ShootingStar
         Position = position,
         OldPositions = new Vector2[MaxOldPositions],
         Velocity = rand.NextVector2CircularEdge(1f, 1f) * rand.NextFloat(MinVelocity, MaxVelocity),
-        Size = rand.NextFloat(MinSize, MaxSize),
+        Rotate = rand.NextFloat(MinRotate, MaxRotate),
         LifeTime = 1f,
         IsActive = true
     };
