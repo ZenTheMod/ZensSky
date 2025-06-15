@@ -47,6 +47,7 @@ public sealed class RedSunSystem : ModSystem
 
     #region Loading
 
+        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
@@ -231,6 +232,18 @@ public sealed class RedSunSystem : ModSystem
             c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
 
             c.EmitBrtrue(jumpSunOrMoonGrabbing);
+
+            if (BetterNightSkySystem.IsEnabled)
+            {
+                c.GotoPrev(MoveType.After,
+                    i => i.MatchLdsfld<Main>(nameof(Main.ForcedMinimumZoom)),
+                    i => i.MatchMul(),
+                    i => i.MatchStloc(moonScale));
+
+                c.EmitLdloca(moonScale);
+
+                c.EmitDelegate(BetterNightSkySystem.ModifyMoonScale);
+            }
         }
         catch (Exception e)
         {

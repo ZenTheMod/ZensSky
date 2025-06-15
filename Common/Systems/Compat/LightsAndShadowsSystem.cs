@@ -28,6 +28,7 @@ public sealed class LightsAndShadowsSystem : ModSystem
 
     #region Loading
 
+        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;

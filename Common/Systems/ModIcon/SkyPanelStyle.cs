@@ -49,8 +49,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     #region Loading
 
-    public override void Unload() =>
-        PanelTarget?.Dispose();
+    public override void Unload() => Main.QueueMainThreadAction(() => PanelTarget?.Dispose());
 
     #endregion
 

@@ -11,14 +11,18 @@ namespace ZensSky.Common.Systems.SunAndMoon;
 [Autoload(Side = ModSide.Client)]
 public sealed class SunAndMoonSystem : ModSystem
 {
-    #region Fields
+    #region Private Fields
 
     private const int SunMoonY = -80;
 
     private const float MinSunBrightness = 0.82f;
     private const float MinMoonBrightness = 0.35f;
 
-        // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
+    #endregion
+
+    #region Public Properties
+
+    // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
     public static Vector2 SunPosition { get; private set; }
     public static Color SunColor { get; private set; }
     public static float SunRotation { get; private set; }
@@ -29,7 +33,8 @@ public sealed class SunAndMoonSystem : ModSystem
     public static float MoonRotation { get; private set; }
     public static float MoonScale { get; private set; }
 
-    public static Vector2 SceneAreaSize { get; private set; }
+    public static Main.SceneArea SceneArea { get; private set; }
+    public static Vector2 SceneAreaSize => new(SceneArea.totalWidth, SceneArea.totalHeight);
 
     // This is fine because this is ONLY changed on load.
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
@@ -105,8 +110,7 @@ public sealed class SunAndMoonSystem : ModSystem
             if (SkipDrawing)
                 c.GotoNext(MoveType.Before,
                     i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
-                    i => i.MatchBrtrue(out _),
-                    i => i.MatchLdcR4(1f));
+                    i => i.MatchBrtrue(out _));
             else
                 c.GotoNext(MoveType.After,
                     i => i.MatchLdarg1(),
@@ -214,7 +218,7 @@ public sealed class SunAndMoonSystem : ModSystem
         SunRotation = rotation;
         SunScale = scale;
 
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+        SceneArea = sceneArea;
 
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.UpdateSunAndMoonPosition(position);
@@ -227,6 +231,6 @@ public sealed class SunAndMoonSystem : ModSystem
         MoonRotation = rotation;
         MoonScale = scale;
 
-        SceneAreaSize = new(sceneArea.totalWidth, sceneArea.totalHeight);
+        SceneArea = sceneArea;
     }
 }

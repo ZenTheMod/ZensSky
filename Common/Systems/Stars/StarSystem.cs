@@ -39,12 +39,16 @@ public sealed class StarSystem : ModSystem
 
     #region Public Fields
 
+    public const int StarCount = 1200;
+    public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
+
+    #endregion
+
+    #region Public Properties
+
     public static float TemporaryStarAlpha { get; set; }
 
     public static bool CanDrawStars { get; private set; }
-
-    public const int StarCount = 1200;
-    public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
 
     public static float StarRotation { get; private set; }
     public static float StarAlpha { get; private set; }
@@ -79,12 +83,7 @@ public sealed class StarSystem : ModSystem
         float dayRateDivisor = Main.gameMenu ? MainMenuDayRateDivisor : GameDayRateDivisor;
         StarRotation += (float)(Main.dayRate / dayRateDivisor);
 
-        if (TemporaryStarAlpha != -1)
-            StarAlpha = TemporaryStarAlpha;
-        else
-            StarAlpha = CalculateStarAlpha();
-
-        TemporaryStarAlpha = -1;
+        StarAlpha = CalculateStarAlpha();
 
         UpdateSupernovae();
 
@@ -106,41 +105,35 @@ public sealed class StarSystem : ModSystem
             switch (star.SupernovaProgress)
             {
                 case SupernovaProgress.Shrinking:
-                    {
-                        Stars[i].SupernovaTimer += CompressionIncrement * (float)Main.dayRate;
+                    Stars[i].SupernovaTimer += CompressionIncrement * (float)Main.dayRate;
 
-                        if (Stars[i].SupernovaTimer < 1f)
-                            break;
-
-                        Stars[i].SupernovaTimer = 0f;
-                        Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
-
+                    if (Stars[i].SupernovaTimer < 1f)
                         break;
-                    }
+
+                    Stars[i].SupernovaTimer = 0f;
+                    Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
+
+                    break;
                 case SupernovaProgress.Exploding:
-                    {
-                        Stars[i].SupernovaTimer += ExplosionIncrement * (float)Main.dayRate;
+                    Stars[i].SupernovaTimer += ExplosionIncrement * (float)Main.dayRate;
 
-                        if (Stars[i].SupernovaTimer < 1f)
-                            break;
-
-                        Stars[i].SupernovaTimer = 1f;
-                        Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
-
+                    if (Stars[i].SupernovaTimer < 1f)
                         break;
-                    }
+
+                    Stars[i].SupernovaTimer = 1f;
+                    Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
+
+                    break;
                 case SupernovaProgress.Regenerating:
-                    {
-                        Stars[i].SupernovaTimer -= RegenerationIncrement * (float)Main.dayRate;
+                    Stars[i].SupernovaTimer -= RegenerationIncrement * (float)Main.dayRate;
 
-                        if (Stars[i].SupernovaTimer > 0f)
-                            break;
-
-                        Stars[i].SupernovaTimer = 1f;
-                        Stars[i].SupernovaProgress = SupernovaProgress.None;
-
+                    if (Stars[i].SupernovaTimer > 0f)
                         break;
-                    }
+
+                    Stars[i].SupernovaTimer = 1f;
+                    Stars[i].SupernovaProgress = SupernovaProgress.None;
+
+                    break;
                 default:
                     break;
             }
@@ -299,8 +292,10 @@ public sealed class StarSystem : ModSystem
         else
             alpha = 1f;
 
-        if (Main.shimmerAlpha > 0f)
-            alpha *= 1f - Main.shimmerAlpha;
+        if (Main.gameMenu)
+            Main.shimmerAlpha = 0f;
+
+        alpha += Main.shimmerAlpha;
 
         if (Main.GraveyardVisualIntensity > 0f)
             alpha *= 1f - Main.GraveyardVisualIntensity * GraveyardAlphaMultiplier;

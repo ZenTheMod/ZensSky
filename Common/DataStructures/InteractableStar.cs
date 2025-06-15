@@ -66,7 +66,4 @@ public record struct InteractableStar
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly Color GetColor() => Color.Lerp(Color, Compressed, SupernovaTimer);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public readonly Vector2 GetRotatedPosition() => Position.RotatedBy(StarSystem.StarRotation);
 }

@@ -76,7 +76,7 @@ public sealed class StarRenderingSystem : ModSystem
 
         foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress != SupernovaProgress.Exploding))
         {
-            Vector2 position = center + star.GetRotatedPosition();
+            Vector2 position = center + star.Position;
 
             float twinklePhase = star.Twinkle + Main.GlobalTimeWrappedHourly / TwinkleFrequencyDivisor;
             float twinkle = (MathF.Sin(twinklePhase) * TwinkleAmplitude) + TwinkleBaseMultiplier;
@@ -132,7 +132,7 @@ public sealed class StarRenderingSystem : ModSystem
         foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
         {
             float time = star.SupernovaTimer / star.BaseSize;
-            Vector2 position = center + star.GetRotatedPosition();
+            Vector2 position = center + star.Position;
 
                 // Multiply the Vector4 and not the Color to give values past 1.
             supernova.Parameters["startColor"]?.SetValue(star.Color.ToVector4() * ExplosionStart);
@@ -177,7 +177,9 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.DrawStars();
 
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix * RotationMatrix());
+
+        RealisticSkySystem.ApplyStarShader();
 
         if (alpha > 0)
             DrawStars(spriteBatch, screenCenter, alpha);
@@ -189,7 +191,23 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.DrawGalaxy();
 
+        if (BetterNightSkySystem.IsEnabled)
+            BetterNightSkySystem.DrawSpecialStars(alpha);
+
         spriteBatch.Restart(in snapshot);
+    }
+
+    #endregion
+
+    #region Public Methods
+
+    public static Matrix RotationMatrix()
+    {
+        Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
+        Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
+        Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
+
+        return revoffset * rotation * offset * Main.BackgroundViewMatrix.EffectMatrix;
     }
 
     #endregion

@@ -8,18 +8,22 @@
 		<!-- Include various mods to make cross-modding easier, 
 			(Also the use of sortBefore in build.txt eleminates the chance of a race condition via cross-mod) -->
 		<Reference Include="RealisticSky">
-			<HintPath>..\ModAssemblies\RealisticSky_v1.0.24.dll</HintPath>
+			<HintPath>..\ModAssemblies\RealisticSky.dll</HintPath>
 		</Reference>
 		<Reference Include="RedSunAndRealisticSky">
-			<HintPath>..\ModAssemblies\RedSunAndRealisticSky_v1.0.2.dll</HintPath>
+			<HintPath>..\ModAssemblies\RedSunAndRealisticSky.dll</HintPath>
 		</Reference>
 		<Reference Include="Lights">
-			<HintPath>..\ModAssemblies\Lights_v1.4.2.dll</HintPath>
+			<HintPath>..\ModAssemblies\Lights.dll</HintPath>
+		</Reference>
+		<!-- This would be more helpful if BetterNightSky.cs wasn't internal -->
+		<Reference Include="BetterNightSky">
+			<HintPath>..\ModAssemblies\BetterNightSky.dll</HintPath>
 		</Reference>
 		
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
-			<HintPath>..\ModAssemblies\Daybreak_v1.1.1.dll</HintPath>
+			<HintPath>..\ModAssemblies\Daybreak.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 
@@ -42,6 +46,12 @@
 		
 		<!-- Irrelevant due to Daybreak's SpriteBatchSnapshot impl -->
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+
+		<!-- Publicize RealisticSky -->
+		<Publicize Include="RealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
+
+		<!-- Publicize BetterNightSky -->
+		<Publicize Include="BetterNightSky" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed.) -->

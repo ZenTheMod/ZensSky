@@ -66,6 +66,7 @@ public static class DrawingUtils
 
     #region RenderTargets
 
+        // TODO: Boot to main thread.
     /// <summary>
     /// Reinitializes <paramref name="target"/> if needed.
     /// </summary>

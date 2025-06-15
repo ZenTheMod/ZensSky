@@ -60,6 +60,7 @@ public sealed class RealisticSkySystem : ModSystem
 
     #region Loading
 
+        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
@@ -75,7 +76,7 @@ public sealed class RealisticSkySystem : ModSystem
             RemoveBias = new(verticallyBiasSunAndMoon, 
                 (orig_VerticallyBiasSunAndMoon orig) => { });
 
-        MethodInfo? calculatePerspectiveMatrix = typeof(StarsRenderer).GetMethod("CalculatePerspectiveMatrix", NonPublic | Static);
+        MethodInfo? calculatePerspectiveMatrix = typeof(StarsRenderer).GetMethod(nameof(StarsRenderer.CalculatePerspectiveMatrix), NonPublic | Static);
 
         if (calculatePerspectiveMatrix is not null)
             StarRotationPatch = new(calculatePerspectiveMatrix,
@@ -89,7 +90,7 @@ public sealed class RealisticSkySystem : ModSystem
 
         #region Inverted Gravity Patches
 
-        MethodInfo? handleAtmosphereTargetReqest = typeof(AtmosphereTargetContent).GetMethod("HandleUseReqest", NonPublic | Instance);
+        MethodInfo? handleAtmosphereTargetReqest = typeof(AtmosphereTargetContent).GetMethod(nameof(AtmosphereTargetContent.HandleUseReqest), NonPublic | Instance);
         if (handleAtmosphereTargetReqest is not null)
             PatchAtmosphereTarget = new(handleAtmosphereTargetReqest,
                 CommonRequestsInvertedGravity);
@@ -101,7 +102,7 @@ public sealed class RealisticSkySystem : ModSystem
             //     PatchAtmosphereShader = new(drawToAtmosphereTarget,
             //         CommonShaderInvertedGravity);
 
-        MethodInfo? handleCloudsTargetReqest = typeof(CloudsTargetContent).GetMethod("HandleUseReqest", NonPublic | Instance);
+        MethodInfo? handleCloudsTargetReqest = typeof(CloudsTargetContent).GetMethod(nameof(CloudsTargetContent.HandleUseReqest), NonPublic | Instance);
         if (handleCloudsTargetReqest is not null)
             PatchCloudsTarget = new(handleCloudsTargetReqest,
                 CommonRequestsInvertedGravity);
@@ -339,19 +340,6 @@ public sealed class RealisticSkySystem : ModSystem
 
     #endregion
 
-    #region Private Methods
-
-    private static Matrix GalaxyMatrix()
-    {
-        Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
-        Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
-        Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
-
-        return revoffset * rotation * offset * Main.BackgroundViewMatrix.EffectMatrix;
-    }
-
-    #endregion
-
     #region Public Methods
 
     public static Effect? ApplyStarShader()
@@ -385,8 +373,8 @@ public sealed class RealisticSkySystem : ModSystem
 
         shader.Parameters["sunPosition"]?.SetValue(Main.dayTime ? sunPosition : (Vector2.One * 50000f));
 
-        if (AtmosphereTarget?.IsReady is true)
-            Main.instance.GraphicsDevice.Textures[1] = AtmosphereTarget.GetTarget() ?? Textures.Invis.Value;
+        if (AtmosphereRenderer.AtmosphereTarget?.IsReady ?? false)
+            Main.instance.GraphicsDevice.Textures[1] = AtmosphereRenderer.AtmosphereTarget.GetTarget();
     }
 
     public static void DrawStars() 
@@ -403,11 +391,9 @@ public sealed class RealisticSkySystem : ModSystem
             return;
 
         Main.spriteBatch.End(out var snapshot);
-        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), GalaxyMatrix());
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), snapshot.TransformMatrix);
 
         GalaxyRenderer.Render();
-
-            // Main.spriteBatch.Restart(in snapshot);
     }
 
     public static void UpdateSunAndMoonPosition(Vector2 position)
