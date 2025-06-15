@@ -3,8 +3,8 @@ using MonoMod.Cil;
 using System;
 using System.IO;
 using Terraria;
+using Terraria.GameInput;
 using Terraria.ModLoader;
-using Terraria.ModLoader.UI;
 using Terraria.Utilities;
 
 namespace ZensSky.Common.Utilities;
@@ -18,6 +18,8 @@ public static class MiscUtils
     public static Vector2 ScreenSize => new(Main.screenWidth, Main.screenHeight);
 
     public static Vector2 HalfScreenSize => ScreenSize * 0.5f;
+
+    public static Vector2 MousePosition => new(PlayerInput.MouseX, PlayerInput.MouseY);
 
     #endregion
 

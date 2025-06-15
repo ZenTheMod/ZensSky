@@ -221,9 +221,7 @@ public sealed class MenuControllerSystem : ModSystem
 
             int configIndex = -1;
 
-                // I don't want to match for:
-                    // ldfld class Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_0' Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_1'::'CS$<>8__locals1'
-                    // ldfld class Terraria.ModLoader.Config.ModConfig Terraria.ModLoader.Config.UI.UIModConfigList/'<>c__DisplayClass11_0'::config
+                // Not exactly sure how to use a compiler generated backing class as a type argument.
             FieldReference? displayClassLocal = null;
             FieldReference? displayClassConfig = null;
 

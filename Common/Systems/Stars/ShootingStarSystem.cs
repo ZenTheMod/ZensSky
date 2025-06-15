@@ -33,6 +33,7 @@ public sealed class ShootingStarSystem : ModSystem
         Main.QueueMainThreadAction(() => {
             IL_Main.DoUpdate += ModifyInGameStarFall;
             IL_Main.UpdateMenu += ModifyMenuStarFall;
+            On_Star.StarFall += ModifyFallingStarSpawn;
         });
     }
 
@@ -41,6 +42,7 @@ public sealed class ShootingStarSystem : ModSystem
         Main.QueueMainThreadAction(() => {
             IL_Main.DoUpdate -= ModifyInGameStarFall;
             IL_Main.UpdateMenu -= ModifyMenuStarFall;
+            On_Star.StarFall -= ModifyFallingStarSpawn;
         });
     }
 
@@ -103,6 +105,19 @@ public sealed class ShootingStarSystem : ModSystem
         }
     }
 
+
+    private void ModifyFallingStarSpawn(On_Star.orig_StarFall orig, float positionX)
+    {
+        if (!StarSystem.CanDrawStars)
+        {
+            orig(positionX);
+            return;
+        }
+
+        Star.starFallCount++;
+        SpawnShootingStar();
+    }
+
     public static void SpawnShootingStar()
     {
         int index = Array.FindIndex(ShootingStars, s => !s.IsActive);
@@ -126,11 +141,18 @@ public sealed class ShootingStarSystem : ModSystem
 
     #region Updating
 
-    public static void UpdateShootingStars()
+    public static void Update()
     {
         for (int i = 0; i < ShootingStarCount; i++)
             if (ShootingStars[i].IsActive)
                 ShootingStars[i].Update();
+    }
+
+    public static void StarGameUpdate()
+    {
+        for (int i = 0; i < ShootingStarCount; i++)
+            if (ShootingStars[i].IsActive)
+                ShootingStars[i].StarGameUpdate();
     }
 
     #endregion

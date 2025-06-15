@@ -46,11 +46,10 @@ public sealed class StarSystem : ModSystem
 
     #region Public Properties
 
-    public static float TemporaryStarAlpha { get; set; }
-
     public static bool CanDrawStars { get; private set; }
 
     public static float StarRotation { get; private set; }
+
     public static float StarAlpha { get; private set; }
 
     #endregion
@@ -87,7 +86,10 @@ public sealed class StarSystem : ModSystem
 
         UpdateSupernovae();
 
-        ShootingStarSystem.UpdateShootingStars();
+        if (Main.starGame)
+            ShootingStarSystem.StarGameUpdate();
+        else
+            ShootingStarSystem.Update();
     }
 
     private static void UpdateSupernovae()

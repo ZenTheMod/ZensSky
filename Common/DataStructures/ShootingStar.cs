@@ -1,7 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Numerics;
 using Terraria;
+using Terraria.Audio;
 using Terraria.Utilities;
+using ZensSky.Common.Utilities;
+using Terraria.ID;
 
 namespace ZensSky.Common.DataStructures;
 
@@ -21,6 +25,9 @@ public record struct ShootingStar
 
     private const float VelocityDegrade = .97f;
 
+    private const float StarGameDistance = 4800f;
+    private const float StarGameReflect = 10f;
+
     #endregion
 
     #region Public Properties
@@ -31,6 +38,7 @@ public record struct ShootingStar
     public required float Rotate { get; init; }
     public required float LifeTime { get; set; }
     public required bool IsActive { get; set; }
+    public required bool Hit { get; set; }
 
     #endregion
 
@@ -57,6 +65,26 @@ public record struct ShootingStar
         OldPositions[0] = Position;
     }
 
+    public void StarGameUpdate()
+    {
+        Update();
+
+        if (Hit || Position.DistanceSQ(MiscUtils.MousePosition) >= StarGameDistance)
+            return;
+
+        Main.starsHit++;
+
+        float magnitude = Velocity.Length();
+
+        Velocity = Position - MiscUtils.MousePosition;
+        Velocity = Vector2.Normalize(Velocity) * magnitude * StarGameReflect;
+
+        Hit = true;
+
+        SoundEngine.PlaySound(in SoundID.CoinPickup);
+        SoundEngine.PlaySound(in SoundID.Meowmere);
+    }
+
     #endregion
 
     public static ShootingStar CreateActive(Vector2 position, UnifiedRandom rand) => new()
@@ -66,6 +94,7 @@ public record struct ShootingStar
         Velocity = rand.NextVector2CircularEdge(1f, 1f) * rand.NextFloat(MinVelocity, MaxVelocity),
         Rotate = rand.NextFloat(MinRotate, MaxRotate),
         LifeTime = 1f,
-        IsActive = true
+        IsActive = true,
+        Hit = false
     };
 }
