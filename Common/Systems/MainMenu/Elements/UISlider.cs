@@ -1,23 +1,21 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Terraria.Audio;
-using Terraria.UI;
-using Terraria.ID;
-using ZensSky.Common.Registries;
+using ReLogic.Content;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.ID;
+using Terraria.UI;
+using ZensSky.Common.Registries;
+using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
 public sealed class UISlider : UIElement
 {
-    public UISlider() 
-    {
-        Width.Set(0, 1f);
-        Height.Set(16, 0f);
+    #region Public Fields
 
-        InnerColor = Color.Gray;
-    }
+    public Asset<Texture2D> InnerTexture;
 
     public Color InnerColor;
 
@@ -25,12 +23,29 @@ public sealed class UISlider : UIElement
 
     public float Ratio;
 
+    #endregion
+
+    #region Constructor
+
+    public UISlider()
+    {
+        Width.Set(0, 1f);
+        Height.Set(16, 0f);
+
+        InnerColor = Color.Gray;
+
+        InnerTexture = Textures.Gradient;
+    }
+
+    #endregion
+
     public override void LeftMouseDown(UIMouseEvent evt)
     {
+        base.LeftMouseDown(evt);
+
         if (Main.alreadyGrabbingSunOrMoon)
             return;
 
-        base.LeftMouseDown(evt);
         if (evt.Target == this)
             IsHeld = true;
     }
@@ -43,10 +58,13 @@ public sealed class UISlider : UIElement
 
     public override void MouseOver(UIMouseEvent evt)
     {
-        if (Main.alreadyGrabbingSunOrMoon)
+        base.MouseOver(evt);
+
+        IsMouseHovering = !Main.alreadyGrabbingSunOrMoon;
+
+        if (!IsMouseHovering || IsHeld)
             return;
 
-        base.MouseOver(evt);
         SoundEngine.PlaySound(SoundID.MenuTick);
     }
 
@@ -57,7 +75,7 @@ public sealed class UISlider : UIElement
             // Dispite how impossible it should be I'm doing this to be extra safe.
         if (IsHeld && !Main.alreadyGrabbingSunOrMoon)
         {
-            float num = UserInterface.ActiveInstance.MousePosition.X - dims.X;
+            float num = MiscUtils.UIMousePosition.X - dims.X;
             Ratio = MathHelper.Clamp(num / dims.Width, 0f, 1);
         }
 
@@ -71,7 +89,7 @@ public sealed class UISlider : UIElement
             DrawBar(spriteBatch, sliderOutline, size, Main.OurFavoriteColor);
 
         size.Inflate(-4, -4);
-        spriteBatch.Draw(Textures.Gradient.Value, size, InnerColor);
+        spriteBatch.Draw(InnerTexture.Value, size, InnerColor);
 
         Texture2D blip = TextureAssets.ColorSlider.Value;
 

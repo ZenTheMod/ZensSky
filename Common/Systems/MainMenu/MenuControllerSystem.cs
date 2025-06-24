@@ -16,7 +16,6 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using tModPorter;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
 using static System.Reflection.BindingFlags;
@@ -103,6 +102,9 @@ public sealed class MenuControllerSystem : ModSystem
         });
     }
 
+    public override void PostSetupContent() =>
+        RefreshAll();
+
     #endregion
 
     #region Public Methods
@@ -176,10 +178,10 @@ public sealed class MenuControllerSystem : ModSystem
         {
             ILCursor c = new(il);
 
-            // TODO: Match for something better.
+                // TODO: Match for something better.
             c.GotoNext(i => i.MatchLdloc(173));
 
-            // Genuinely I can't.
+                // Genuinely I can't.
             string[] names = [nameof(Main.focusMenu), nameof(Main.selectedMenu), nameof(Main.selectedMenu2)];
             for (int j = 0; j < names.Length * 2; j++)
             {
@@ -187,7 +189,7 @@ public sealed class MenuControllerSystem : ModSystem
                     c.EmitDelegate((int hovering) => Hovering ? -1 : hovering);
             }
 
-            // Have our popup draw.
+                // Have our popup draw.
             c.TryGotoNext(MoveType.AfterLabel,
                 i => i.MatchLdloc(out _),
                 i => i.MatchLdloc(out _),

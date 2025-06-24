@@ -194,7 +194,9 @@ public sealed class PixelateSkySystem : ModSystem
 
         pixelate.Parameters["steps"]?.SetValue(SkyConfig.Instance.ColorSteps);
 
-        pixelate.CurrentTechnique.Passes[0].Apply();
+        int pass = (SkyConfig.Instance.ColorSteps == 255).ToInt();
+
+        pixelate.CurrentTechnique.Passes[pass].Apply();
 
         spriteBatch.Draw(SkyTarget, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.White);
 

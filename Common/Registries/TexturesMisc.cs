@@ -13,6 +13,7 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _invis = new(() => Request("Invis"));
 
     private static readonly Lazy<Asset<Texture2D>> _gradient = new(() => Request("Gradient"));
+    private static readonly Lazy<Asset<Texture2D>> _hueGradient = new(() => Request("HueGradient"));
 
     private static readonly Lazy<Asset<Texture2D>> _loopingNoise = new(() => Request("LoopingNoise"));
 
@@ -20,6 +21,7 @@ public static partial class Textures
     public static Asset<Texture2D> Invis => _invis.Value;
 
     public static Asset<Texture2D> Gradient => _gradient.Value;
+    public static Asset<Texture2D> HueGradient => _hueGradient.Value;
 
     public static Asset<Texture2D> LoopingNoise => _loopingNoise.Value;
 

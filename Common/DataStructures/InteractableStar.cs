@@ -1,7 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Utilities;
-using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.DataStructures;

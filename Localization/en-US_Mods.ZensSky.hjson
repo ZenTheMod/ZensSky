@@ -140,6 +140,26 @@ Configs: {
 			Label: Time Multiplier
 			Tooltip: The speed of days on the titlescreen.
 		}
+
+		UseMenuButtonColor: {
+			Label: Use Menu Button Color
+			Tooltip: ""
+		}
+
+		MenuButtonColor: {
+			Label: Menu Button Color
+			Tooltip: ""
+		}
+
+		UseMenuButtonHoverColor: {
+			Label: Use Menu Button Hover Color
+			Tooltip: ""
+		}
+
+		MenuButtonHoverColor: {
+			Label: Menu Button Hover Color
+			Tooltip: ""
+		}
 	}
 
 	Locked: - Locked
@@ -155,4 +175,7 @@ MenuController: {
 	Wind: Wind Direction
 	Parallax: Parallax Direction
 	CloudDensity: Cloud Density
+	ButtonColor: Menu Button Colors
+	ButtonColorHoverFalse: Swap to Hover Color (<right> to reset current)
+	ButtonColorHoverTrue: Swap to Normal Color (<right> to reset current)
 }

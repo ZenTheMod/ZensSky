@@ -87,8 +87,11 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     #region Drawing
 
-    public override bool PreDrawPanel(UIModItem element, SpriteBatch spriteBatch)
+    public override bool PreDrawPanel(UIModItem element, SpriteBatch spriteBatch, ref bool drawDivider)
     {
+            // Thanks roton, it looked so ugly.
+        drawDivider = false;
+
         if (element._needsTextureLoading)
         {
             element._needsTextureLoading = false;

@@ -1,8 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria;
-using Terraria.Audio;
-using Terraria.GameContent.UI.Elements;
-using Terraria.ID;
 using Terraria.UI;
 using ZensSky.Common.Registries;
 
@@ -29,7 +26,7 @@ public abstract class SliderController : MenuControllerElement
 
         Slider.InnerColor = InnerColor;
 
-        UIImageButton leftButton = new(Textures.ArrowLeft)
+        FixedImageButton leftButton = new(Textures.ArrowLeft)
         {
             HAlign = 0f
         };
@@ -50,7 +47,7 @@ public abstract class SliderController : MenuControllerElement
 
         leftButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
 
-        UIImageButton rightButton = new(Textures.ArrowRight)
+        FixedImageButton rightButton = new(Textures.ArrowRight)
         {
             HAlign = 1f
         };

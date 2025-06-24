@@ -48,7 +48,7 @@ public sealed class CloudSystem : ModSystem
 
             #region Shader Parameters
 
-            // Setup the shaders parameters.
+                // Setup the shaders parameters.
             c.EmitLdloca(lighting);
             c.EmitDelegate((ref Effect lighting) =>
             {

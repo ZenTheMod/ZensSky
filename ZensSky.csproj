@@ -3,6 +3,17 @@
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
 
+	<PropertyGroup>
+		<!-- Hide this pesky warning -->
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+
+		<!-- Enable nullable types -->
+		<Nullable>enable</Nullable>
+		
+		<!-- Use the preview version to allow for null conditional assigment -->
+		<LangVersion>preview</LangVersion>
+	</PropertyGroup>
+
 	<!-- References -->
 	<ItemGroup>
 		<!-- Include various mods to make cross-modding easier, 
@@ -16,7 +27,6 @@
 		<Reference Include="Lights">
 			<HintPath>..\ModAssemblies\Lights.dll</HintPath>
 		</Reference>
-		<!-- This would be more helpful if BetterNightSky.cs wasn't internal -->
 		<Reference Include="BetterNightSky">
 			<HintPath>..\ModAssemblies\BetterNightSky.dll</HintPath>
 		</Reference>
@@ -26,16 +36,6 @@
 			<HintPath>..\ModAssemblies\Daybreak.dll</HintPath>
 		</Reference>
 	</ItemGroup>
-
-	<!-- Hide this pesky warning -->
-	<PropertyGroup>
-		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
-	</PropertyGroup>
-
-	<!-- Enable nullable types -->
-	<PropertyGroup>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
 
 	<!-- Publicizer -->
 	<ItemGroup>

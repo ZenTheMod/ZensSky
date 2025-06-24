@@ -65,6 +65,8 @@ public sealed class StarRenderingSystem : ModSystem
         Texture2D flareTexture = Textures.Star.Value;
         Vector2 flareOrigin = flareTexture.Size() * 0.5f;
 
+        float flareRotation = -StarSystem.StarRotation;
+
         Texture2D bloomTexture = Textures.SunBloom.Value;
         Vector2 bloomOrigin = bloomTexture.Size() * 0.5f;
 
@@ -86,10 +88,10 @@ public sealed class StarRenderingSystem : ModSystem
             Color color = star.GetColor() * star.BaseSize * alpha;
 
             Color primaryFlareColor = (color * PrimaryFlareOpacity) with { A = 0 };
-            spriteBatch.Draw(flareTexture, position, null, primaryFlareColor, 0, flareOrigin, scale / PrimaryFlareScaleDivisor, SpriteEffects.None, 0f);
+            spriteBatch.Draw(flareTexture, position, null, primaryFlareColor, flareRotation, flareOrigin, scale / PrimaryFlareScaleDivisor, SpriteEffects.None, 0f);
 
             Color secondaryFlareColor = (color * SecondaryFlareOpacity) with { A = 0 };
-            spriteBatch.Draw(flareTexture, position, null, secondaryFlareColor, 0, flareOrigin, scale / SecondaryFlareScaleDivisor, SpriteEffects.None, 0f);
+            spriteBatch.Draw(flareTexture, position, null, secondaryFlareColor, flareRotation, flareOrigin, scale / SecondaryFlareScaleDivisor, SpriteEffects.None, 0f);
 
             if (vanillaStyle)
             {

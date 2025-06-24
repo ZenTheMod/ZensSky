@@ -1,9 +1,10 @@
 ﻿using Terraria;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.MainMenu.Elements;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
-public sealed class CloudDensitySlider : SliderController
+public sealed class CloudDensityController : SliderController
 {
     #region Properties
 
@@ -31,8 +32,8 @@ public sealed class CloudDensitySlider : SliderController
 
             Main.cloudBGActive = Utils.Remap(density, 0.75f, 1f, 0f, 1f);
         }
-        else if (Slider is not null)
-            Slider.Ratio = (float)Main.numClouds / Main.maxClouds;
+        else
+            Slider?.Ratio = (float)Main.numClouds / Main.maxClouds;
 
         if (Main.numClouds != prior)
             Cloud.resetClouds();

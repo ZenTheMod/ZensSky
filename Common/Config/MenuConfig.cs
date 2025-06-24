@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.Xna.Framework;
+using System.ComponentModel;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
@@ -35,4 +36,16 @@ public sealed class MenuConfig : ModConfig
     [DefaultValue(0.3f)]
     [Range(0f, 1f)]
     public float CloudDensity;
+
+    [DefaultValue(false)]
+    public bool UseMenuButtonColor;
+
+    [DefaultValue(typeof(Vector3), "0, 0, 0")]
+    public Vector3 MenuButtonColor = new();
+
+    [DefaultValue(false)]
+    public bool UseMenuButtonHoverColor;
+
+    [DefaultValue(typeof(Vector3), "0, 0, 0")]
+    public Vector3 MenuButtonHoverColor = new();
 }

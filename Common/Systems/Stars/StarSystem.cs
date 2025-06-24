@@ -267,7 +267,7 @@ public sealed class StarSystem : ModSystem
     {
         StarRotation = 0f;
 
-        if (Stars != null)
+        if (Stars is not null)
         {
             for (int i = 0; i < StarCount; i++)
             {

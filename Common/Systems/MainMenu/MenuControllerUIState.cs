@@ -33,7 +33,7 @@ public sealed class MenuControllerUIState : UIState
     public UIPanel? Panel;
     public UIList? Controllers;
 
-    public UIImageButton? ResetButton;
+    public FixedImageButton? ResetButton;
 
     #endregion
 
@@ -78,7 +78,6 @@ public sealed class MenuControllerUIState : UIState
         ResetButton.Height.Set(20f, 0f);
 
         ResetButton.OnLeftMouseDown += ClickReset;
-        ResetButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
 
         Panel.Append(ResetButton);
 
@@ -112,6 +111,8 @@ public sealed class MenuControllerUIState : UIState
             controllers[i].Width.Set(0f, 1f);
             Controllers.Add(controllers[i]);
         }
+
+        Recalculate();
     }
 
     #endregion
@@ -140,9 +141,6 @@ public sealed class MenuControllerUIState : UIState
 
         SoundEngine.PlaySound(SoundID.MenuOpen);
     }
-
-    private void DisableHoveringWhileGrabbingSunOrMoon(UIMouseEvent evt, UIElement listeningElement) =>
-        listeningElement.IsMouseHovering = !Main.alreadyGrabbingSunOrMoon;
 
     #endregion
 }
