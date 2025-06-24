@@ -142,23 +142,23 @@ Configs: {
 		}
 
 		UseMenuButtonColor: {
-			Label: Use Menu Button Color
-			Tooltip: ""
+			Label: Uses Menu Button Color
+			Tooltip: If the below option will be used upon load.
 		}
 
 		MenuButtonColor: {
 			Label: Menu Button Color
-			Tooltip: ""
+			Tooltip: The color of menu buttons.
 		}
 
 		UseMenuButtonHoverColor: {
-			Label: Use Menu Button Hover Color
-			Tooltip: ""
+			Label: Uses Menu Button Hover Color
+			Tooltip: If the below option will be used upon load.
 		}
 
 		MenuButtonHoverColor: {
 			Label: Menu Button Hover Color
-			Tooltip: ""
+			Tooltip: The color of menu buttons when hovered.
 		}
 	}
 

@@ -12,7 +12,7 @@ using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
-public sealed class OptionColorController : MenuControllerElement
+public sealed class ButtonColorController : MenuControllerElement
 {
     #region Private Fields
 
@@ -48,7 +48,7 @@ public sealed class OptionColorController : MenuControllerElement
 
     #region Constructor
 
-    public OptionColorController() : base()
+    public ButtonColorController() : base()
     {
         Height.Set(75f, 0f);
 
