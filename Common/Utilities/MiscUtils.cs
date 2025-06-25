@@ -27,6 +27,8 @@ public static class MiscUtils
 
     #endregion
 
+    #region RNG
+
     /// <summary>
     /// Generate a <see cref="Vector2"/> uniformly in a circle with <paramref name="radius"/> as the radius.
     /// </summary>
@@ -40,6 +42,8 @@ public static class MiscUtils
 
         return new Vector2(r * MathF.Cos(a), r * MathF.Sin(a));
     }
+
+    #endregion
 
     #region IL
 
@@ -95,6 +99,8 @@ public static class MiscUtils
             Main.QueueMainThreadAction(() => action?.Invoke());
     }
 
+    #region Lang
+
     /// <summary>
     /// Retrieves the text value for a specified localization key — but with glyph support via <see cref="Lang.SupportGlyphs"/>, allowing the use of <c>&lt;left&gt;</c> and <c>&lt;right&gt;</c> —. <br/>
     /// The text returned will be for the currently selected language.
@@ -103,6 +109,8 @@ public static class MiscUtils
     /// <returns></returns>
     public static string GetTextValueWithGlyphs(string key) =>
         Lang.SupportGlyphs(Language.GetTextValue(key));
+
+    #endregion
 
     #region Triangles
 
@@ -123,7 +131,7 @@ public static class MiscUtils
     /// </summary>
     /// <param name="point"></param>
     /// <param name="points"></param>
-    /// <returns><see cref="true"/> if points.Length >= 3 and <paramref name="point"/> is inside of the triangle created by <paramref name="points"/>.</returns>
+    /// <returns><see cref="true"/> if <c>points.Length >= 3</c> and <paramref name="point"/> is inside of the triangle created by <paramref name="points"/>.</returns>
     public static bool IsPointInTriangle(Vector2 point, Vector2[] points) =>
         points.Length >= 3 && IsPointInTriangle(point, points[0], points[1], points[2]);
 
@@ -153,9 +161,22 @@ public static class MiscUtils
         return c3;
     }
 
+    /// <summary>
+    /// Clamps a point to the bounds of a triangle created by <paramref name="points"/>.
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="points"></param>
+    /// <returns>The closest point on the triangle — returns <paramref name="point"/> if its already inside the triangle —, and <see cref="Vector2.Zero"/> if <c>points.Length &lt; 3</c></returns>
     public static Vector2 ClosestPointOnTriangle(Vector2 point, Vector2[] points) =>
         points.Length >= 3 ? ClosestPointOnTriangle(point, points[0], points[1], points[2]) : Vector2.Zero;
 
+    /// <summary>
+    /// Iterpolates between <paramref name="colors"/> — using cartesian coordinates — based on <paramref name="point"/> and the triangle formed by <paramref name="points"/>.
+    /// </summary>
+    /// <param name="point"></param>
+    /// <param name="points"></param>
+    /// <param name="colors"></param>
+    /// <returns>Resulting color after interpolation, <see cref="Color.Transparent"/> if <c>points.Length  &lt; 3 || colors.Length &lt; 3</c></returns>
     public static Color LerpTriangle(Vector2 point, Vector2[] points, Color[] colors)
     {
         if (points.Length < 3 || colors.Length < 3)

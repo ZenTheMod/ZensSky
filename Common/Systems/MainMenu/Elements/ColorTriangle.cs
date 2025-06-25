@@ -160,7 +160,7 @@ public sealed class ColorTriangle : UIElement
 
         Vector2 position = (PickerPosition * dims.Size()) + dims.Center();
 
-        spriteBatch.Draw(picker, position, null, Color.White, 0f, pickerOrigin, 1f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(picker, Utils.Round(position), null, Color.White, 0f, pickerOrigin, 1f, SpriteEffects.None, 0f);
     }
 
     #endregion

@@ -212,12 +212,16 @@ public sealed class ButtonColorController : MenuControllerElement
     {
         MenuConfig config = MenuConfig.Instance;
 
+        if (!config.UseMenuButtonColor)
+            ButtonColor = new(r, g, b, a);
+        if (!config.UseMenuButtonHoverColor)
+            ButtonHoverColor = Hover;
+
         if (!config.UseMenuButtonColor && !config.UseMenuButtonHoverColor)
             return false;
 
-        Color normalColor = config.UseMenuButtonColor ? ButtonColor : new(r, g, b, a);
-
-        Color hoverColor = config.UseMenuButtonHoverColor ? ButtonHoverColor : Hover;
+        Color normalColor = ButtonColor;
+        Color hoverColor = ButtonHoverColor;
 
         color = Color.Lerp(normalColor, hoverColor, interpolator);
 
@@ -232,8 +236,10 @@ public sealed class ButtonColorController : MenuControllerElement
     {
         MenuConfig config = MenuConfig.Instance;
 
-        ButtonColor = GetColor(config.MenuButtonColor);
-        ButtonHoverColor = GetColor(config.MenuButtonHoverColor);
+        if (config.UseMenuButtonColor)
+            ButtonColor = GetColor(config.MenuButtonColor);
+        if (config.UseMenuButtonHoverColor)
+            ButtonHoverColor = GetColor(config.MenuButtonHoverColor);
     }
 
     public override void Update(GameTime gameTime)
@@ -256,7 +262,10 @@ public sealed class ButtonColorController : MenuControllerElement
             Slider.Ratio = Modifying.Z;
 
         if (Triangle.IsHeld || Slider.IsHeld)
+        {
+            ModifyingUse = true;
             Refresh();
+        }
 
         ColorDisplay.InnerColor = SettingHover ? ButtonHoverColor : ButtonColor;
         ColorDisplay.HoverText = MiscUtils.GetTextValueWithGlyphs(DisplayHover + SettingHover);
