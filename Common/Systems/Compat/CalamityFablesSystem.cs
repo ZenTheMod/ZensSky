@@ -1,16 +1,20 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Reflection;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
-using ZensSky.Common.Registries;
+using Terraria.UI.Chat;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
-[JITWhenModsEnabled("CalamityFables")]
-[ExtendsFromMod("CalamityFables")]
 [Autoload(Side = ModSide.Client)]
 public sealed class CalamityFablesSystem : ModSystem
 {
     #region Public Properties
+
+    public static int PriorMoonStyles { get; private set; }
 
     public static bool IsEnabled { get; private set; }
 
@@ -18,13 +22,29 @@ public sealed class CalamityFablesSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => IsEnabled = true;
+    public override void Load() 
+    {
+        PriorMoonStyles = TextureAssets.Moon.Length;
+
+        if (!ModLoader.HasMod("CalamityFables"))
+            return;
+
+        IsEnabled = true;
+
+        Assembly fablessAsm = ModLoader.GetMod("CalamityFables").Code;
+
+        Type? moddedMoons = fablessAsm.GetType("CalamityFables.Core.ModdedMoons");
+
+        FieldInfo? vanillaMoonCount = moddedMoons?.GetField("VanillaMoonCount", Public | Static);
+
+        PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
+    }
 
     #endregion
 
     public static bool IsEdgeCase()
     {
-        return (Main.moonType - (Textures.Moon.Length - 1)) switch
+        return (Main.moonType - (PriorMoonStyles - 1)) switch
         {
             1 => true,
             2 => true,
@@ -40,6 +60,6 @@ public sealed class CalamityFablesSystem : ModSystem
 
     public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-
+        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, (Main.moonType - (PriorMoonStyles - 1)).ToString(), position, Color.White, 0f, Vector2.Zero, Vector2.One);
     }
 }

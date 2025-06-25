@@ -1,6 +1,7 @@
 ﻿using MonoMod.Cil;
 using System;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
@@ -70,7 +71,7 @@ public sealed class TimeController : SliderController
 
                     // Prevent changing moon type while loading into a world.
                 if (!Main.lockMenuBGChange)
-                    Main.moonType = Main.rand.Next(SunAndMoonSystem.MoonStyleCount);
+                    Main.moonType = Main.rand.Next(TextureAssets.Moon.Length);
             });
 
                 // Change the speed of time.
@@ -96,7 +97,7 @@ public sealed class TimeController : SliderController
             {
                     // Prevent changing moon type while loading into a world.
                 if (!Main.lockMenuBGChange)
-                    Main.moonType = Main.rand.Next(SunAndMoonSystem.MoonStyleCount); 
+                    Main.moonType = Main.rand.Next(TextureAssets.Moon.Length); 
             });
 
                 // Vanilla moon cycles through moon phases 1-7. :agony:

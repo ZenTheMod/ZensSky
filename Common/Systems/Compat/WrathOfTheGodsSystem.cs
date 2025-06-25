@@ -5,8 +5,6 @@ using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
-[JITWhenModsEnabled("NoxusBoss")]
-[ExtendsFromMod("NoxusBoss")]
 [Autoload(Side = ModSide.Client)]
 public sealed class WrathOfTheGodsSystem : ModSystem
 {
@@ -27,6 +25,9 @@ public sealed class WrathOfTheGodsSystem : ModSystem
 
     public override void Load()
     {
+        if (!ModLoader.HasMod("NoxusBoss"))
+            return;
+
         IsEnabled = true;
 
             // I don't feel like adding a project reference for a massive mod just for 4 lines of compat.

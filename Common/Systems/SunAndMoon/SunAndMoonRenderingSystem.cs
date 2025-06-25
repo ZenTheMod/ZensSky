@@ -331,10 +331,11 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static Texture2D MoonTexture()
     {
-        Texture2D ret = Moon[Main.moonType].Value;
+        Texture2D ret = Moon[Math.Min(Main.moonType, Moon.Length - 1)].Value;
 
-        if (CalamityFablesSystem.IsEnabled && Main.moonType >= Moon.Length)
-            ret = FablesMoon[Main.moonType - (Moon.Length - 1)].Value;
+        if (CalamityFablesSystem.IsEnabled && 
+            Main.moonType >= CalamityFablesSystem.PriorMoonStyles)
+            ret = FablesMoon[Math.Min(Main.moonType - (CalamityFablesSystem.PriorMoonStyles - 1), FablesMoon.Length - 1)].Value;
 
         if (WorldGen.drunkWorldGen)
             ret = Moon[0].Value;
