@@ -3,7 +3,9 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Common.Systems.SunAndMoon;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
@@ -68,7 +70,7 @@ public sealed class TimeController : SliderController
 
                     // Prevent changing moon type while loading into a world.
                 if (!Main.lockMenuBGChange)
-                    Main.moonType = Main.rand.Next(9);
+                    Main.moonType = Main.rand.Next(SunAndMoonSystem.MoonStyleCount);
             });
 
                 // Change the speed of time.
@@ -93,8 +95,8 @@ public sealed class TimeController : SliderController
             c.EmitDelegate(() => 
             {
                     // Prevent changing moon type while loading into a world.
-                if (!Main.lockMenuBGChange) // Don't ask me why it uses this bool.
-                    Main.moonType = Main.rand.Next(9); 
+                if (!Main.lockMenuBGChange)
+                    Main.moonType = Main.rand.Next(SunAndMoonSystem.MoonStyleCount); 
             });
 
                 // Vanilla moon cycles through moon phases 1-7. :agony:

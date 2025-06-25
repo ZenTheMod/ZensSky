@@ -72,6 +72,9 @@ public sealed class ShootingStarRenderingSystem : ModSystem
 
     private static void DrawShootingStars()
     {
+        if (!StarSystem.CanDrawStars)
+            return;
+
         SpriteBatch spriteBatch = Main.spriteBatch;
 
         GraphicsDevice device = Main.instance.GraphicsDevice;

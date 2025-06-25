@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using RealisticSky;
 using RealisticSky.Common.DataStructures;
 using RealisticSky.Content;
 using RealisticSky.Content.Atmosphere;
@@ -11,6 +12,7 @@ using RealisticSky.Content.NightSky;
 using RealisticSky.Content.Sun;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -342,9 +344,18 @@ public sealed class RealisticSkySystem : ModSystem
 
     #region Public Methods
 
+    /// <summary>
+    /// Apply a star masking shader if <see cref="RealisticSky"/> is enabled and is active.
+    /// </summary>
+    /// <returns></returns>
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Effect? ApplyStarShader()
     {
         if (!IsEnabled)
+            return null;
+
+            // Runtime does not like it if these ifs are combined.
+        if (!CanDraw())
             return null;
 
         Effect star = Shaders.StarAtmosphere.Value;
@@ -377,17 +388,19 @@ public sealed class RealisticSkySystem : ModSystem
             Main.instance.GraphicsDevice.Textures[1] = AtmosphereRenderer.AtmosphereTarget.GetTarget();
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawStars() 
     {
-        if (!SkyConfig.Instance.DrawRealisticStars)
+        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
             return;
 
         StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity); 
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawGalaxy() 
     {
-        if (!SkyConfig.Instance.DrawRealisticStars)
+        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
             return;
 
         Main.spriteBatch.End(out var snapshot);
@@ -401,6 +414,14 @@ public sealed class RealisticSkySystem : ModSystem
         SetSunPosition?.Invoke(null, [position]);
         SetMoonPosition?.Invoke(null, [position]);
     }
+
+    public static void UpdateMoonPosition(Vector2 position) =>
+        SetMoonPosition?.Invoke(null, [position]);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool CanDraw() =>
+        RealisticSkyManager.CanRender && !RealisticSkyManager.TemporarilyDisabled && 
+        !(!RealisticSkyConfig.Instance.ShowInMainMenu && Main.gameMenu);
 
     #endregion
 }

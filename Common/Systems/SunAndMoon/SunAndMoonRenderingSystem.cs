@@ -199,6 +199,12 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         Texture2D moon = MoonTexture();
 
+        if (CalamityFablesSystem.IsEdgeCase())
+        {
+            CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
+            return;
+        }
+
         if (WorldGen.drunkWorldGen)
         {
             DrawSmiley(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor);
@@ -284,7 +290,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #endregion
 
-    private static void ApplyPlanetShader(float shadowAngle, Color shadowColor)
+    public static void ApplyPlanetShader(float shadowAngle, Color shadowColor)
     {
         Effect planet = Planet.Value;
 
@@ -326,6 +332,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     public static Texture2D MoonTexture()
     {
         Texture2D ret = Moon[Main.moonType].Value;
+
+        if (CalamityFablesSystem.IsEnabled && Main.moonType >= Moon.Length)
+            ret = FablesMoon[Main.moonType - (Moon.Length - 1)].Value;
 
         if (WorldGen.drunkWorldGen)
             ret = Moon[0].Value;

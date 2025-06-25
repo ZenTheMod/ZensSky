@@ -3,6 +3,7 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu;
 
@@ -36,12 +37,17 @@ public sealed class SunAndMoonSystem : ModSystem
     public static Main.SceneArea SceneArea { get; private set; }
     public static Vector2 SceneAreaSize => new(SceneArea.totalWidth, SceneArea.totalHeight);
 
-    // This is fine because this is ONLY changed on load.
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
+
+    public static int MoonStyleCount =>
+        Textures.Moon.Length + (CalamityFablesSystem.IsEnabled ? Textures.FablesMoon.Length : 0);
 
     #endregion
 
+    #region Loading
+
     public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
+
     public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
 
     private void ModifyDrawing(ILContext il)
@@ -211,6 +217,10 @@ public sealed class SunAndMoonSystem : ModSystem
         }
     }
 
+    #endregion
+
+    #region Public Methods
+
     public static void FetchSunInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
     {
         SunPosition = position;
@@ -222,6 +232,9 @@ public sealed class SunAndMoonSystem : ModSystem
 
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.UpdateSunAndMoonPosition(position);
+
+        if (WrathOfTheGodsSystem.IsEnabled)
+            RealisticSkySystem.UpdateSunAndMoonPosition(position);
     }
 
     public static void FetchMoonInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
@@ -232,5 +245,13 @@ public sealed class SunAndMoonSystem : ModSystem
         MoonScale = scale;
 
         SceneArea = sceneArea;
+
+        if (RealisticSkySystem.IsEnabled)
+            RealisticSkySystem.UpdateMoonPosition(position);
+
+        if (WrathOfTheGodsSystem.IsEnabled)
+            RealisticSkySystem.UpdateMoonPosition(position);
     }
+
+    #endregion
 }

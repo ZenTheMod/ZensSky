@@ -1,5 +1,6 @@
 ﻿[h1]✦ Zen's Sky ✦[/h1]
-A highly compatible mod that vastly improves the visual style of the sky in various ways.
+A highly cross-compatible mod that vastly improves the visual style of the sky in various ways.
+As well as including simple and easy to use menu configuration straight from the titlescreen; you don't even have to click save!
 
 [h2]✦ Features ✦[/h2]
 
@@ -17,25 +18,42 @@ A highly compatible mod that vastly improves the visual style of the sky in vari
 
 [b]Compatibility with:[/b]
 'Realistic Sky' by Lucille Karma,
-'Wrath of the Gods' by Lucille Karma,
-'Red Sun and Realistic Sky' by Waffles22,
+*'Wrath of the Gods' by Lucille Karma 
+    (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),
+'Red Sun and Realistic Sky' by Waffles22, 
 'Lights And Shadows' by yiyang233,
 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy.
+'Calamity Fables' by IbanPlay.
 
 [u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 
 Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url].
 
-If you would like to contribute to this mod, please send me a DM on Discord: [b]@z_e_n_.[/b], and I may add you as a contributor.
+If you would like to contribute to this mod, please send me a DM on Discord: [b]@z_e_n_.[/b].
 
 [h2]✦ Credits ✦[/h2]
 
-Zoey
-Ebonfly
-Azathoth
-Tuna
-Lion8Cake
-Roton
-Plushie
-Oli
-Tomat
+✦ Developer(s) ✦
+[list]
+    [*]Zoey
+[/list]
+
+✦ Help with Development ✦
+[list]
+    [*]Sprunolia
+    [*]Ebonfly
+    [*]Azathoth
+    [*]Tuna
+    [*]Lion8Cake
+    [*]Roton
+    [*]Plushie
+    [*]Oli
+    [*]Tomat
+[/list]
+
+✦ Textures ✦
+[list]
+    [*]Sprunolia (Huge help with HD Calamity Fables moons.)
+    [*][url=https://www.solarsystemscope.com/textures/]​Solar System Scope Textures[/url]
+    [*]Ebonfly
+[/list]
