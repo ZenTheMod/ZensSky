@@ -39,7 +39,7 @@ public sealed class ColorTriangle : UIElement
     #region Properties
 
     private bool Hovering =>
-        ContainsPoint(MiscUtils.UIMousePosition) && !Main.alreadyGrabbingSunOrMoon;
+        ContainsPoint(MiscUtils.UIMousePosition) && !Main.alreadyGrabbingSunOrMoon && Parent.IsMouseHovering;
 
     #endregion
 

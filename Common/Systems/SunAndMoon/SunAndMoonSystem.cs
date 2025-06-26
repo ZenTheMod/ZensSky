@@ -39,22 +39,6 @@ public sealed class SunAndMoonSystem : ModSystem
 
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
 
-        // TODO: More inclusive system for other mods.
-    public static int MoonStyleCount
-    {
-        get {
-            int moons = Textures.Moon.Length;
-
-            if (CalamityFablesSystem.IsEnabled)
-                moons += Textures.FablesMoon.Length;
-
-            if (BetterNightSkySystem.IsEnabled && BetterNightSkySystem.StyleIndex != -1)
-                moons++;
-
-            return moons;
-        }
-    }
-
     #endregion
 
     #region Loading

@@ -4,14 +4,23 @@ using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using Terraria.UI.Chat;
+using ZensSky.Common.Registries;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class CalamityFablesSystem : IOrderedLoadable
 {
+    #region Private Fields
+
+    private const float SingleMoonPhase = 0.125f;
+
+    private static readonly Color DarkAtmosphere = new(13, 69, 96);
+
+    #endregion
+
     #region Public Properties
 
     public static int PriorMoonStyles { get; private set; }
@@ -49,7 +58,7 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 
     public static bool IsEdgeCase()
     {
-        return (Main.moonType - (PriorMoonStyles - 1)) switch
+        return (Main.moonType - PriorMoonStyles) switch
         {
             1 => true,
             2 => true,
@@ -62,8 +71,25 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
         };
     }
 
+    #region Drawing
+
     public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, (Main.moonType - (PriorMoonStyles - 1)).ToString(), position, Color.White, 0f, Vector2.Zero, Vector2.One);
+        switch (Main.moonType - PriorMoonStyles)
+        {
+            case 1:
+                DrawDark(spriteBatch, moon, position, rotation, scale);
+                break;
+        };
     }
+
+    private static void DrawDark(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale)
+    {
+        ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, Color.Black, DarkAtmosphere, Color.Transparent);
+
+        Vector2 size = new(MoonSize * scale);
+        spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+    }
+
+    #endregion
 }

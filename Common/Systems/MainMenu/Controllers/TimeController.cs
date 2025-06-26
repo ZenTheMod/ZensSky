@@ -97,7 +97,7 @@ public sealed class TimeController : SliderController
             {
                     // Prevent changing moon type while loading into a world.
                 if (!Main.lockMenuBGChange)
-                    Main.moonType = Main.rand.Next(TextureAssets.Moon.Length); 
+                    Main.moonType = Main.rand.Next(TextureAssets.Moon.Length);
             });
 
                 // Vanilla moon cycles through moon phases 1-7. :agony:

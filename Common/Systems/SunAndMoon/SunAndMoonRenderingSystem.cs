@@ -47,8 +47,6 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const float SingleMoonPhase = 0.125f;
 
-    private static int MoonSize => TextureAssets.Moon[Main.moonType].Value.Width + 12;
-
     private const float MoonRadius = 0.9f;
     private const float MoonAtmosphere = 0.1f;
 
@@ -70,6 +68,12 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private static readonly Vector2 Moon8ExtraLowerPosition = new(34);
     private const float Moon8ExtraUpperScale = 0.3f;
     private const float Moon8ExtraLowerScale = 0.45f;
+
+    #endregion
+
+    #region Public Properties
+
+    public static int MoonSize => TextureAssets.Moon[Main.moonType].Value.Width + 12;
 
     #endregion
 
@@ -216,7 +220,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
             // This code is kinda soup. 😋
         if (Main.moonType == 2)
-            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * 0.5f, scale, moonColor, shadowColor);
+            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * .5f, scale, moonColor, shadowColor);
 
         ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
 
@@ -224,10 +228,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             DrawMoon8Extras(spriteBatch, moon, position, rotation, scale, moonColor);
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
-        spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
+        spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
 
         if (Main.moonType == 2)
-            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * 0.5f, 0f), scale, moonColor, shadowColor);
+            DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * .5f, 0f), scale, moonColor, shadowColor);
     }
 
     #region GetFixedBoi Moon
@@ -239,16 +243,16 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Vector2 starLeftOffset = SmileyLeftEyePosition.RotatedBy(rotation) * scale;
         Vector2 starRightOffset = SmileyRightEyePosition.RotatedBy(rotation) * scale;
 
-        spriteBatch.Draw(star, position + starLeftOffset, null, (moonColor * 0.4f) with { A = 0 }, 0, star.Size() * 0.5f, scale / 3f, SpriteEffects.None, 0f);
-        spriteBatch.Draw(star, position + starRightOffset, null, (moonColor * 0.4f) with { A = 0 }, 0, star.Size() * 0.5f, scale / 3f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starLeftOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starRightOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
 
-        spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
-        spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * 0.5f, scale / 5f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
 
         ApplyPlanetShader(SmileyPhase, shadowColor);
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
-        spriteBatch.Draw(moon, position, null, moonColor, rotation - MathHelper.PiOver2, moon.Size() * 0.5f, size, SpriteEffects.None, 0f);
+        spriteBatch.Draw(moon, position, null, moonColor, rotation - MathHelper.PiOver2, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
     #endregion
@@ -282,7 +286,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Vector2 upperMoonOffset = Moon8ExtraUpperPosition.RotatedBy(rotation) * scale;
         Vector2 lowerMoonOffset = Moon8ExtraLowerPosition.RotatedBy(rotation) * scale;
 
-        Vector2 origin = texture.Size() * 0.5f;
+        Vector2 origin = texture.Size() * .5f;
         Vector2 size = new Vector2(MoonSize * scale) / texture.Size();
 
         spriteBatch.Draw(texture, position + upperMoonOffset, null, moonColor, rotation, origin, size * Moon8ExtraUpperScale, SpriteEffects.None, 0f);
@@ -291,7 +295,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #endregion
 
-    public static void ApplyPlanetShader(float shadowAngle, Color shadowColor)
+    public static void ApplyPlanetShader(float shadowAngle, Color shadowColor, Color? atmosphereColor = null, Color? atmosphereShadowColor = null)
     {
         Effect planet = Planet.Value;
 
@@ -304,8 +308,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         planet.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
 
         planet.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
-        planet.Parameters["atmosphereColor"]?.SetValue(AtmosphereColor);
-        planet.Parameters["atmosphereShadowColor"]?.SetValue(AtmosphereShadowColor);
+        planet.Parameters["atmosphereColor"]?.SetValue(atmosphereColor?.ToVector4() ?? AtmosphereColor);
+
+        Vector4 atmoShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent.ToVector4() : (atmosphereShadowColor?.ToVector4() ?? AtmosphereShadowColor);
+        planet.Parameters["atmosphereShadowColor"]?.SetValue(atmoShadowColor);
 
         planet.CurrentTechnique.Passes[0].Apply();
     }
@@ -336,7 +342,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         if (CalamityFablesSystem.IsEnabled && 
             Main.moonType >= CalamityFablesSystem.PriorMoonStyles)
-            ret = FablesMoon[Math.Min(Main.moonType - (CalamityFablesSystem.PriorMoonStyles - 1), FablesMoon.Length - 1)].Value;
+            ret = FablesMoon[Math.Min(Main.moonType - CalamityFablesSystem.PriorMoonStyles, FablesMoon.Length - 1)].Value;
 
         if (BetterNightSkySystem.IsEnabled &&
             Main.moonType == BetterNightSkySystem.StyleIndex)
