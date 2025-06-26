@@ -10,7 +10,7 @@ using static System.Reflection.BindingFlags;
 namespace ZensSky.Common.Systems.Compat;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class CalamityFablesSystem : ModSystem
+public sealed class CalamityFablesSystem : IOrderedLoadable
 {
     #region Public Properties
 
@@ -22,7 +22,7 @@ public sealed class CalamityFablesSystem : ModSystem
 
     #region Loading
 
-    public override void Load() 
+    public void Load() 
     {
         PriorMoonStyles = TextureAssets.Moon.Length;
 
@@ -31,6 +31,7 @@ public sealed class CalamityFablesSystem : ModSystem
 
         IsEnabled = true;
 
+            // I don't feel like adding a project reference for a massive mod just for moon styles of all things.
         Assembly fablessAsm = ModLoader.GetMod("CalamityFables").Code;
 
         Type? moddedMoons = fablessAsm.GetType("CalamityFables.Core.ModdedMoons");
@@ -39,6 +40,10 @@ public sealed class CalamityFablesSystem : ModSystem
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
     }
+
+    public void Unload() { }
+
+    public short Index => 1;
 
     #endregion
 
@@ -53,7 +58,6 @@ public sealed class CalamityFablesSystem : ModSystem
             10 => true,
             13 => true,
             14 => true,
-            15 => true,
             _ => false
         };
     }

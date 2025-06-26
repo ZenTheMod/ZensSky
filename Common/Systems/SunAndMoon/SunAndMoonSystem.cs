@@ -23,7 +23,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #region Public Properties
 
-    // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
+        // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
     public static Vector2 SunPosition { get; private set; }
     public static Color SunColor { get; private set; }
     public static float SunRotation { get; private set; }
@@ -40,8 +40,20 @@ public sealed class SunAndMoonSystem : ModSystem
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
 
         // TODO: More inclusive system for other mods.
-    public static int MoonStyleCount =>
-        Textures.Moon.Length + (CalamityFablesSystem.IsEnabled ? Textures.FablesMoon.Length : 0);
+    public static int MoonStyleCount
+    {
+        get {
+            int moons = Textures.Moon.Length;
+
+            if (CalamityFablesSystem.IsEnabled)
+                moons += Textures.FablesMoon.Length;
+
+            if (BetterNightSkySystem.IsEnabled && BetterNightSkySystem.StyleIndex != -1)
+                moons++;
+
+            return moons;
+        }
+    }
 
     #endregion
 

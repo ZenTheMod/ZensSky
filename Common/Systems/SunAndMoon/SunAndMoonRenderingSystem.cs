@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
@@ -46,7 +47,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const float SingleMoonPhase = 0.125f;
 
-    private const int MoonSize = 62;
+    private static int MoonSize => TextureAssets.Moon[Main.moonType].Value.Width + 12;
 
     private const float MoonRadius = 0.9f;
     private const float MoonAtmosphere = 0.1f;
@@ -336,6 +337,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         if (CalamityFablesSystem.IsEnabled && 
             Main.moonType >= CalamityFablesSystem.PriorMoonStyles)
             ret = FablesMoon[Math.Min(Main.moonType - (CalamityFablesSystem.PriorMoonStyles - 1), FablesMoon.Length - 1)].Value;
+
+        if (BetterNightSkySystem.IsEnabled &&
+            Main.moonType == BetterNightSkySystem.StyleIndex)
+            ret = BetterNightSkyMoon.Value;
 
         if (WorldGen.drunkWorldGen)
             ret = Moon[0].Value;

@@ -53,7 +53,9 @@ If you would like to contribute to this mod, please send me a DM on Discord: [b]
 
 ✦ Textures ✦
 [list]
-    [*]Sprunolia (Huge help with HD Calamity Fables moons.)
+    [*]Sprunolia
     [*][url=https://www.solarsystemscope.com/textures/]​Solar System Scope Textures[/url]
+    [*][url=https://www.usgs.gov/]​USGS[/url]
+    [*][url=https://bjj.mmedia.is/]​Björn Jónsson's Planetary Maps[/url]
     [*]Ebonfly
 [/list]

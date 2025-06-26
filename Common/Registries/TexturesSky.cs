@@ -22,6 +22,8 @@ public static partial class Textures
 
     private static readonly Lazy<Asset<Texture2D>[]> _fablesMoon = new(() => RequestArray("Sky/FablesMoons/Moon", FablesMoonTextures));
 
+    private static readonly Lazy<Asset<Texture2D>> _betterNightSkyMoon = new(() => Request("Sky/BetterNightSkyMoon"));
+
     private static readonly Lazy<Asset<Texture2D>> _shootingStar = new(() => Request("Sky/ShootingStar"));
 
     public static Asset<Texture2D> Star => _star.Value;
@@ -36,6 +38,8 @@ public static partial class Textures
     public static Asset<Texture2D> SnowMoon => _snowMoon.Value;
 
     public static Asset<Texture2D>[] FablesMoon => _fablesMoon.Value;
+
+    public static Asset<Texture2D> BetterNightSkyMoon => _betterNightSkyMoon.Value;
 
     public static Asset<Texture2D> ShootingStar => _shootingStar.Value;
 }

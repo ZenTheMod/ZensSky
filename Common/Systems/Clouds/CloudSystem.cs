@@ -170,7 +170,8 @@ public sealed class CloudSystem : ModSystem
         Main.spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
-
+        
+            // TODO: More inclusive system for unhandled moon styles.
         device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture();
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
