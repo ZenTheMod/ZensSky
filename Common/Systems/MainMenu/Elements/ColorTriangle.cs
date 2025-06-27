@@ -1,6 +1,5 @@
 ﻿using Daybreak.Common.Features.Hooks;
 using Daybreak.Common.Rendering;
-using Daybreak.Core.Hooks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;

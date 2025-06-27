@@ -4,9 +4,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu.Elements;
-using ZensSky.Common.Systems.SunAndMoon;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
