@@ -19,6 +19,7 @@ public static class Shaders
     private static readonly Lazy<Asset<Effect>> _pixelateAndQuantize = new(() => Request("Sky/PixelateAndQuantize"));
 
     private static readonly Lazy<Asset<Effect>> _starAtmosphere = new(() => Request("Compat/StarAtmosphere"));
+    private static readonly Lazy<Asset<Effect>> _cyst = new(() => Request("Compat/Cyst"));
 
     private static readonly Lazy<Asset<Effect>> _panel = new(() => Request("UI/Panel"));
 
@@ -32,6 +33,7 @@ public static class Shaders
     public static Asset<Effect> PixelateAndQuantize => _pixelateAndQuantize.Value;
 
     public static Asset<Effect> StarAtmosphere => _starAtmosphere.Value;
+    public static Asset<Effect> Cyst => _cyst.Value;
 
     public static Asset<Effect> Panel => _panel.Value;
 

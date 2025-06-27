@@ -146,45 +146,4 @@ const float TAU = 6.28318530718;
 const float PI = 3.14159265359;
 const float PIOVER2 = 1.57079632679;
 
-float aafi(float2 p)
-{
-    float fi = atan2(p.y, p.x);
-    fi += step(p.y, 0) * TAU;
-    return fi;
-}
-
-float2 lonlat(float3 p)
-{
-    float lon = aafi(p.xy) / TAU;
-    float lat = aafi(float2(p.z, length(p.xy))) / PI;
-    return float2(1 - lon, lat);
-}
-
-float3x3 rotateX(float f)
-{
-    return float3x3(
-	    float3(1, 0, 0),
-	    float3(0, cos(f), -sin(f)),
-		float3(0, sin(f), cos(f))
-    );
-}
-
-float3x3 rotateY(float f)
-{
-    return float3x3(
-	    float3(cos(f), 0, sin(f)),
-	    float3(0, 1, 0),
-		float3(-sin(f), 0, cos(f))
-    );
-}
-
-float3x3 rotateZ(float f)
-{
-    return float3x3(
-	    float3(cos(f), -sin(f), 0),
-	    float3(sin(f), cos(f), 0),
-		float3(0, 0, 1)
-    );
-}
-
 #endif

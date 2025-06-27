@@ -25,30 +25,30 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const int SunTopBuffer = 50;
 
-    private static readonly Vector2[] FlareScales = [new(6f, 0.02f), new(3.3f, 0.09f), new(2f, 0.06f)];
-    private static readonly float[] FlareOpacities = [0.6f, 0.3f, 1f];
+    private static readonly Vector2[] FlareScales = [new(6f, .02f), new(3.3f, .09f), new(2f, .06f)];
+    private static readonly float[] FlareOpacities = [.6f, .3f, 1f];
 
     private const float FlareEdgeFallOffStart = 1f;
     private const float FlareEdgeFallOffEnd = 1.11f;
 
-    private const float SunOuterGlowScale = 0.35f;
-    private const float SunOuterGlowOpacity = 0.2f;
-    private const float SunInnerGlowScale = 0.23f;
+    private const float SunOuterGlowScale = .35f;
+    private const float SunOuterGlowOpacity = .2f;
+    private const float SunInnerGlowScale = .23f;
     private const float SunInnerGlowColorMultiplier = 3.4f;
-    private const float SunHugeGlowScale = 0.7f;
-    private const float SunHugeGlowOpacity = 0.25f;
+    private const float SunHugeGlowScale = .7f;
+    private const float SunHugeGlowOpacity = .25f;
 
-    private static readonly float[] EclipseBloomScales = [0.36f, 0.27f, 0.2f];
-    private static readonly float[] EclipseColorMultipliers = [0.2f, 1f, 1.6f];
+    private static readonly float[] EclipseBloomScales = [.36f, .27f, .2f];
+    private static readonly float[] EclipseColorMultipliers = [.2f, 1f, 1.6f];
 
-    private const float EclipseTendrilsScale = 0.16f;
+    private const float EclipseTendrilsScale = .16f;
 
-    private const float SunglassesScale = 0.3f;
+    private const float SunglassesScale = .3f;
 
-    private const float SingleMoonPhase = 0.125f;
+    private const float SingleMoonPhase = .125f;
 
-    private const float MoonRadius = 0.9f;
-    private const float MoonAtmosphere = 0.1f;
+    private const float MoonRadius = .9f;
+    private const float MoonAtmosphere = .1f;
 
         // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
     private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
@@ -57,17 +57,17 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private static readonly Vector2 SmileyLeftEyePosition = new(-24, -32);
     private static readonly Vector2 SmileyRightEyePosition = new(13, -44);
 
-    private const float SmileyPhase = 0.3125f;
+    private const float SmileyPhase = .3125f;
 
-    private static readonly Vector2 Moon2ExtraRingSize = new(0.28f, 0.07f);
-    private const float Moon2ExtraRingRotation = 0.13f;
+    private static readonly Vector2 Moon2ExtraRingSize = new(.28f, .07f);
+    private const float Moon2ExtraRingRotation = .13f;
     private const float Moon2ExtraShadowExponent = 15f;
     private const float Moon2ExtraShadowSize = 4.6f;
 
     private static readonly Vector2 Moon8ExtraUpperPosition = new(-30, -26);
     private static readonly Vector2 Moon8ExtraLowerPosition = new(34);
-    private const float Moon8ExtraUpperScale = 0.3f;
-    private const float Moon8ExtraLowerScale = 0.45f;
+    private const float Moon8ExtraUpperScale = .3f;
+    private const float Moon8ExtraLowerScale = .45f;
 
     #endregion
 

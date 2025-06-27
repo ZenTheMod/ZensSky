@@ -1,9 +1,11 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
+using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
@@ -15,7 +17,15 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 {
     #region Private Fields
 
-    private const float SingleMoonPhase = 0.125f;
+    private const float SingleMoonPhase = .125f;
+
+        // private const float MoonRadius = .9f;
+        // private const float MoonAtmosphere = .1f;
+
+    private const float CystAtmosphere = .175f;
+
+    private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
+    private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
 
     private static readonly Color DarkAtmosphere = new(13, 69, 96);
 
@@ -80,6 +90,9 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
             case 1:
                 DrawDark(spriteBatch, moon, position, rotation, scale);
                 break;
+            case 9:
+                DrawCyst(spriteBatch, moon, position, rotation, scale, moonColor, shadowColor);
+                break;
         };
     }
 
@@ -89,6 +102,30 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 
         Vector2 size = new(MoonSize * scale);
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+    }
+
+    private static void DrawCyst(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale, Color moonColor, Color shadowColor)
+    {
+        Effect planet = Shaders.Cyst.Value;
+
+        if (planet is null)
+            return;
+
+        planet.Parameters["atmosphereRange"]?.SetValue(CystAtmosphere);
+
+        float shadowAngle = Main.moonPhase * SingleMoonPhase;
+        planet.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
+
+        planet.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
+        planet.Parameters["atmosphereColor"]?.SetValue(AtmosphereColor);
+
+        Vector4 atmoShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent.ToVector4() : AtmosphereShadowColor;
+        planet.Parameters["atmosphereShadowColor"]?.SetValue(atmoShadowColor);
+
+        planet.CurrentTechnique.Passes[0].Apply();
+
+        Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
+        spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
     #endregion
