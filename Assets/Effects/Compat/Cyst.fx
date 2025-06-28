@@ -26,6 +26,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
 {
     float2 uv = (coords - .5) * 2;
     
+        // These will act as our "metamoons."
     float2 uv1 = (uv + pos1) / radius1;
     float dist1 = calcdist(uv1);
     
@@ -40,6 +41,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     float3 sp1 = sphere(uv1, 1 / dist, 1) * saturate(dist1);
     float3 sp2 = sphere(uv2, 1 / dist, 1) * saturate(dist2);
     
+        // This is the nicest way I've found to blend the two normal maps.
     float3 sum = lerp(sp1, sp2, ((-saturate(dist1)) + saturate(dist2) + 1) * .5);
     
     float shad = shadow(sum, shadowRotation);

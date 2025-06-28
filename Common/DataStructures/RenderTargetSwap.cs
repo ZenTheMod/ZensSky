@@ -4,10 +4,18 @@ using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.DataStructures;
 
+/// <summary>
+/// Allows for eay swapping and use of a <see cref="RenderTarget2D"/> using the <see cref="using"/> keyword, 
+/// and will reinitiallize the <see cref="RenderTarget2D"/> when using <see cref="RenderTargetSwap(ref RenderTarget2D?, int, int)"/>.
+/// </summary>
 public readonly ref struct RenderTargetSwap
 {
+    #region Public Properties
+
     private RenderTargetBinding[] OldTargets { get; init; }
     private Rectangle OldScissor { get; init; }
+
+    #endregion
 
     #region Public Constructors
 

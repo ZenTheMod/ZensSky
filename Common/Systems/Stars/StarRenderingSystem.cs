@@ -11,6 +11,7 @@ using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Utilities;
+using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -76,7 +77,7 @@ public sealed class StarRenderingSystem : ModSystem
         if (vanillaStyle)
             alpha *= VanillaStarsOpacity;
 
-        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress != SupernovaProgress.Exploding))
+        foreach (Star star in StarSystem.Stars.Where(s => s.SupernovaProgress != SupernovaProgress.Exploding))
         {
             Vector2 position = center + star.Position;
 
@@ -131,7 +132,7 @@ public sealed class StarRenderingSystem : ModSystem
 
         Vector2 origin = texture.Size() * 0.5f;
 
-        foreach (InteractableStar star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
+        foreach (Star star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
         {
             float time = star.SupernovaTimer / star.BaseSize;
             Vector2 position = center + star.Position;

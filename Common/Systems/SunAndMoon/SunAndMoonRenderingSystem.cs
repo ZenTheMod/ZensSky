@@ -69,11 +69,23 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private const float Moon8ExtraUpperScale = .3f;
     private const float Moon8ExtraLowerScale = .45f;
 
+    private const int BigMoonSize = 202;
+
     #endregion
 
     #region Public Properties
 
-    public static int MoonSize => TextureAssets.Moon[Main.moonType].Value.Width + 12;
+    public static int MoonSize
+    {
+        get
+        {
+            if (BetterNightSkySystem.IsEnabled &&
+                BetterNightSkySystem.UseBigMoon)
+                return BigMoonSize;
+
+            return TextureAssets.Moon[Main.moonType].Value.Width + 12;
+        }
+    }
 
     #endregion
 
@@ -204,7 +216,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         Texture2D moon = MoonTexture();
 
-        if (CalamityFablesSystem.IsEdgeCase())
+        bool canDrawEdgeCase = !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
+
+        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCase)
         {
             CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
             return;
@@ -218,19 +232,18 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         Texture2D rings = Moon2Rings.Value;
 
-            // This code is kinda soup. 😋
-        if (Main.moonType == 2)
+        if (Main.moonType == 2 && canDrawEdgeCase)
             DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * .5f, scale, moonColor, shadowColor);
 
         ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
 
-        if (Main.moonType == 8)
+        if (Main.moonType == 8 && canDrawEdgeCase)
             DrawMoon8Extras(spriteBatch, moon, position, rotation, scale, moonColor);
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
 
-        if (Main.moonType == 2)
+        if (Main.moonType == 2 && canDrawEdgeCase)
             DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * .5f, 0f), scale, moonColor, shadowColor);
     }
 
@@ -344,8 +357,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             Main.moonType >= CalamityFablesSystem.PriorMoonStyles)
             ret = FablesMoon[Math.Min(Main.moonType - CalamityFablesSystem.PriorMoonStyles, FablesMoon.Length - 1)].Value;
 
-        if (BetterNightSkySystem.IsEnabled &&
-            Main.moonType == BetterNightSkySystem.StyleIndex)
+        if (BetterNightSkySystem.IsEnabled && 
+            BetterNightSkySystem.UseBigMoon)
             ret = BetterNightSkyMoon.Value;
 
         if (WorldGen.drunkWorldGen)

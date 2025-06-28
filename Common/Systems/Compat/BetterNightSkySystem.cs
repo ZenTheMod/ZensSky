@@ -3,13 +3,15 @@ using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
+using Terraria.ModLoader.Config.UI;
+using ZensSky.Common.Config;
 using ZensSky.Common.Systems.SunAndMoon;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
@@ -19,30 +21,34 @@ namespace ZensSky.Common.Systems.Compat;
 [JITWhenModsEnabled("BetterNightSky")]
 [ExtendsFromMod("BetterNightSky")]
 [Autoload(Side = ModSide.Client)]
-public sealed class BetterNightSkySystem : IOrderedLoadable
+public sealed class BetterNightSkySystem : ModSystem
 {
     #region Private Fields
 
     private delegate void orig_On_Main_DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial);
     private static Hook? DisableDoubleOrig;
 
-    private static ILHook? LoadMoonStyle;
-    private static ILHook? UnloadMoonStyle;
+    private static ILHook? LoadSkip;
+    private static ILHook? UnloadSkip;
+
+    private static ILHook? NoReloadsRequired;
+
+    private static ILHook? ActuallyIgnoreReload;
 
     #endregion
 
     #region Public Properties
 
-    public static int StyleIndex { get; private set; }
-
     public static bool IsEnabled { get; private set; }
+
+    public static bool UseBigMoon => NightConfig.Config.UseHighResMoon;
 
     #endregion
 
     #region Loading
 
         // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
-    public void Load()
+    public override void Load()
     {
         IsEnabled = true;
 
@@ -52,40 +58,63 @@ public sealed class BetterNightSkySystem : IOrderedLoadable
             DisableDoubleOrig = new(on_Main_DrawStarsInBackground,
                 DoubleDetour);
 
-            // TODO: Rename this class.
-            // TODO: PR this to the original developer?
-            // TODO: Don't use sketchy load IL edits.
-        MethodInfo? onModLoad = typeof(BetterNightSky.BetterNightSky.BetterNightSkySystem).GetMethod(nameof(BetterNightSky.BetterNightSky.BetterNightSkySystem.OnModLoad), Public | Instance);
-
-        if (onModLoad is not null)
-            LoadMoonStyle = new(onModLoad,
-                AddMoonStyle);
-
+                // This is placed before the following check purely for a strange bugfix.
+            // When using our moon rework the scale is derived from the texture for accuracy,
+            // however this mods replaces every moon asset; This is also alarming as the resetting of these textures is derived from an unclamped asset replacement (https://github.com/IDGCaptainRussia94/BetterNightSky/blob/master/BetterNightSky.cs#L439).
+            // Although I'm likely the only person in the world who cares about this.
         MethodInfo? doUnloads = typeof(BetterNightSky.BetterNightSky.BetterNightSkySystem).GetMethod(nameof(BetterNightSky.BetterNightSky.BetterNightSkySystem.DoUnloads), Public | Instance);
 
         if (doUnloads is not null)
-            UnloadMoonStyle = new(doUnloads,
-                RemoveMoonStyle);
+            UnloadSkip = new(doUnloads,
+                JumpReset);
+
+        if (!SkyConfig.Instance.SunAndMoonRework)
+            return;
+
+            // TODO: Rename this class.
+        MethodInfo? onModLoad = typeof(BetterNightSky.BetterNightSky.BetterNightSkySystem).GetMethod(nameof(BetterNightSky.BetterNightSky.BetterNightSkySystem.OnModLoad), Public | Instance);
+
+        if (onModLoad is not null)
+            LoadSkip = new(onModLoad,
+                JumpReplacement);
+
+            // When using our moon rework the asset replacement is irrelevant and the reload is not required to activate the visual that is used.
+        MethodInfo? onBind = typeof(ConfigElement).GetMethod(nameof(ConfigElement.OnBind), Public | Instance);
+
+        if (onBind is not null)
+            NoReloadsRequired = new(onBind,
+                NoReloading);
+
+        MethodInfo? needsReload = typeof(ModConfig).GetMethod(nameof(ModConfig.NeedsReload), Public | Instance);
+
+        if (needsReload is not null)
+            ActuallyIgnoreReload = new(needsReload,
+                IgnoreReload);
     }
 
-    public void Unload() 
+    public override void Unload() 
     { 
         DisableDoubleOrig?.Dispose();
 
-        LoadMoonStyle?.Dispose();
-        UnloadMoonStyle?.Dispose();
+        LoadSkip?.Dispose();
+        UnloadSkip?.Dispose();
+
+        NoReloadsRequired?.Dispose();
+        ActuallyIgnoreReload?.Dispose();
     }
 
-    public short Index => 2;
-
     #endregion
+
+    #region Stars
 
     private void DoubleDetour(orig_On_Main_DrawStarsInBackground orig, On_Main.orig_DrawStarsInBackground origorig, Main self, Main.SceneArea sceneArea, bool artificial) =>
         origorig(self, sceneArea, artificial);
 
-    #region Load Moon Styles
+    #endregion
 
-    private void AddMoonStyle(ILContext il)
+    #region Skip Moon Replacement
+
+    private void JumpReplacement(ILContext il)
     {
         try
         {
@@ -95,38 +124,37 @@ public sealed class BetterNightSkySystem : IOrderedLoadable
                 i => i.MatchLdsfld<NightConfig>(nameof(NightConfig.Config)),
                 i => i.MatchLdfld<NightConfig>(nameof(NightConfig.UseHighResMoon)));
 
-            c.EmitDelegate((bool useHighRes) =>
-            {
-                StyleIndex = -1;
+            c.EmitPop();
 
-                if (!useHighRes)
-                    return false;
-
-                Array.Resize(ref TextureAssets.Moon, TextureAssets.Moon.Length + 1);
-
-                StyleIndex = TextureAssets.Moon.Length - 1;
-
-                    // TODO: Lazy loading.
-                TextureAssets.Moon[^1] = ModContent.Request<Texture2D>("BetterNightSky/Textures/Moon1", AssetRequestMode.AsyncLoad);
-
-                return false;
-            });
+            c.EmitLdcI4(0);
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"BetterNightSky.BetterNightSkySystem.OnModLoad\".");
+            Mod.Logger.Error("Failed to patch \"BetterNightSky.BetterNightSkySystem.OnModLoad\".");
 
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
-    private void RemoveMoonStyle(ILContext il)
+    private void JumpReset(ILContext il)
     {
         try
         {
             ILCursor c = new(il);
 
             ILLabel skipLoopTarget = c.DefineLabel();
+
+                // Unsure of the cause but occiasionally Main.DrawStar throws IndexOutOfRangeException, I'm hoping this fixes it.
+            if (c.TryGotoNext(MoveType.After,
+                i => i.MatchLdcI4(5)))
+            {
+                c.EmitPop();
+
+                c.EmitLdcI4(4);
+            }
+
+            if (!SkyConfig.Instance.SunAndMoonRework)
+                return;
 
             c.GotoNext(i => i.MatchRet());
 
@@ -141,42 +169,86 @@ public sealed class BetterNightSkySystem : IOrderedLoadable
                 i => i.MatchStloc(out _),
                 i => i.MatchBr(out _));
 
-            c.EmitDelegate(() =>
-            {
-                if (!NightConfig.Config.UseHighResMoon)
-                    return;
-
-                Asset<Texture2D> betterNightSkyMoon = ModContent.Request<Texture2D>("BetterNightSky/Textures/Moon1", AssetRequestMode.AsyncLoad);
-                int index = -1;
-                for (int i = 0; i < TextureAssets.Moon.Length; i++)
-                {
-                    if (TextureAssets.Moon[i] != betterNightSkyMoon)
-                        continue;
-
-                    index = i;
-                    break;
-                }
-
-                if (TextureAssets.Moon.Length > StyleIndex + 1)
-                {
-                    int j = 0;
-                    for (int i = index + 1; i < TextureAssets.Moon.Length; i++)
-                    {
-                        TextureAssets.Moon[index + j] = TextureAssets.Moon[i];
-                        j++;
-                    }
-                }
-
-                Array.Resize(ref TextureAssets.Moon, TextureAssets.Moon.Length - 1);
-            });
-
             c.EmitBr(skipLoopTarget);
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DrawSunAndMoon\".");
+            Mod.Logger.Error("Failed to patch \"Main.DrawSunAndMoon\".");
+
+            throw new ILPatchFailureException(Mod, il, e);
+        }
+    }
+
+    #endregion
+
+    #region Minor Inconvenience
+
+    private void NoReloading(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            c.GotoNext(i => i.MatchRet());
+
+            c.GotoPrev(MoveType.After,
+                i => i.MatchCall(typeof(ConfigManager).FullName ?? "Terraria.ModLoader.Config.ConfigManager", nameof(ConfigManager.GetCustomAttributeFromMemberThenMemberType)),
+                i => i.MatchLdnull(),
+                i => i.MatchCgtUn());
+
+            c.EmitLdarg0();
+            c.EmitDelegate((bool reloadRequired, ConfigElement element) =>
+            {
+                if (element.MemberInfo.IsField &&
+                    element.MemberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&
+                    element.MemberInfo.Type == NightConfig.Config.UseHighResMoon.GetType())
+                    return false;
+
+                return reloadRequired;
+            });
+        }
+        catch (Exception e)
+        {
+            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"ConfigElement.OnBind\".");
 
             throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+        }
+    }
+
+    private void IgnoreReload(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel? loopStartTarget = c.DefineLabel();
+
+            int memberInfoIndex = -1;
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchBr(out loopStartTarget),
+                i => i.MatchLdloc(out _),
+                i => i.MatchCallvirt<IEnumerator<PropertyFieldWrapper>>($"get_{nameof(IEnumerator<>.Current)}"),
+                i => i.MatchStloc(out memberInfoIndex));
+
+            c.EmitLdloc(memberInfoIndex);
+            c.EmitDelegate((PropertyFieldWrapper memberInfo) =>
+            {
+                if (memberInfo.IsField &&
+                    memberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&
+                    memberInfo.Type == NightConfig.Config.UseHighResMoon.GetType())
+                    return false;
+
+                return true;
+            });
+
+            c.EmitBrfalse(loopStartTarget);
+        }
+        catch (Exception e)
+        {
+            Mod.Logger.Error("Failed to patch \"ModConfig.NeedsReload\".");
+
+            throw new ILPatchFailureException(Mod, il, e);
         }
     }
 
@@ -184,6 +256,7 @@ public sealed class BetterNightSkySystem : IOrderedLoadable
 
     #region Drawing
 
+        // TODO: Include other non 'Special' star drawing.
     public static void DrawSpecialStars(float alpha)
     {
         Main.spriteBatch.End(out var snapshot);

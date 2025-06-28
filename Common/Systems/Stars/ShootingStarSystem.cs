@@ -114,7 +114,7 @@ public sealed class ShootingStarSystem : ModSystem
             return;
         }
 
-        Star.starFallCount++;
+        Terraria.Star.starFallCount++;
         SpawnShootingStar();
     }
 

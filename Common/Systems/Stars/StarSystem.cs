@@ -9,7 +9,8 @@ using Terraria;
 using ZensSky.Common.DataStructures;
 using System.Linq;
 using ZensSky.Common.Utilities;
-using static ZensSky.Common.DataStructures.InteractableStar;
+using Star = ZensSky.Common.DataStructures.Star;
+using static ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -40,7 +41,7 @@ public sealed class StarSystem : ModSystem
     #region Public Fields
 
     public const int StarCount = 1200;
-    public static readonly InteractableStar[] Stars = new InteractableStar[StarCount];
+    public static readonly Star[] Stars = new Star[StarCount];
 
     #endregion
 
@@ -99,11 +100,11 @@ public sealed class StarSystem : ModSystem
 
         for (int i = 0; i < StarCount; i++)
         {
-            InteractableStar star = Stars[i];
+            Star star = Stars[i];
 
             if (star.SupernovaProgress == SupernovaProgress.None)
                 continue;
-
+                // TODO: Sub-Method to shrink down this switch statement slop.
             switch (star.SupernovaProgress)
             {
                 case SupernovaProgress.Shrinking:
@@ -173,17 +174,17 @@ public sealed class StarSystem : ModSystem
 
         int index = 0;
 
-        ReadOnlySpan<InteractableStar> starSpan = Stars.AsSpan();
+        ReadOnlySpan<Star> starSpan = Stars.AsSpan();
         for (int i = 0; i < starSpan.Length; i++)
         {
-            InteractableStar star = starSpan[i];
+            Star star = starSpan[i];
 
             if (star.SupernovaProgress == SupernovaProgress.None)
                 continue;
 
             tag[nameof(Stars) + index] = i;
-            tag[nameof(InteractableStar.SupernovaProgress) + index] = (byte)star.SupernovaProgress;
-            tag[nameof(InteractableStar.SupernovaTimer) + index] = star.SupernovaTimer;
+            tag[nameof(Star.SupernovaProgress) + index] = (byte)star.SupernovaProgress;
+            tag[nameof(Star.SupernovaTimer) + index] = star.SupernovaTimer;
 
             index++;
         }
@@ -201,8 +202,8 @@ public sealed class StarSystem : ModSystem
             {
                 int index = tag.Get<int>(nameof(Stars) + i);
 
-                Stars[index].SupernovaProgress = (SupernovaProgress)tag.Get<byte>(nameof(InteractableStar.SupernovaProgress) + i);
-                Stars[index].SupernovaTimer = tag.Get<float>(nameof(InteractableStar.SupernovaTimer) + i);
+                Stars[index].SupernovaProgress = (SupernovaProgress)tag.Get<byte>(nameof(Star.SupernovaProgress) + i);
+                Stars[index].SupernovaTimer = tag.Get<float>(nameof(Star.SupernovaTimer) + i);
             }
         }
         catch (Exception ex)
@@ -222,10 +223,10 @@ public sealed class StarSystem : ModSystem
         int count = Stars.Count(s => s.SupernovaProgress > SupernovaProgress.None);
         writer.Write7BitEncodedInt(count);
 
-        ReadOnlySpan<InteractableStar> starSpan = Stars.AsSpan();
+        ReadOnlySpan<Star> starSpan = Stars.AsSpan();
         for (int i = 0; i < starSpan.Length; i++)
         {
-            InteractableStar star = starSpan[i];
+            Star star = starSpan[i];
 
             if (star.SupernovaProgress == SupernovaProgress.None)
                 continue;
@@ -267,17 +268,18 @@ public sealed class StarSystem : ModSystem
     {
         StarRotation = 0f;
 
-        if (Stars is not null)
+        if (Stars is null)
+            return;
+
+        for (int i = 0; i < StarCount; i++)
         {
-            for (int i = 0; i < StarCount; i++)
-            {
-                Stars[i].SupernovaProgress = SupernovaProgress.None;
-                Stars[i].SupernovaTimer = 0f;
-            }
+            Stars[i].SupernovaProgress = SupernovaProgress.None;
+            Stars[i].SupernovaTimer = 0f;
         }
+
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     private static float CalculateStarAlpha()
     {
         float alpha;

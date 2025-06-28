@@ -13,7 +13,7 @@ using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 namespace ZensSky.Common.Systems.Compat;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class CalamityFablesSystem : IOrderedLoadable
+public sealed class CalamityFablesSystem : ModSystem
 {
     #region Private Fields
 
@@ -41,7 +41,7 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 
     #region Loading
 
-    public void Load() 
+    public override void Load() 
     {
         PriorMoonStyles = TextureAssets.Moon.Length;
 
@@ -59,10 +59,6 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
     }
-
-    public void Unload() { }
-
-    public short Index => 1;
 
     #endregion
 
@@ -83,6 +79,7 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
 
     #region Drawing
 
+        // Handle a bunch of edge cases for moons with non standard visuals.
     public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
         switch (Main.moonType - PriorMoonStyles)
@@ -96,6 +93,7 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
         };
     }
 
+        // To maintain consistency with Fables I've used the light atmosphere color to act as Dark's outline and decided to not show the shadow atmosphere color.
     private static void DrawDark(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale)
     {
         ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, Color.Black, DarkAtmosphere, Color.Transparent);
@@ -104,6 +102,7 @@ public sealed class CalamityFablesSystem : IOrderedLoadable
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
+        // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.
     private static void DrawCyst(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale, Color moonColor, Color shadowColor)
     {
         Effect planet = Shaders.Cyst.Value;

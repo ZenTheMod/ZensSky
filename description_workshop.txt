@@ -1,5 +1,5 @@
 ﻿[h1]✦ Zen's Sky ✦[/h1]
-A highly cross-compatible mod that vastly improves the visual style of the sky in various ways.
+A highly configurable, and cross-compatible mod that vastly improves the visual style of the sky in various ways.
 As well as including simple and easy to use menu configuration straight from the titlescreen; you don't even have to click save!
 
 [h2]✦ Features ✦[/h2]
@@ -7,7 +7,7 @@ As well as including simple and easy to use menu configuration straight from the
 [b]Currently adds:[/b]
 [list]
     [*]More dynamic sun in the style of 1.4.5 leaks.
-    [*]More accurate moon, works for every vanilla moon style.
+    [*]More accurate moon, works for every vanilla moon style (Including Calamity Fables's 16 additional moon styles).
     [*]Prettier stars.
     [*]Supernovae.
     [*]Fancy shooting stars.
@@ -16,14 +16,19 @@ As well as including simple and easy to use menu configuration straight from the
     [*]Menu configuration via a dropdown.
 [/list]
 
-[b]Compatibility with:[/b]
+[b]Compatibility with big mods like:[/b]
 'Realistic Sky' by Lucille Karma,
-*'Wrath of the Gods' by Lucille Karma 
+*'Wrath of the Gods' by Lucille Karma
     (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),
-'Red Sun and Realistic Sky' by Waffles22, 
 'Lights And Shadows' by yiyang233,
-'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy.
 'Calamity Fables' by IbanPlay.
+
+[b]And even small mods like:[/b]
+'Calamity Mod' by Ozzatron,
+'Red Sun and Realistic Sky' by Waffles22,
+'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy.
+
+[h2]✦ Misc ✦[/h2]
 
 [u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 
@@ -42,6 +47,7 @@ If you would like to contribute to this mod, please send me a DM on Discord: [b]
 [list]
     [*]Sprunolia
     [*]Ebonfly
+    [*]jupiter.ryo
     [*]Azathoth
     [*]Tuna
     [*]Lion8Cake
@@ -54,6 +60,7 @@ If you would like to contribute to this mod, please send me a DM on Discord: [b]
 ✦ Textures ✦
 [list]
     [*]Sprunolia
+    [*][url=https://spaceengine.org/]​Space Engine[/url]
     [*][url=https://www.solarsystemscope.com/textures/]​Solar System Scope Textures[/url]
     [*][url=https://www.usgs.gov/]​USGS[/url]
     [*][url=https://bjj.mmedia.is/]​Björn Jónsson's Planetary Maps[/url]

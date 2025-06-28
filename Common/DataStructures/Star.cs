@@ -13,7 +13,11 @@ public enum SupernovaProgress : byte
     Regenerating = 3
 }
 
-public record struct InteractableStar
+    // Thanks to jupiter.ryo for early help with this.
+/// <summary>
+/// A simpler version of <see cref="Terraria.Star"/> that provides extra supernova functionality with <see cref="SupernovaTimer"/> and <see cref="SupernovaProgress"/>.
+/// </summary>
+public record struct Star
 {
     #region Private Fields
 
@@ -33,16 +37,26 @@ public record struct InteractableStar
 
     #endregion
 
+    #region Public Properties
+
     public required Vector2 Position { get; init; }
+
     public required Color Color { get; init; }
+
     public required float BaseSize { get; init; }
+
     public required float Rotation { get; init; }
+
     public required float Twinkle { get; init; }
+
     public required int StarType { get; init; }
+
     public float SupernovaTimer { get; set; }
     public SupernovaProgress SupernovaProgress { get; set; }
 
-    public static InteractableStar CreateRandom(UnifiedRandom rand) => new()
+    #endregion
+
+    public static Star CreateRandom(UnifiedRandom rand) => new()
     {
         Position = rand.NextUniformVector2Circular(CircularRadius),
         Color = GenerateColor(rand.NextFloat(1)),
