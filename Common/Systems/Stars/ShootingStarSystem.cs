@@ -24,6 +24,12 @@ public sealed class ShootingStarSystem : ModSystem
 
     #endregion
 
+    #region Public Properties
+
+    public static bool ShowShootingStars {  get; set; }
+
+    #endregion
+
     #region Loading
 
     public override void Load()
@@ -108,7 +114,7 @@ public sealed class ShootingStarSystem : ModSystem
 
     private void ModifyFallingStarSpawn(On_Star.orig_StarFall orig, float positionX)
     {
-        if (!StarSystem.CanDrawStars)
+        if (!ZensSky.CanDrawSky || !ShowShootingStars)
         {
             orig(positionX);
             return;

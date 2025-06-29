@@ -30,6 +30,9 @@
 		<Reference Include="BetterNightSky">
 			<HintPath>..\ModAssemblies\BetterNightSky.dll</HintPath>
 		</Reference>
+		<Reference Include="YouBoss">
+			<HintPath>..\ModAssemblies\YouBoss.dll</HintPath>
+		</Reference>
 		
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
@@ -52,6 +55,9 @@
 
 		<!-- Publicize BetterNightSky -->
 		<Publicize Include="BetterNightSky" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+
+		<!-- Publicize YouBoss -->
+		<Publicize Include="YouBoss" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed.) -->

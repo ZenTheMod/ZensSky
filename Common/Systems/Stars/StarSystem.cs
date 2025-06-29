@@ -47,11 +47,11 @@ public sealed class StarSystem : ModSystem
 
     #region Public Properties
 
-    public static bool CanDrawStars { get; private set; }
-
     public static float StarRotation { get; private set; }
 
     public static float StarAlpha { get; private set; }
+
+    public static float StarAlphaOverride { get; set; } = -1;
 
     #endregion
 
@@ -66,15 +66,13 @@ public sealed class StarSystem : ModSystem
 
     public override void Unload() => MiscUtils.SafeMainThreadAction(() => On_Star.UpdateStars -= UpdateStars);
 
-    public override void PostSetupContent() => CanDrawStars = true;
-
     #endregion
 
     #region Updating
 
     private void UpdateStars(On_Star.orig_UpdateStars orig)
     {
-        if (!CanDrawStars)
+        if (!ZensSky.CanDrawSky)
         {
             orig();
             return;
@@ -82,8 +80,6 @@ public sealed class StarSystem : ModSystem
 
         float dayRateDivisor = Main.gameMenu ? MainMenuDayRateDivisor : GameDayRateDivisor;
         StarRotation += (float)(Main.dayRate / dayRateDivisor);
-
-        StarAlpha = CalculateStarAlpha();
 
         UpdateSupernovae();
 
@@ -330,6 +326,13 @@ public sealed class StarSystem : ModSystem
 
         for (int i = 0; i < StarCount; i++)
             Stars[i] = CreateRandom(rand);
+    }
+
+    public static void UpdateStarAlpha()
+    {
+        StarAlpha = StarAlphaOverride == -1 ? CalculateStarAlpha() : StarAlphaOverride;
+
+        StarAlphaOverride = -1;
     }
 
     #endregion

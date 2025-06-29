@@ -9,7 +9,6 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu;
-using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
@@ -76,10 +75,15 @@ public sealed class RedSunSystem : ModSystem
 
             c.EmitDelegate(() =>
             {
-                if (!StarSystem.CanDrawStars || !SkipDrawing)
+                if (!ZensSky.CanDrawSky ||
+                !SkipDrawing ||
+                (!ShowSun && !ShowMoon))
                     return;
 
                 Draw();
+
+                ShowSun = true;
+                ShowMoon = true;
             });
 
             c.GotoNext(MoveType.After,
@@ -272,11 +276,12 @@ public sealed class RedSunSystem : ModSystem
         Color moonColor = MoonColor * MoonScale;
         moonColor.A = 255;
 
-        if (Main.dayTime)
+        if (Main.dayTime && ShowSun)
             DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
 
-            // Draw the moon regardless due to this mod.
-        DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+            // Draw the moon regardless* due to this mod.
+        if (ShowMoon)
+            DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
 
         spriteBatch.Restart(in snapshot);
     }

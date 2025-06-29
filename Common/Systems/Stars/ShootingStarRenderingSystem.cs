@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
+using static ZensSky.Common.Systems.Stars.ShootingStarSystem;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -72,8 +73,11 @@ public sealed class ShootingStarRenderingSystem : ModSystem
 
     private static void DrawShootingStars()
     {
-        if (!StarSystem.CanDrawStars)
+        if (!ZensSky.CanDrawSky || !ShowShootingStars)
+        {
+            ShowShootingStars = true;
             return;
+        }
 
         SpriteBatch spriteBatch = Main.spriteBatch;
 
@@ -84,7 +88,7 @@ public sealed class ShootingStarRenderingSystem : ModSystem
         spriteBatch.End(out var snapshot);
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
 
-        foreach (ShootingStar star in ShootingStarSystem.ShootingStars.Where(s => s.IsActive))
+        foreach (ShootingStar star in ShootingStars.Where(s => s.IsActive))
             DrawShootingStar(spriteBatch, device, star, alpha);
 
         spriteBatch.Restart(in snapshot);

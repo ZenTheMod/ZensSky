@@ -29,6 +29,12 @@ public sealed class CloudSystem : ModSystem
 
     #endregion
 
+    #region Public Properties
+
+    public static bool LightClouds { get; set; }
+
+    #endregion
+
     #region Loading
 
     public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG += ApplyCloudLighting);
@@ -150,6 +156,13 @@ public sealed class CloudSystem : ModSystem
             c.EmitDelegate(ResetSpritebatch);
 
             #endregion
+
+            c.GotoNext(MoveType.Before,
+                i => i.MatchRet());
+
+            c.MoveAfterLabels();
+
+            c.EmitDelegate(() => { LightClouds = true; });
         }
         catch (Exception e)
         {
@@ -161,7 +174,7 @@ public sealed class CloudSystem : ModSystem
 
     private void ApplyShader(ref SpriteBatchSnapshot snapshot, Effect lighting)
     {
-        if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
+        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || lighting is null)
             return;
 
         lighting.CurrentTechnique.Passes[0].Apply();
@@ -171,14 +184,13 @@ public sealed class CloudSystem : ModSystem
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
         
-            // TODO: More inclusive system for unhandled moon styles.
-        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture();
+        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture;
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
 
     private void ResetSpritebatch(SpriteBatchSnapshot snapshot)
     {
-        if (!SkyConfig.Instance.CloudsEnabled)
+        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled)
             return;
 
         Main.spriteBatch.Restart(in snapshot);

@@ -12,6 +12,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Utilities;
 using Star = ZensSky.Common.DataStructures.Star;
+using static ZensSky.Common.Systems.Stars.StarSystem;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -66,7 +67,7 @@ public sealed class StarRenderingSystem : ModSystem
         Texture2D flareTexture = Textures.Star.Value;
         Vector2 flareOrigin = flareTexture.Size() * 0.5f;
 
-        float flareRotation = -StarSystem.StarRotation;
+        float flareRotation = -StarRotation;
 
         Texture2D bloomTexture = Textures.SunBloom.Value;
         Vector2 bloomOrigin = bloomTexture.Size() * 0.5f;
@@ -162,16 +163,18 @@ public sealed class StarRenderingSystem : ModSystem
 
     private void DrawStarsToSky(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
-        if (!StarSystem.CanDrawStars)
+        if (!ZensSky.CanDrawSky)
         {
             orig(self, sceneArea, artificial);
             return;
         }
 
+        UpdateStarAlpha();
+
         SpriteBatch spriteBatch = Main.spriteBatch;
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        float alpha = StarSystem.StarAlpha;
+        float alpha = StarAlpha;
 
         Vector2 screenCenter = MiscUtils.HalfScreenSize;
 
@@ -206,7 +209,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     public static Matrix RotationMatrix()
     {
-        Matrix rotation = Matrix.CreateRotationZ(StarSystem.StarRotation);
+        Matrix rotation = Matrix.CreateRotationZ(StarRotation);
         Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
         Matrix revoffset = Matrix.CreateTranslation(new(-MiscUtils.HalfScreenSize, 0f));
 

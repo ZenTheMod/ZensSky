@@ -4,6 +4,12 @@ namespace ZensSky;
 
 public sealed class ZensSky : Mod
 {
+    public static bool CanDrawSky { get; private set; }
+
+    public override void PostSetupContent() => CanDrawSky = true;
+
+        // TODO: Mod.Call implementation.
+
     /*
         private static IOrderedLoadable?[]? Cache;
 

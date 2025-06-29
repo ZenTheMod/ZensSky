@@ -18,25 +18,28 @@ public sealed class SunAndMoonSystem : ModSystem
     private const float MinSunBrightness = 0.82f;
     private const float MinMoonBrightness = 0.35f;
 
+    private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
+
     #endregion
 
     #region Public Properties
 
-        // These used to be the same for both the sun and moon, but due to other mods I've seperated them for ease of use.
     public static Vector2 SunPosition { get; private set; }
     public static Color SunColor { get; private set; }
     public static float SunRotation { get; private set; }
     public static float SunScale { get; private set; }
+
+    public static bool ShowSun { get; set; } = true;
 
     public static Vector2 MoonPosition { get; private set; }
     public static Color MoonColor { get; private set; }
     public static float MoonRotation { get; private set; }
     public static float MoonScale { get; private set; }
 
+    public static bool ShowMoon { get; set; } = true;
+
     public static Main.SceneArea SceneArea { get; private set; }
     public static Vector2 SceneAreaSize => new(SceneArea.totalWidth, SceneArea.totalHeight);
-
-    private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
 
     #endregion
 
