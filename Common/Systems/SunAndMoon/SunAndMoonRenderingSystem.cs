@@ -172,7 +172,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         if (!Main.gameMenu && Main.LocalPlayer.head == 12)
         {
             Texture2D sunglasses = Sunglasses.Value;
-            spriteBatch.Draw(sunglasses, position, null, Color.White, 0, sunglasses.Size() * 0.5f, SunglassesScale * scale, SpriteEffects.None, 0f);
+            spriteBatch.Draw(sunglasses, position, null, Color.White, rotation, sunglasses.Size() * .5f, SunglassesScale * scale, SpriteEffects.None, 0f);
         }
 
         #endregion
@@ -218,15 +218,15 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         bool canDrawEdgeCase = !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
 
-        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCase)
-        {
-            CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
-            return;
-        }
-
         if (WorldGen.drunkWorldGen)
         {
             DrawSmiley(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor);
+            return;
+        }
+
+        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCase)
+        {
+            CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
             return;
         }
 
