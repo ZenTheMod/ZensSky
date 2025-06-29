@@ -15,6 +15,8 @@ public static partial class Textures
     private static readonly Lazy<Asset<Texture2D>> _sunBloom = new(() => Request("Sky/SunBloom"));
     private static readonly Lazy<Asset<Texture2D>> _sunglasses = new(() => Request("Sky/Sunglasses"));
 
+    private static readonly Lazy<Asset<Texture2D>> _creppySun = new(() => Request("Sky/CreppySun"));
+
     private static readonly Lazy<Asset<Texture2D>[]> _moon = new(() => RequestArray("Sky/Moon", MoonTextures));
     private static readonly Lazy<Asset<Texture2D>> _moon2Rings = new(() => Request("Sky/Rings"));
     private static readonly Lazy<Asset<Texture2D>> _pumpkinMoon = new(() => Request("Sky/MoonPumpkin"));
@@ -24,6 +26,8 @@ public static partial class Textures
 
     private static readonly Lazy<Asset<Texture2D>> _betterNightSkyMoon = new(() => Request("Sky/BetterNightSkyMoon"));
 
+    private static readonly Lazy<Asset<Texture2D>> _creppyMoon = new(() => Request("Sky/CreppyMoon"));
+
     private static readonly Lazy<Asset<Texture2D>> _shootingStar = new(() => Request("Sky/ShootingStar"));
 
     public static Asset<Texture2D> Star => _star.Value;
@@ -31,6 +35,8 @@ public static partial class Textures
 
     public static Asset<Texture2D> SunBloom => _sunBloom.Value;
     public static Asset<Texture2D> Sunglasses => _sunglasses.Value;
+
+    public static Asset<Texture2D> CreppySun => _creppySun.Value;
 
     public static Asset<Texture2D>[] Moon => _moon.Value;
     public static Asset<Texture2D> Moon2Rings => _moon2Rings.Value;
@@ -40,6 +46,8 @@ public static partial class Textures
     public static Asset<Texture2D>[] FablesMoon => _fablesMoon.Value;
 
     public static Asset<Texture2D> BetterNightSkyMoon => _betterNightSkyMoon.Value;
+
+    public static Asset<Texture2D> CreppyMoon => _creppyMoon.Value;
 
     public static Asset<Texture2D> ShootingStar => _shootingStar.Value;
 }

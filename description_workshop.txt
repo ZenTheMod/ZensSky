@@ -21,7 +21,8 @@ As well as including simple and easy to use menu configuration straight from the
 *'Wrath of the Gods' by Lucille Karma
     (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),
 'Lights And Shadows' by yiyang233,
-'Calamity Fables' by IbanPlay.
+'Calamity Fables' by IbanPlay,
+'Creppy Mod' by Zinkle.
 
 [b]And even small mods like:[/b]
 'Calamity Mod' by Ozzatron,

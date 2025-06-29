@@ -166,6 +166,13 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #endregion
 
+        #region Creppy Mode
+
+        if (CreppyModSystem.IsEnabled)
+            CreppyModSystem.DrawCreppySun(spriteBatch, position, rotation, scale);
+
+        #endregion
+
         #region Sungls
 
             // Not ideal to check every frame.
@@ -217,6 +224,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Texture2D moon = MoonTexture();
 
         bool canDrawEdgeCase = !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
+
+        if (CreppyModSystem.IsEnabled &&
+            CreppyModSystem.CreppyModeOn)
+            canDrawEdgeCase = false;
 
         if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCase)
         {
@@ -360,6 +371,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         if (BetterNightSkySystem.IsEnabled && 
             BetterNightSkySystem.UseBigMoon)
             ret = BetterNightSkyMoon.Value;
+
+        if (CreppyModSystem.IsEnabled &&
+            CreppyModSystem.CreppyModeOn)
+            ret = CreppyMoon.Value;
 
         if (WorldGen.drunkWorldGen)
             ret = Moon[0].Value;
