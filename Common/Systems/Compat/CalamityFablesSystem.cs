@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
@@ -82,15 +83,21 @@ public sealed class CalamityFablesSystem : ModSystem
         // Handle a bunch of edge cases for moons with non standard visuals.
     public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
+        DrawShatter(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
+        return;
+
         switch (Main.moonType - PriorMoonStyles)
         {
             case 1:
                 DrawDark(spriteBatch, moon, position, rotation, scale);
                 break;
+            case 8:
+                DrawShatter(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
+                break;
             case 9:
                 DrawCyst(spriteBatch, moon, position, rotation, scale, moonColor, shadowColor);
                 break;
-        };
+        }
     }
 
         // To maintain consistency with Fables I've used the light atmosphere color to act as Dark's outline and decided to not show the shadow atmosphere color.
@@ -100,6 +107,20 @@ public sealed class CalamityFablesSystem : ModSystem
 
         Vector2 size = new(MoonSize * scale);
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+    }
+
+    private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
+    {
+        Matrix matrix = Matrix.CreateScale(90.6f);
+
+        spriteBatch.End(out var snapshot);
+        //spriteBatch.Begin(SpriteSortMode.Deferred, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, matrix);
+
+        device.Textures[0] = moon;
+
+        Models.Shatter.Value?.Draw(device);
+
+        spriteBatch.Begin(in snapshot);
     }
 
         // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.

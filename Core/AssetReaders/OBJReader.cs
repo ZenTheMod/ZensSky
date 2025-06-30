@@ -25,13 +25,17 @@ public sealed class OBJReader : IAssetReader, ILoadable
             assetReaderCollection.RegisterReader(this, Extension);
     }
 
-    public void Unload()
-    {
-        AssetReaderCollection? assetReaderCollection = Main.instance.Services.Get<AssetReaderCollection>();
+    public void Unload() { }
 
-        if (assetReaderCollection.TryGetReader(Extension, out IAssetReader reader) && reader == this)
-            assetReaderCollection.RegisterReader(this, Extension);
-    }
+    /*
+        public void Unload()
+        {
+            AssetReaderCollection? assetReaderCollection = Main.instance.Services.Get<AssetReaderCollection>();
+
+            if (assetReaderCollection.TryGetReader(Extension, out IAssetReader reader) && reader == this)
+                assetReaderCollection.RemoveExtension(Extension);
+        } 
+    */
 
     #endregion
 
@@ -42,7 +46,7 @@ public sealed class OBJReader : IAssetReader, ILoadable
 
         await mainThreadCtx;
 
-        var result = OBJModel.Create(stream);
+        OBJModel? result = OBJModel.Create(stream);
 
         return (result as T)!;
     }

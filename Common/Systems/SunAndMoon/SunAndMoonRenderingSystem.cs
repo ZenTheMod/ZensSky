@@ -8,7 +8,6 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
 using static ZensSky.Common.Registries.Shaders;
 using static ZensSky.Common.Registries.Textures;
@@ -253,7 +252,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             return;
         }
 
-        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCases)
+        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCases || true)
         {
             CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
             return;
