@@ -2,7 +2,7 @@
 using Terraria;
 using ZensSky.Common.Utilities;
 
-namespace ZensSky.Common.DataStructures;
+namespace ZensSky.Core.DataStructures;
 
 /// <summary>
 /// Allows for eay swapping and use of a <see cref="RenderTarget2D"/> using the <see cref="using"/> keyword, 

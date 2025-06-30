@@ -1,4 +1,7 @@
+using ReLogic.Content.Sources;
+using Terraria;
 using Terraria.ModLoader;
+using ZensSky.Core.AssetReaders;
 
 namespace ZensSky;
 
@@ -8,7 +11,15 @@ public sealed class ZensSky : Mod
 
     public override void PostSetupContent() => CanDrawSky = true;
 
-        // TODO: Mod.Call implementation.
+    public override IContentSource CreateDefaultContentSource()
+    {
+        if (!Main.dedServ)
+            AddContent(new OBJReader());
+
+        return base.CreateDefaultContentSource();
+    }
+
+    // TODO: Mod.Call implementation.
 
     /*
         private static IOrderedLoadable?[]? Cache;

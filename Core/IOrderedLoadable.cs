@@ -1,4 +1,4 @@
-﻿namespace ZensSky.Common;
+﻿namespace ZensSky.Core;
 
 public interface IOrderedLoadable
 {

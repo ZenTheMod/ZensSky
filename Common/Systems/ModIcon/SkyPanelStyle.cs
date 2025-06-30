@@ -11,8 +11,8 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.Utilities;
-using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
+using ZensSky.Core.DataStructures;
 
 namespace ZensSky.Common.Systems.ModIcon;
 
