@@ -9,7 +9,7 @@ public static class Models
 {
     private const string Prefix = "ZensSky/Assets/Models/";
 
-    private static readonly Lazy<Asset<OBJModel>> _shatter = new(() => Request("Sky/Shatter"));
+    private static readonly Lazy<Asset<OBJModel>> _shatter = new(() => Request("stupidbirdihatesadface"));
 
     public static Asset<OBJModel> Shatter => _shatter.Value;
 

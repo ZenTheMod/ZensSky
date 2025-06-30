@@ -252,7 +252,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             return;
         }
 
-        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCases || true)
+        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCases)
         {
             CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
             return;

@@ -83,9 +83,6 @@ public sealed class CalamityFablesSystem : ModSystem
         // Handle a bunch of edge cases for moons with non standard visuals.
     public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-        DrawShatter(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
-        return;
-
         switch (Main.moonType - PriorMoonStyles)
         {
             case 1:
@@ -111,16 +108,46 @@ public sealed class CalamityFablesSystem : ModSystem
 
     private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-        Matrix matrix = Matrix.CreateScale(90.6f);
+        Effect shatter = Shaders.Shatter.Value;
+
+        if (shatter is null)
+            return;
 
         spriteBatch.End(out var snapshot);
-        //spriteBatch.Begin(SpriteSortMode.Deferred, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, matrix);
 
-        device.Textures[0] = moon;
+        device.Textures[0] = Textures.Pixel.Value;
+        device.RasterizerState = RasterizerState.CullNone;
+
+        Viewport viewport = device.Viewport;
+        Vector2 screenSize = new(viewport.Width, viewport.Height);
+        shatter.Parameters["screenSize"]?.SetValue(screenSize);
+
+        Matrix projection = CalculateMoonMatrix(position, screenSize, rotation, scale);
+        shatter.Parameters["projection"]?.SetValue(projection);
+
+        shatter.CurrentTechnique.Passes[0]?.Apply();
 
         Models.Shatter.Value?.Draw(device);
 
         spriteBatch.Begin(in snapshot);
+    }
+
+    private static Matrix CalculateMoonMatrix(Vector2 position, Vector2 screenSize, float rotation, float scale)
+    {
+        bool flip = Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically);
+
+        Vector3 size = new(new Vector2(MoonSize * scale * 10) / screenSize, 1);
+
+        Vector2 translation = position - (screenSize * .5f);
+        translation /= screenSize * .5f;
+
+        return
+            Matrix.CreateLookAt(Vector3.Zero, Vector3.UnitZ, Vector3.Up) *
+            Matrix.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 0) *
+            Matrix.CreateRotationZ(rotation) *
+            Matrix.CreateScale(size) *
+            Matrix.CreateTranslation(translation.X, translation.Y, 0f) *
+            Matrix.CreateScale(1f, flip ? 1f : -1f, 1f);
     }
 
         // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.

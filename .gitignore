@@ -98,6 +98,9 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Include 3D Models
+!Assets/Models/**.obj
+
 # Chutzpah Test files
 _Chutzpah*
 
