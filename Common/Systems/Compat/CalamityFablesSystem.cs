@@ -1,13 +1,18 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil;
+using Stubble.Core.Classes;
 using System;
+using System.Drawing;
+using System.Linq.Expressions;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
+using ZensSky.Core.DataStructures;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 
@@ -20,15 +25,21 @@ public sealed class CalamityFablesSystem : ModSystem
 
     private const float SingleMoonPhase = .125f;
 
-        // private const float MoonRadius = .9f;
-        // private const float MoonAtmosphere = .1f;
+    private static readonly Color DarkAtmosphere = new(13, 69, 96);
+
+    // private const float MoonRadius = .9f;
+    // private const float MoonAtmosphere = .1f;
+
+    private const float ShatterScale = 1.3f;
 
     private const float CystAtmosphere = .175f;
 
     private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
     private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
 
-    private static readonly Color DarkAtmosphere = new(13, 69, 96);
+    private static readonly Vector2 ShatterTargetSize = new(200);
+
+    private static RenderTarget2D? ShatterTarget;
 
     #endregion
 
@@ -60,6 +71,8 @@ public sealed class CalamityFablesSystem : ModSystem
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
     }
+
+    public override void Unload() => Main.QueueMainThreadAction(() => ShatterTarget?.Dispose());
 
     #endregion
 
@@ -106,6 +119,7 @@ public sealed class CalamityFablesSystem : ModSystem
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
+        // To maintain consitency with Fables I have implemented a .obj filetype reader to import 3D models into terraria.
     private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
         Effect shatter = Shaders.Shatter.Value;
@@ -115,42 +129,48 @@ public sealed class CalamityFablesSystem : ModSystem
 
         spriteBatch.End(out var snapshot);
 
-        device.Textures[0] = Textures.Pixel.Value;
-        device.RasterizerState = RasterizerState.CullNone;
+            // Use a RenderTarget here to give the effect of anti aliasing. (Make sure to correctly handle depth.)
+        using (new RenderTargetSwap(ref ShatterTarget, (int)ShatterTargetSize.X, (int)ShatterTargetSize.Y, preferredDepthFormat: DepthFormat.Depth16))
+        {
+            device.Clear(Color.Transparent);
 
-        Viewport viewport = device.Viewport;
-        Vector2 screenSize = new(viewport.Width, viewport.Height);
-        shatter.Parameters["screenSize"]?.SetValue(screenSize);
+                // The texture of the broken chunks.
+            device.Textures[0] = moon;
 
-        Matrix projection = CalculateMoonMatrix(position, screenSize, rotation, scale);
-        shatter.Parameters["projection"]?.SetValue(projection);
+            device.RasterizerState = RasterizerState.CullNone;
+            
+            device.DepthStencilState = DepthStencilState.Default;
 
-        shatter.CurrentTechnique.Passes[0]?.Apply();
+            Viewport viewport = device.Viewport;
+            Vector2 screenSize = new(viewport.Width, viewport.Height);
+            shatter.Parameters["screenSize"]?.SetValue(screenSize);
 
-        Models.Shatter.Value?.Draw(device);
+            Matrix projection = CalculateShatterMatrix();
+            shatter.Parameters["projection"]?.SetValue(projection);
+
+            shatter.Parameters["color"]?.SetValue(color.ToVector4());
+
+            shatter.CurrentTechnique.Passes[0]?.Apply();
+
+            Models.Shatter.Value?.Draw(device, 0);
+
+                // The "Black Hole" in the center.
+            device.Textures[0] = Textures.Star.Value;
+
+            Models.Shatter.Value?.Draw(device, 1);
+        }
 
         spriteBatch.Begin(in snapshot);
+
+        Vector2 size = new Vector2(MoonSize * scale * ShatterScale * 2.5f) / ShatterTargetSize;
+        spriteBatch.Draw(ShatterTarget, position, null, Color.White, rotation, ShatterTarget.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
-    private static Matrix CalculateMoonMatrix(Vector2 position, Vector2 screenSize, float rotation, float scale)
-    {
-        bool flip = Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically);
+    private static Matrix CalculateShatterMatrix() => 
+        Matrix.CreateLookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY) *
+        Matrix.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
 
-        Vector3 size = new(new Vector2(MoonSize * scale * 10) / screenSize, 1);
-
-        Vector2 translation = position - (screenSize * .5f);
-        translation /= screenSize * .5f;
-
-        return
-            Matrix.CreateLookAt(Vector3.Zero, Vector3.UnitZ, Vector3.Up) *
-            Matrix.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 0) *
-            Matrix.CreateRotationZ(rotation) *
-            Matrix.CreateScale(size) *
-            Matrix.CreateTranslation(translation.X, translation.Y, 0f) *
-            Matrix.CreateScale(1f, flip ? 1f : -1f, 1f);
-    }
-
-        // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.
+    // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.
     private static void DrawCyst(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale, Color moonColor, Color shadowColor)
     {
         Effect planet = Shaders.Cyst.Value;

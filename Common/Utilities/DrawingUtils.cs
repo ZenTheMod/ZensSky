@@ -5,8 +5,7 @@ namespace ZensSky.Common.Utilities;
 public static class DrawingUtils
 {
     #region RenderTargets
-
-        // TODO: Boot to main thread.
+    
     /// <summary>
     /// Reinitializes <paramref name="target"/> if needed.
     /// </summary>
@@ -14,7 +13,15 @@ public static class DrawingUtils
     /// <param name="device"></param>
     /// <param name="width"></param>
     /// <param name="height"></param>
-    public static void ReintializeTarget(ref RenderTarget2D? target, GraphicsDevice device, int width, int height)
+    public static void ReintializeTarget(ref RenderTarget2D? target, 
+        GraphicsDevice device,
+        int width,
+        int height,
+        bool mipMap = false,
+        SurfaceFormat preferredFormat = SurfaceFormat.Color,
+        DepthFormat preferredDepthFormat = DepthFormat.None,
+        int preferredMultiSampleCount = 0,
+        RenderTargetUsage usage = RenderTargetUsage.PreserveContents)
     {
         if (target is null ||
             target.IsDisposed ||
@@ -22,7 +29,14 @@ public static class DrawingUtils
             target.Height != height)
         {
             target?.Dispose();
-            target = new(device, width, height, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            target = new(device,
+                width,
+                height,
+                mipMap,
+                preferredFormat,
+                preferredDepthFormat,
+                preferredMultiSampleCount,
+                usage);
         }
     }
 

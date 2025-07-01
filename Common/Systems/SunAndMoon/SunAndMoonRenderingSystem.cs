@@ -392,7 +392,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
         spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
         DrawSunAndMoon(spriteBatch, device);
 

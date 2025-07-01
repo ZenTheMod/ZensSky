@@ -81,8 +81,8 @@ public sealed class OBJModel : IDisposable
                     if (segments.Length < 2)
                         break;
 
-                    if (verticies.Count < 3 && meshName != string.Empty)
-                        meshes.Add(new Mesh(meshName, startIndex, verticies.Count - 1));
+                    if (verticies.Count > 3 && meshName != string.Empty)
+                        meshes.Add(new Mesh(meshName, startIndex, verticies.Count));
 
                     meshName = segments[1];
                     startIndex = verticies.Count;
@@ -135,7 +135,11 @@ public sealed class OBJModel : IDisposable
 
                         vertex.Position = positions[int.Parse(components[0]) - 1];
 
-                        vertex.TextureCoordinate = textureCoordinates[int.Parse(components[1]) - 1];
+                            // Account for the inversed Y coordinate.
+                        Vector2 coord = textureCoordinates[int.Parse(components[1]) - 1];
+                        coord.Y = 1 - coord.Y;
+
+                        vertex.TextureCoordinate = coord;
 
                             // Pack normal data as a color input.
                         Vector3 normal = (Vector3.Normalize(vertexNormals[int.Parse(components[2]) - 1]) * .5f) + new Vector3(.5f);
@@ -147,8 +151,8 @@ public sealed class OBJModel : IDisposable
             }
         }
 
-        if (verticies.Count < 3 && meshName != string.Empty)
-            meshes.Add(new Mesh(meshName, startIndex, verticies.Count - 1));
+        if (verticies.Count > 3 && meshName != string.Empty)
+            meshes.Add(new Mesh(meshName, startIndex, verticies.Count));
 
         if (meshes.Count > 0) 
             model.Meshes = [.. meshes];

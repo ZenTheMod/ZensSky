@@ -44,7 +44,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float2 position = input.Position.xy;
     float2 screenCoords = position / screenSize;
     
-    return tex2D(tex, coords) * input.Color;
+    return tex2D(tex, coords) * color;
 }
 
 technique Technique1

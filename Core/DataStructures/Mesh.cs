@@ -42,6 +42,9 @@ public record struct Mesh : IDisposable
         if (Buffer is not null && !Buffer.IsDisposed)
             return Buffer;
 
+        if (verticies.Length < 3)
+            throw new InvalidOperationException($"{nameof(Mesh)}: Not enough verticies to generate {nameof(VertexBuffer)}!");
+
         Buffer = new(device, typeof(T), EndIndex - StartIndex, BufferUsage.None);
         Buffer.SetData(verticies, StartIndex, EndIndex - StartIndex);
 

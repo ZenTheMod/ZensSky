@@ -36,7 +36,14 @@ public readonly ref struct RenderTargetSwap
             target?.Height ?? Main.graphics.PreferredBackBufferHeight);
     }
 
-    public RenderTargetSwap(ref RenderTarget2D? target, int width, int height)
+    public RenderTargetSwap(ref RenderTarget2D? target,
+        int width,
+        int height,
+        bool mipMap = false,
+        SurfaceFormat preferredFormat = SurfaceFormat.Color,
+        DepthFormat preferredDepthFormat = DepthFormat.None,
+        int preferredMultiSampleCount = 0,
+        RenderTargetUsage usage = RenderTargetUsage.PreserveContents)
     {
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
@@ -47,7 +54,15 @@ public readonly ref struct RenderTargetSwap
             if (oldTarget.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
-        DrawingUtils.ReintializeTarget(ref target, device, width, height);
+        DrawingUtils.ReintializeTarget(ref target,
+            device,
+            width,
+            height,
+            mipMap,
+            preferredFormat,
+            preferredDepthFormat,
+            preferredMultiSampleCount,
+            usage);
 
         device.SetRenderTarget(target);
         device.ScissorRectangle = new(0, 0,

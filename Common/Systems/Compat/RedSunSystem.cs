@@ -261,9 +261,9 @@ public sealed class RedSunSystem : ModSystem
     {
         SpriteBatch spriteBatch = Main.spriteBatch;
         GraphicsDevice device = Main.instance.GraphicsDevice;
-
+        
         spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
         float centerX = MiscUtils.HalfScreenSize.X;
         float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
