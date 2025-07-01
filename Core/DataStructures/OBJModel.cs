@@ -13,38 +13,39 @@ public sealed class OBJModel : IDisposable
     #region Private Fields
 
     private VertexPositionColorTexture[]? Verticies;
-
-    #endregion
-
-    #region Public Fields
-
-    public VertexBuffer? Buffer;
+    private Mesh[]? Meshes;
 
     #endregion
 
     #region Private Methods
 
-    private void UpdateBuffer()
+    private VertexBuffer? ResetBuffer(GraphicsDevice device, int i)
     {
-        if (Verticies is null)
+        if (Verticies is null || Meshes is null || !Meshes.IndexInRange(i))
+            return null;
+
+        return Meshes[i].ResetBuffer(device, Verticies);
+    }
+
+    private void ResetBuffers(GraphicsDevice device)
+    {
+        if (Verticies is null || Meshes is null)
             return;
 
-        if (Buffer is null || Buffer.IsDisposed || Buffer.graphicsDevice.IsDisposed)
-        {
-            Buffer?.Dispose();
-
-            Buffer = new(Main.instance.GraphicsDevice, typeof(VertexPositionColorTexture), Verticies.Length, BufferUsage.None);
-
-            Buffer?.SetData(Verticies);
-        }
+        Array.ForEach(Meshes, m => m.ResetBuffer(device, Verticies));
     }
 
     #endregion
 
     #region Public Methods
 
-    public void Dispose() =>
-        Buffer?.Dispose();
+    public void Dispose()
+    {
+        if (Meshes is not null)
+            Array.ForEach(Meshes, m => m.Dispose());
+    }
+
+    #region Reading
 
         // TODO: Implement a reader/writer for a binary filetype, (Similar to Celeste's?) e.g. .obj.export.
     public static OBJModel Create(Stream stream)
@@ -53,9 +54,14 @@ public sealed class OBJModel : IDisposable
 
         List<VertexPositionColorTexture> verticies = [];
 
+        List<Mesh> meshes = [];
+
         List<Vector3> positions = [];
         List<Vector2> textureCoordinates = [];
         List<Vector3> vertexNormals = [];
+
+        string meshName = string.Empty;
+        int startIndex = 0;
 
         bool containsNonTriangularFaces = false;
 
@@ -71,6 +77,17 @@ public sealed class OBJModel : IDisposable
 
             switch (segments[0])
             {
+                case "o":
+                    if (segments.Length < 2)
+                        break;
+
+                    if (verticies.Count < 3 && meshName != string.Empty)
+                        meshes.Add(new Mesh(meshName, startIndex, verticies.Count - 1));
+
+                    meshName = segments[1];
+                    startIndex = verticies.Count;
+                    break;
+
                 case "v":
                     if (segments.Length < 4)
                         break;
@@ -130,30 +147,65 @@ public sealed class OBJModel : IDisposable
             }
         }
 
+        if (verticies.Count < 3 && meshName != string.Empty)
+            meshes.Add(new Mesh(meshName, startIndex, verticies.Count - 1));
+
+        if (meshes.Count > 0) 
+            model.Meshes = [.. meshes];
+        else
+            throw new InvalidDataException($"{nameof(OBJModel)}: Model did not contain at least one object!");
+
         model.Verticies = [.. verticies];
 
         if (containsNonTriangularFaces)
             ModContent.GetInstance<ZensSky>().Logger.Warn($"{nameof(OBJModel)}: Model contained non triangular faces! These will not be drawn.");
 
         if (model.Verticies.Length < 3)
-            throw new InvalidDataException($"{nameof(OBJModel)}: Not enough verticies to create vertex buffer.");
+            throw new InvalidDataException($"{nameof(OBJModel)}: Not enough verticies to create vertex buffer!");
 
-        model.UpdateBuffer();
+        model.ResetBuffers(Main.instance.GraphicsDevice);
 
         return model;
     }
 
-    public void Draw(GraphicsDevice device)
-    {
-        UpdateBuffer();
+    #endregion
 
-        if (Buffer is null)
+    #region Drawing
+
+    /// <summary>
+    /// Draws the first <see cref="Mesh"/> where <see cref="Mesh.Name"/> is equal to <paramref name="name"/>.
+    /// </summary>
+    /// <param name="device"></param>
+    /// <param name="name"></param>
+    public void Draw(GraphicsDevice device, string name)
+    {
+        if (Meshes is null)
             return;
 
-        device.SetVertexBuffer(Buffer);
+        int i = Array.FindIndex(Meshes, m => m.Name == name);
 
-        device.DrawPrimitives(PrimitiveType.TriangleList, 0, Buffer.VertexCount / 3);
+        if (i != -1)
+            Draw(device, i);
     }
+
+    /// <summary>
+    /// Draws the <see cref="Mesh"/> at index <paramref name="i"/> if within range.
+    /// </summary>
+    /// <param name="device"></param>
+    /// <param name="i"></param>
+    public void Draw(GraphicsDevice device, int i = 0)
+    {
+        VertexBuffer? buffer = ResetBuffer(device, i);
+
+        if (buffer is null)
+            return;
+
+        device.SetVertexBuffer(buffer);
+
+        device.DrawPrimitives(PrimitiveType.TriangleList, 0, buffer.VertexCount / 3);
+    }
+
+    #endregion
 
     #endregion
 }
