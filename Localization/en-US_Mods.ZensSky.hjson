@@ -62,7 +62,11 @@ Configs: {
 
 		PixelatedSky: {
 			Label: "[i:3725] Pixelated Sky"
-			Tooltip: Pixelates the Stars, Sun, and Moon.
+			Tooltip:
+				'''
+				Pixelates the Stars, Sun, and Moon.
+				(Can be less performant, due to extra reasources being used!)
+				'''
 		}
 
 		ColorSteps: {
@@ -77,6 +81,16 @@ Configs: {
 		CloudsEnabled: {
 			Label: "[i:751] Fancy Cloud Lighting"
 			Tooltip: If clouds have added lighting.
+		}
+
+		CloudsEdgeLighting: {
+			Label: "[i:752] Cloud Edge Lighting"
+			Tooltip:
+				'''
+				If cloud lighting includes rim lighting on the edges of clouds.
+				(Can be less performant, due to extra reasources being used!)
+				[c/FF0000:Requires 'Fancy Cloud Lighting' to be enabled!]
+				'''
 		}
 
 		WindParticles: {

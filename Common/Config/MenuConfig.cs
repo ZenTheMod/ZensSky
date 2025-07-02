@@ -1,13 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using System.ComponentModel;
-using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+#pragma warning disable CA2211 // Non-constant fields should not be visible.
 
 namespace ZensSky.Common.Config;
 
 public sealed class MenuConfig : ModConfig
 {
-    public static MenuConfig Instance => ModContent.GetInstance<MenuConfig>();
+    public static MenuConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 

@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
-using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using ZensSky.Common.Config.Elements;
 using ZensSky.Common.Systems.Compat;
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
+#pragma warning disable CA2211 // Non-constant fields should not be visible.
 
 namespace ZensSky.Common.Config;
 
@@ -10,10 +12,11 @@ internal sealed class SunAndMoonReworkElement : LockedBoolElement { public overr
 internal sealed class RealisticSkyElement : LockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
 internal sealed class WindOpacityElement : LockedFloatSlider { public override bool IsLocked => !SkyConfig.Instance.WindParticles; }
 internal sealed class ColorStepsElement : LockedIntSlider { public override bool IsLocked => !SkyConfig.Instance.PixelatedSky; }
+internal sealed class CloudEdgeLightingElement : LockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.CloudsEnabled; }
 
 public sealed class SkyConfig : ModConfig
 {
-    public static SkyConfig Instance => ModContent.GetInstance<SkyConfig>();
+    public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
 
@@ -59,6 +62,10 @@ public sealed class SkyConfig : ModConfig
 
     [DefaultValue(true)]
     public bool CloudsEnabled;
+
+    [DefaultValue(true)]
+    [CustomModConfigItem(typeof(CloudEdgeLightingElement))]
+    public bool CloudsEdgeLighting;
 
     [Header("Ambient")]
 

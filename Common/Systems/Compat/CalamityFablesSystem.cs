@@ -1,11 +1,7 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil;
-using Stubble.Core.Classes;
 using System;
-using System.Drawing;
-using System.Linq.Expressions;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
@@ -27,10 +23,10 @@ public sealed class CalamityFablesSystem : ModSystem
 
     private static readonly Color DarkAtmosphere = new(13, 69, 96);
 
-    // private const float MoonRadius = .9f;
-    // private const float MoonAtmosphere = .1f;
+        // private const float MoonRadius = .9f;
+        // private const float MoonAtmosphere = .1f;
 
-    private const float ShatterScale = 1.3f;
+    private const float ShatterScale = 1.35f;
 
     private const float CystAtmosphere = .175f;
 
@@ -149,20 +145,26 @@ public sealed class CalamityFablesSystem : ModSystem
             shatter.Parameters["projection"]?.SetValue(projection);
 
             shatter.Parameters["color"]?.SetValue(color.ToVector4());
+            shatter.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
+
+            shatter.Parameters["innerColor"]?.SetValue(Color.Red.ToVector4());
+
+            float shadowAngle = Main.moonPhase * SingleMoonPhase;
+            shatter.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
 
             shatter.CurrentTechnique.Passes[0]?.Apply();
 
             Models.Shatter.Value?.Draw(device, 0);
 
                 // The "Black Hole" in the center.
-            device.Textures[0] = Textures.Star.Value;
+            device.Textures[0] = Textures.Pixel.Value;
 
-            Models.Shatter.Value?.Draw(device, 1);
+                // Models.Shatter.Value?.Draw(device, 1);
         }
 
         spriteBatch.Begin(in snapshot);
 
-        Vector2 size = new Vector2(MoonSize * scale * ShatterScale * 2.5f) / ShatterTargetSize;
+        Vector2 size = new Vector2(MoonSize * scale * ShatterScale) / ShatterTargetSize;
         spriteBatch.Draw(ShatterTarget, position, null, Color.White, rotation, ShatterTarget.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 

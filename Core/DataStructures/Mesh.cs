@@ -35,18 +35,18 @@ public record struct Mesh : IDisposable
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="device"></param>
-    /// <param name="verticies"></param>
+    /// <param name="vertices"></param>
     /// <returns><see cref="Buffer"/></returns>
-    public VertexBuffer? ResetBuffer<T>(GraphicsDevice device, T[] verticies) where T : struct, IVertexType
+    public VertexBuffer? ResetBuffer<T>(GraphicsDevice device, T[] vertices) where T : struct, IVertexType
     {
         if (Buffer is not null && !Buffer.IsDisposed)
             return Buffer;
 
-        if (verticies.Length < 3)
-            throw new InvalidOperationException($"{nameof(Mesh)}: Not enough verticies to generate {nameof(VertexBuffer)}!");
+        if (vertices.Length < 3)
+            throw new InvalidOperationException($"{nameof(Mesh)}: Not enough vertices to generate {nameof(VertexBuffer)}!");
 
         Buffer = new(device, typeof(T), EndIndex - StartIndex, BufferUsage.None);
-        Buffer.SetData(verticies, StartIndex, EndIndex - StartIndex);
+        Buffer.SetData(vertices, StartIndex, EndIndex - StartIndex);
 
         return Buffer;
     }

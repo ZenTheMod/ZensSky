@@ -12,7 +12,7 @@ public sealed class OBJModel : IDisposable
 {
     #region Private Fields
 
-    private VertexPositionColorTexture[]? Verticies;
+    private VertexPositionNormalTexture[]? Vertices;
     private Mesh[]? Meshes;
 
     #endregion
@@ -21,18 +21,18 @@ public sealed class OBJModel : IDisposable
 
     private VertexBuffer? ResetBuffer(GraphicsDevice device, int i)
     {
-        if (Verticies is null || Meshes is null || !Meshes.IndexInRange(i))
+        if (Vertices is null || Meshes is null || !Meshes.IndexInRange(i))
             return null;
 
-        return Meshes[i].ResetBuffer(device, Verticies);
+        return Meshes[i].ResetBuffer(device, Vertices);
     }
 
     private void ResetBuffers(GraphicsDevice device)
     {
-        if (Verticies is null || Meshes is null)
+        if (Vertices is null || Meshes is null)
             return;
 
-        Array.ForEach(Meshes, m => m.ResetBuffer(device, Verticies));
+        Array.ForEach(Meshes, m => m.ResetBuffer(device, Vertices));
     }
 
     #endregion
@@ -52,7 +52,7 @@ public sealed class OBJModel : IDisposable
     {
         OBJModel model = new();
 
-        List<VertexPositionColorTexture> verticies = [];
+        List<VertexPositionNormalTexture> vertices = [];
 
         List<Mesh> meshes = [];
 
@@ -81,11 +81,11 @@ public sealed class OBJModel : IDisposable
                     if (segments.Length < 2)
                         break;
 
-                    if (verticies.Count > 3 && meshName != string.Empty)
-                        meshes.Add(new Mesh(meshName, startIndex, verticies.Count));
+                    if (vertices.Count > 3 && meshName != string.Empty)
+                        meshes.Add(new Mesh(meshName, startIndex, vertices.Count));
 
                     meshName = segments[1];
-                    startIndex = verticies.Count;
+                    startIndex = vertices.Count;
                     break;
 
                 case "v":
@@ -126,7 +126,7 @@ public sealed class OBJModel : IDisposable
 
                     for (int i = 1; i < segments.Length; i++) 
                     {
-                        VertexPositionColorTexture vertex = new();
+                        VertexPositionNormalTexture vertex = new();
 
                         string[] components = segments[i].Split('/', StringSplitOptions.RemoveEmptyEntries);
 
@@ -141,31 +141,30 @@ public sealed class OBJModel : IDisposable
 
                         vertex.TextureCoordinate = coord;
 
-                            // Pack normal data as a color input.
-                        Vector3 normal = (Vector3.Normalize(vertexNormals[int.Parse(components[2]) - 1]) * .5f) + new Vector3(.5f);
-                        vertex.Color = new(normal);
+                        Vector3 normal = vertexNormals[int.Parse(components[2]) - 1];
+                        vertex.Normal = normal;
 
-                        verticies.Add(vertex);
+                        vertices.Add(vertex);
                     }
                     break;
             }
         }
 
-        if (verticies.Count > 3 && meshName != string.Empty)
-            meshes.Add(new Mesh(meshName, startIndex, verticies.Count));
+        if (vertices.Count > 3 && meshName != string.Empty)
+            meshes.Add(new Mesh(meshName, startIndex, vertices.Count));
 
         if (meshes.Count > 0) 
             model.Meshes = [.. meshes];
         else
             throw new InvalidDataException($"{nameof(OBJModel)}: Model did not contain at least one object!");
 
-        model.Verticies = [.. verticies];
+        model.Vertices = [.. vertices];
 
         if (containsNonTriangularFaces)
             ModContent.GetInstance<ZensSky>().Logger.Warn($"{nameof(OBJModel)}: Model contained non triangular faces! These will not be drawn.");
 
-        if (model.Verticies.Length < 3)
-            throw new InvalidDataException($"{nameof(OBJModel)}: Not enough verticies to create vertex buffer!");
+        if (model.Vertices.Length < 3)
+            throw new InvalidDataException($"{nameof(OBJModel)}: Not enough vertices to create vertex buffer!");
 
         model.ResetBuffers(Main.instance.GraphicsDevice);
 

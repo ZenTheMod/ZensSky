@@ -1,9 +1,12 @@
 ﻿using Daybreak.Common.CIL;
 using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using MonoMod.RuntimeDetour;
 using System;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -12,6 +15,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
+using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
@@ -24,8 +28,13 @@ public sealed class CloudSystem : ModSystem
     private const float FlareEdgeFallOffStart = 1f;
     private const float FlareEdgeFallOffEnd = 1.11f;
 
+    private const float NoonAlpha = .2f;
+
     private static readonly Color SunMultiplier = new(255, 245, 225);
     private static readonly Color MoonMultiplier = new(40, 40, 50);
+
+    private delegate void orig_DrawCloud(int cloudIndex, Color color, float yOffset);
+    private static Hook? EdgeLighting;
 
     #endregion
 
@@ -37,9 +46,26 @@ public sealed class CloudSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG += ApplyCloudLighting);
+    public override void Load() 
+    { 
+        Main.QueueMainThreadAction(() => {
+            IL_Main.DrawSurfaceBG += ApplyCloudLighting;
 
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSurfaceBG -= ApplyCloudLighting);
+            MethodInfo? drawCloud = typeof(Main).GetMethod($"<{nameof(Main.DrawSurfaceBG)}>g__DrawCloud|1826_0", Static | NonPublic);
+
+            if (drawCloud is not null)
+                EdgeLighting = new(drawCloud,
+                    ApplyEdgeLighting);
+        }); 
+    }
+
+    public override void Unload()
+    {
+        Main.QueueMainThreadAction(() => {
+            IL_Main.DrawSurfaceBG -= ApplyCloudLighting;
+            EdgeLighting?.Dispose();
+        });
+    }
 
     #endregion
 
@@ -67,6 +93,8 @@ public sealed class CloudSystem : ModSystem
 
                 Vector2 viewportSize = viewport.Bounds.Size();
                 lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
+
+                lighting.Parameters["UseEdgeLighting"]?.SetValue(false);
 
                 Vector2 sunPosition = SunPosition;
                 Vector2 moonPosition = MoonPosition;
@@ -172,18 +200,59 @@ public sealed class CloudSystem : ModSystem
         }
     }
 
+    private void ApplyEdgeLighting(orig_DrawCloud orig, int cloudIndex, Color color, float yOffset)
+    {
+        Effect lighting = Shaders.Cloud.Value;
+
+        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || !SkyConfig.Instance.CloudsEdgeLighting || lighting is null)
+        {
+            orig(cloudIndex, color, yOffset);
+            return;
+        }
+
+        lighting.Parameters["UseEdgeLighting"]?.SetValue(true);
+
+        Cloud cloud = Main.cloud[cloudIndex];
+
+            // This has the potential to break when modders use custom draw functions with a ModCloud class, but no one uses ModCloud anyway lmao.
+        Texture2D cloudTexture = TextureAssets.Cloud[cloud.type].Value;
+
+        Vector2 pixelSize = new Vector2(2) / cloudTexture.Size();
+        pixelSize /= cloud.scale;
+
+        lighting.Parameters["Pixel"]?.SetValue(pixelSize);
+
+            // Account for the sprite direction.
+        SpriteEffects dir = cloud.spriteDir;
+
+        Vector2 flip = new(
+            dir.HasFlag(SpriteEffects.FlipHorizontally) ? -1 : 1,
+            dir.HasFlag(SpriteEffects.FlipVertically) ? -1 : 1);
+
+        lighting.Parameters["Flipped"]?.SetValue(flip);
+
+        lighting.CurrentTechnique.Passes[0].Apply();
+
+        orig(cloudIndex, color, yOffset);
+    }
+
     private void ApplyShader(ref SpriteBatchSnapshot snapshot, Effect lighting)
     {
         if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || lighting is null)
             return;
 
+        lighting.Parameters["UseEdgeLighting"]?.SetValue(false);
+
         lighting.CurrentTechnique.Passes[0].Apply();
 
+        bool edgeLighting = SkyConfig.Instance.CloudsEdgeLighting;
+
         Main.spriteBatch.End(out snapshot);
-        Main.spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
+        Main.spriteBatch.Begin(edgeLighting ? SpriteSortMode.Immediate : snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
-        
+
+            // Samples the moon texture to grab a more accurate color. (May not work correctly when not using the moon overhaul.)
         device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture;
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
@@ -211,6 +280,10 @@ public sealed class CloudSystem : ModSystem
         color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
             // And lessen it at the lower part of the screen.
         color *= 1 - (position.Y / MiscUtils.ScreenSize.Y);
+
+            // Decrease the intensity at noon to make the clouds not just be pure white.
+        if (day)
+            color *= MathHelper.Lerp(NoonAlpha, 1f, MathF.Pow(distanceFromCenter, 2));
 
         return color;
     }
