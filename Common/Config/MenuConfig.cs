@@ -9,6 +9,7 @@ namespace ZensSky.Common.Config;
 
 public sealed class MenuConfig : ModConfig
 {
+        // ConfigManager.Add Sets any instance fields to the ModConfig type.
     public static MenuConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

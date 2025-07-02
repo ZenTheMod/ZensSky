@@ -16,6 +16,7 @@ internal sealed class CloudEdgeLightingElement : LockedBoolElement { public over
 
 public sealed class SkyConfig : ModConfig
 {
+        // ConfigManager.Add Sets any instance fields to the ModConfig type.
     public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
