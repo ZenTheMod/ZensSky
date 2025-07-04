@@ -409,6 +409,9 @@ public sealed class RealisticSkySystem : ModSystem
         GalaxyRenderer.Render();
     }
 
+    public static Color GetRainColor(Color color, Rain rain) => 
+        RainReplacementManager.CalculateRainColor(color, rain);
+
     public static void UpdateSunAndMoonPosition(Vector2 position)
     {
         SetSunPosition?.Invoke(null, [position]);

@@ -118,6 +118,8 @@ public sealed class StarRenderingSystem : ModSystem
         if (supernova is null)
             return;
 
+        supernova.CurrentTechnique.Passes[0].Apply();
+
             // Set all of the generic color info.
         supernova.Parameters["background"]?.SetValue(Background);
 
@@ -148,8 +150,6 @@ public sealed class StarRenderingSystem : ModSystem
             supernova.Parameters["longTime"]?.SetValue(time);
 
             supernova.Parameters["offset"]?.SetValue(position / MiscUtils.ScreenSize);
-
-            supernova.CurrentTechnique.Passes[0].Apply();
 
             float opacity = alpha + (MinimumSupernovaAlpha / star.BaseSize);
 

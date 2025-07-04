@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System.ComponentModel;
 using Terraria.ModLoader.Config;
+using Terraria.ModLoader.UI;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.
@@ -9,10 +10,17 @@ namespace ZensSky.Common.Config;
 
 public sealed class MenuConfig : ModConfig
 {
+    private const string NotifyLoadFreeze = "Please do not report any short freezes during loading.";
+
         // ConfigManager.Add Sets any instance fields to the ModConfig type.
     public static MenuConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
+
+        // This is ran here as ModConfig is loaded before most ModSystems.
+            // TODO: Move all hook application to OnModLoad and use Mod.Load to change this string.
+    public override void OnLoaded() =>
+        Interface.loadMods.SubProgressText = NotifyLoadFreeze;
 
     [DefaultValue(1f)]
     [Range(-20f, 20f)]

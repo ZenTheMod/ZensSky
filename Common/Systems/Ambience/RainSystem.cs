@@ -1,7 +1,12 @@
-﻿using MonoMod.Cil;
+﻿using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
 using System;
+using System.Linq;
 using Terraria;
+using Terraria.GameContent;
+using Terraria.ID;
 using Terraria.ModLoader;
+using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -57,6 +62,9 @@ public sealed class RainSystem : ModSystem
             {
                 if (Main.cloudAlpha <= 0)
                     return;
+
+                    // Make the water color change with the daynight cycle.
+                Main.waterStyle = Main.dayTime ? WaterStyleID.Purity : WaterStyleID.Corrupt;
 
                 float num = Main.screenWidth / MagicScreenWidth;
                 num *= 0.25f + 1f * Main.cloudAlpha;
@@ -151,7 +159,35 @@ public sealed class RainSystem : ModSystem
         if (!Main.gameMenu)
             return;
 
-        self.DrawRain();
+        DrawRain();
+    }
+
+    private static void DrawRain()
+    {
+        Rectangle frame = new(0, 0, 2, 40);
+
+        Color sky = Main.ColorOfTheSkies * .9f;
+
+        Color baseColor = new(Math.Max(sky.R, (byte)80), Math.Max(sky.G, (byte)110), Math.Max(sky.B, (byte)130), sky.A);
+
+        foreach (Rain rain in Main.rain.Where(r => r.active))
+        {
+            frame.X = rain.type * 4;
+
+            Color color = baseColor;
+
+            if (RealisticSkySystem.IsEnabled)
+                color = RealisticSkySystem.GetRainColor(color, rain);
+
+            Texture2D texture = TextureAssets.Rain.Value;
+
+            if (rain.waterStyle >= 15)
+                texture = LoaderManager.Get<WaterStylesLoader>().Get(rain.waterStyle).GetRainTexture().Value;
+
+            Main.spriteBatch.Draw(texture, rain.position - Main.screenPosition, frame, color, rain.rotation, Vector2.Zero, rain.scale, SpriteEffects.None, 0f);
+
+            rain.Update();
+        }
     }
 
     #endregion

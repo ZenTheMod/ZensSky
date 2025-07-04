@@ -231,8 +231,6 @@ public sealed class CloudSystem : ModSystem
 
         lighting.Parameters["Flipped"]?.SetValue(flip);
 
-        lighting.CurrentTechnique.Passes[0].Apply();
-
         orig(cloudIndex, color, yOffset);
     }
 
