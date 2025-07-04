@@ -32,16 +32,18 @@ public sealed class ShootingStarRenderingSystem : ModSystem
     {
         Main.QueueMainThreadAction(() => {
             IL_Main.DoDraw += DrawAfterSunAndMoon;
-            IL_Main.DrawCapture += DrawAfterSunAndMoon;
         });
+
+        IL_Main.DrawCapture += DrawAfterSunAndMoon;
     }
 
     public override void Unload()
     {
         Main.QueueMainThreadAction(() => {
             IL_Main.DoDraw -= DrawAfterSunAndMoon;
-            IL_Main.DrawCapture -= DrawAfterSunAndMoon;
         });
+
+        IL_Main.DrawCapture -= DrawAfterSunAndMoon;
     }
 
     #endregion

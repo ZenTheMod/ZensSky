@@ -27,10 +27,9 @@ public sealed class WindRenderingSystem : ModSystem
 
     public override void Load() 
     {
-        Main.QueueMainThreadAction(() => {
-            On_Main.DrawInfernoRings += InGameDraw;
-            On_Main.DrawBackgroundBlackFill += MenuDraw; 
-        });
+        Main.QueueMainThreadAction(() => On_Main.DrawBackgroundBlackFill += MenuDraw);
+
+        On_Main.DrawInfernoRings += InGameDraw;
     }
 
     public override void Unload()
@@ -41,6 +40,8 @@ public sealed class WindRenderingSystem : ModSystem
 
             WindTarget?.Dispose();
         });
+
+        On_Main.DrawInfernoRings -= InGameDraw;
     }
 
     private void MenuDraw(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
