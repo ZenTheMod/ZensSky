@@ -50,7 +50,7 @@ float4 Lighting(float2 lightPosition, float2 screenPosition, float2 uv, float4 l
     float shadows = 1 - cloud.r;
     
         // Combine the distance with the dark parts to make it look as if light is bleeding through.
-    float glow = distlight * ((shadows * 2.7) + (cloud.r * 0.65));
+    float glow = distlight * ((shadows * 2.7) + (cloud.r * .65));
     
     float4 outer = float4(0, 0, 0, 0);
     

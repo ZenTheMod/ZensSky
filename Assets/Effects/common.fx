@@ -48,12 +48,12 @@ float inOutCubic(float t)
 }
 
     // https://bottosson.github.io/posts/oklab / https://www.shadertoy.com/view/ttcyRS
-const float3x3 kCONEtoLMS = float3x3(
+static const float3x3 kCONEtoLMS = float3x3(
          0.4121656120, 0.2118591070, 0.0883097947,
          0.5362752080, 0.6807189584, 0.2818474174,
          0.0514575653, 0.1074065790, 0.6302613616);
     
-const float3x3 kLMStoCONE = float3x3(
+static const float3x3 kLMStoCONE = float3x3(
          4.0767245293, -1.2681437731, -0.0041119885,
         -3.3072168827, 2.6093323231, -0.7034763098,
          0.2307590544, -0.3411344290, 1.7068625689);
@@ -118,7 +118,7 @@ float3 RGBtoHSL(float3 rgb)
 }
 
     // https://www.shadertoy.com/view/M3dXzB
-const float2x2 coronariesMatrix = float2x2(cos(1 + float4(0, 33, 11, 0)));
+static const float2x2 coronariesMatrix = float2x2(cos(1 + float4(0, 33, 11, 0)));
 
 float coronaries(float2 uv, float time)
 {
@@ -142,8 +142,8 @@ float coronaries(float2 uv, float time)
     return res.x + res.y;
 }
 
-const float TAU = 6.28318530718;
-const float PI = 3.14159265359;
-const float PIOVER2 = 1.57079632679;
+static const float TAU = 6.28318530718;
+static const float PI = 3.14159265359;
+static const float PIOVER2 = 1.57079632679;
 
 #endif

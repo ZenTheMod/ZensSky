@@ -120,7 +120,7 @@ public sealed class WindRenderingSystem : ModSystem
     {
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        device.Textures[0] = Textures.SunBloom.Value;
+        device.Textures[0] = Textures.Bloom.Value;
 
         foreach (WindParticle wind in WindSystem.Winds.Where(w => w.IsActive))
             DrawWindTrail(device, wind);

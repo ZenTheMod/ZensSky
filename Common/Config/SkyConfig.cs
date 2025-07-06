@@ -1,6 +1,8 @@
-﻿using System.ComponentModel;
+﻿using RealisticSky.Common.DataStructures;
+using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using ZensSky.Common.Config.Elements;
+using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
@@ -41,8 +43,8 @@ public sealed class SkyConfig : ModConfig
 
     [Header("Stars")]
 
-    [DefaultValue(false)]
-    public bool VanillaStyleStars;
+    [DefaultValue(StarVisual.Vanilla)]
+    public StarVisual StarStyle;
 
     [DefaultValue(true)]
     [CustomModConfigItem(typeof(RealisticSkyElement))]

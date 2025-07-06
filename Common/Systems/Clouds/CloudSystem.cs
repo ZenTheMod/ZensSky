@@ -114,8 +114,8 @@ public sealed class CloudSystem : ModSystem
                 Color moonColor = GetColor(false);
                 lighting.Parameters["MoonColor"]?.SetValue(moonColor.ToVector4());
 
-                lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime);
-                lighting.Parameters["DrawMoon"]?.SetValue(RedSunSystem.IsEnabled || !Main.dayTime);
+                lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime && ShowSun);
+                lighting.Parameters["DrawMoon"]?.SetValue((RedSunSystem.IsEnabled || !Main.dayTime) && ShowMoon);
             });
 
             #endregion

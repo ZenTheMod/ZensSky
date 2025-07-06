@@ -235,7 +235,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
     {
         UnifiedRandom rand = new("Ebon will never steal my code.".GetHashCode());
 
-        Texture2D crease = Textures.SunBloom.Value;
+        Texture2D crease = Textures.Bloom.Value;
         Vector2 creaseOrigin = crease.Size() * 0.5f;
 
         Color color = (Color.White * CreaseOpacity) with { A = 0 };

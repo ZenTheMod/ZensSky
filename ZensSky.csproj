@@ -33,7 +33,10 @@
 		<Reference Include="YouBoss">
 			<HintPath>..\ModAssemblies\YouBoss.dll</HintPath>
 		</Reference>
-		
+		<Reference Include="Macrocosm">
+			<HintPath>..\ModAssemblies\Macrocosm.dll</HintPath>
+		</Reference>
+
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
 			<HintPath>..\ModAssemblies\Daybreak.dll</HintPath>
@@ -58,6 +61,9 @@
 
 		<!-- Publicize YouBoss -->
 		<Publicize Include="YouBoss" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+
+		<!-- Publicize Macrocosm -->
+		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed.) -->

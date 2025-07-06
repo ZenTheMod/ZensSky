@@ -76,7 +76,7 @@ public sealed class UISlider : UIElement
         if (IsHeld && !Main.alreadyGrabbingSunOrMoon)
         {
             float num = MiscUtils.UIMousePosition.X - dims.X;
-            Ratio = MathHelper.Clamp(num / dims.Width, 0f, 1);
+            Ratio = MiscUtils.Saturate(num / dims.Width);
         }
 
         Texture2D slider = Textures.Slider.Value;

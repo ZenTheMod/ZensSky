@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
@@ -127,31 +128,34 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Drawing
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawSunAndMoon(SpriteBatch spriteBatch, GraphicsDevice device)
+    {
+        if (Main.dayTime && ShowSun)
+            DrawSun(spriteBatch, device);
+        else if (ShowMoon)
+            DrawMoon(spriteBatch, device);
+    }
+
+    #region Sun Drawing
+
+    public static void DrawSun(SpriteBatch spriteBatch, GraphicsDevice device)
     {
         float centerX = MiscUtils.HalfScreenSize.X;
         float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
 
         float distanceFromTop = (SunPosition.Y + SunTopBuffer) / SceneAreaSize.Y;
 
-        Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
-
-        Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = MoonColor * MoonScale;
-        moonColor.A = 255;
-
-        if (Main.dayTime && ShowSun)
-            DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
-        else if (ShowMoon)
-            DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+        DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
     }
-
-    #region Sun Drawing
 
     public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
     {
         if (RealisticSkySystem.IsEnabled && SkyConfig.Instance.RealisticSun)
+        {
+            RealisticSkySystem.DrawSun();
             return;
+        }
 
         if (Main.eclipse)
         {
@@ -165,7 +169,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #region Bloom
 
-        Texture2D bloom = SunBloom.Value;
+        Texture2D bloom = Bloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
         Color outerGlowColor = color * SunOuterGlowOpacity;
@@ -210,7 +214,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private static void DrawEclipse(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, GraphicsDevice device)
     {
-        Texture2D bloom = SunBloom.Value;
+        Texture2D bloom = Bloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
         color.A = 0;
@@ -239,6 +243,17 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     #endregion
 
     #region Moon Drawing
+
+    public static void DrawMoon(SpriteBatch spriteBatch, GraphicsDevice device)
+    {
+        Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
+
+        Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
+        Color moonColor = MoonColor * MoonScale;
+        moonColor.A = 255;
+
+        DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+    }
 
     public static void DrawMoon(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
@@ -384,6 +399,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
                 ShowSun = true;
                 ShowMoon = true;
             }
+
+            if (RealisticSkySystem.IsEnabled)
+                RealisticSkySystem.DrawSun();
+
             orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
             return;
         }

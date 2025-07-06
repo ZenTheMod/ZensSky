@@ -17,6 +17,7 @@ As well as including simple and easy to use menu configuration straight from the
 [/list]
 
 [b]Compatibility with big mods like:[/b]
+'Macrocosm [BETA]' by MechanicPluto24
 'Realistic Sky' by Lucille Karma,
 *'Wrath of the Gods' by Lucille Karma
     (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),

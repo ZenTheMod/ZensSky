@@ -7,7 +7,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
 {
     float veins = 1 - coronaries(coords * 3, uTime);
     
-    float dist = saturate(1 - length(coords - 0.5) * 2.);
+    float dist = saturate(1 - length(coords - .5) * 2.);
     
     float mixed = saturate(lerp(dist * 1.2, saturate(veins * 1.2), .5) - .5) * 12.;
     

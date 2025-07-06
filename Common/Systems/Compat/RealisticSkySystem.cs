@@ -322,12 +322,11 @@ public sealed class RealisticSkySystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
 
-            c.EmitDelegate(() => SkyConfig.Instance.SunAndMoonRework && !SkyConfig.Instance.RealisticSun);
-            c.EmitBrtrue(jumpSunRendering);
+            c.EmitBr(jumpSunRendering);
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdnull(),
-                i => i.MatchCall<Matrix>("get_Identity"));
+                i => i.MatchCall<Matrix>($"get_{nameof(Matrix.Identity)}"));
 
             c.EmitPop();
             c.EmitDelegate(() => Main.BackgroundViewMatrix.EffectMatrix);
@@ -408,6 +407,19 @@ public sealed class RealisticSkySystem : ModSystem
 
         GalaxyRenderer.Render();
     }
+
+    public static void DrawSun()
+    {
+        if (!IsEnabled)
+            return;
+
+            // Runtime does not like it if these ifs are combined.
+        if (!CanDraw())
+            return;
+
+        SunRenderer.Render(1f - RealisticSkyManager.SunlightIntensityByTime);
+    }
+
 
     public static Color GetRainColor(Color color, Rain rain) => 
         RainReplacementManager.CalculateRainColor(color, rain);

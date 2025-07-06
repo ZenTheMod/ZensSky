@@ -1,4 +1,5 @@
 ﻿using Daybreak.Common.CIL;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
@@ -23,11 +24,9 @@ public sealed class PixelateSkySystem : ModSystem
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() =>
-        {
-            IL_Main.DoDraw += InjectDoDraw;
-            IL_Main.DrawCapture += InjectDrawCapture;
-        });
+        Main.QueueMainThreadAction(() => IL_Main.DoDraw += InjectDoDraw);
+
+        IL_Main.DrawCapture += InjectDrawCapture;
     }
 
     public override void Unload()
@@ -35,10 +34,11 @@ public sealed class PixelateSkySystem : ModSystem
         Main.QueueMainThreadAction(() =>
         {
             IL_Main.DoDraw -= InjectDoDraw;
-            IL_Main.DrawCapture -= InjectDrawCapture;
 
             SkyTarget?.Dispose();
         });
+
+        IL_Main.DrawCapture -= InjectDrawCapture;
     }
 
     #endregion
@@ -86,6 +86,8 @@ public sealed class PixelateSkySystem : ModSystem
 
                 // Lazy.
             c.EmitDelegate(() => SamplerState.PointClamp);
+
+            MonoModHooks.DumpIL(Mod, il);
         }
         catch (Exception e)
         {
@@ -145,12 +147,21 @@ public sealed class PixelateSkySystem : ModSystem
 
     #endregion
 
-    private static void PrepareTarget(ref RenderTargetBinding[] oldTargets)
+    public static void PrepareTarget(ref RenderTargetBinding[] oldTargets)
     {
         Effect pixelate = Shaders.PixelateAndQuantize.Value;
 
         if (!SkyConfig.Instance.PixelatedSky || pixelate is null)
             return;
+
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        bool beginCalled = spriteBatch.beginCalled;
+
+        SpriteBatchSnapshot snapshot = new();
+
+        if (beginCalled)
+            spriteBatch.End(out snapshot);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
@@ -168,9 +179,12 @@ public sealed class PixelateSkySystem : ModSystem
 
         device.SetRenderTarget(SkyTarget);
         device.Clear(Color.Transparent);
+
+        if (beginCalled)
+            spriteBatch.Begin(in snapshot);
     }
 
-    private static void DrawTarget(ref RenderTargetBinding[] oldTargets)
+    public static void DrawTarget(ref RenderTargetBinding[] oldTargets)
     {
         Effect pixelate = Shaders.PixelateAndQuantize.Value;
 
@@ -178,6 +192,13 @@ public sealed class PixelateSkySystem : ModSystem
             return;
 
         SpriteBatch spriteBatch = Main.spriteBatch;
+
+        bool beginCalled = spriteBatch.beginCalled;
+
+        SpriteBatchSnapshot snapshot = new();
+
+        if (beginCalled)
+            spriteBatch.End(out snapshot);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
@@ -200,6 +221,10 @@ public sealed class PixelateSkySystem : ModSystem
 
         spriteBatch.Draw(SkyTarget, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.White);
 
-        spriteBatch.End();
+
+        if (beginCalled)
+            spriteBatch.Restart(in snapshot);
+        else
+            spriteBatch.End();
     }
 }

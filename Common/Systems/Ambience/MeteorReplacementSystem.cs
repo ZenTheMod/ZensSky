@@ -12,9 +12,9 @@ public sealed class MeteorReplacementSystem : ModSystem
 {
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => IL_AmbientSky.Spawn += ModifyMeteorSpawn);
+    public override void Load() => IL_AmbientSky.Spawn += ModifyMeteorSpawn;
 
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_AmbientSky.Spawn -= ModifyMeteorSpawn);
+    public override void Unload() => IL_AmbientSky.Spawn -= ModifyMeteorSpawn;
 
     #endregion
 

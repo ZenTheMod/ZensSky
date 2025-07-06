@@ -302,7 +302,7 @@ public sealed class StarSystem : ModSystem
 
         float atmosphericBoost = MathF.Pow(1f - Main.atmo, 3f);
 
-        return MathF.Pow(MathHelper.Clamp(alpha + atmosphericBoost, 0f, 1f), 3f);
+        return MathF.Pow(MiscUtils.Saturate(alpha + atmosphericBoost), 3f);
     }
 
     #endregion

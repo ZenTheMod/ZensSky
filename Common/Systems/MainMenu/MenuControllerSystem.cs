@@ -68,21 +68,22 @@ public sealed class MenuControllerSystem : ModSystem
                 AddMenuControllerToggle = new(updateAndDrawModMenuInner, 
                     AddToggle);
 
-            MethodInfo? populateConfigs = typeof(UIModConfigList).GetMethod(nameof(UIModConfigList.PopulateConfigs), Instance | NonPublic);
-            if (populateConfigs is not null)
-                HideConfigFromList = new(populateConfigs,
-                    HideMenuConfig);
-
-            MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
-
-            if (save is not null)
-                SaveConfig = new(save,
-                    RefreshOnSave);
-
             IL_Main.DrawMenu += ModifyInteraction;
             On_Main.UpdateUIStates += UpdateInterface;
             Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
         });
+
+        MethodInfo? populateConfigs = typeof(UIModConfigList).GetMethod(nameof(UIModConfigList.PopulateConfigs), Instance | NonPublic);
+
+        if (populateConfigs is not null)
+            HideConfigFromList = new(populateConfigs,
+                HideMenuConfig);
+
+        MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
+
+        if (save is not null)
+            SaveConfig = new(save,
+                RefreshOnSave);
 
         MenuController?.Activate();
     }
@@ -92,7 +93,6 @@ public sealed class MenuControllerSystem : ModSystem
         Main.QueueMainThreadAction(() =>
         {
             AddMenuControllerToggle?.Dispose();
-            HideConfigFromList?.Dispose();
 
             SaveConfig?.Dispose();
 
@@ -100,6 +100,10 @@ public sealed class MenuControllerSystem : ModSystem
             On_Main.UpdateUIStates -= UpdateInterface;
             Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
         });
+
+        HideConfigFromList?.Dispose();
+
+        SaveConfig?.Dispose();
     }
 
     public override void PostSetupContent() =>
@@ -229,7 +233,7 @@ public sealed class MenuControllerSystem : ModSystem
 
                 // Get the label to the bottom of the loop, this will act as our 'continue' keyword.
             c.GotoNext(MoveType.After,
-                i => i.MatchCallvirt<List<ModConfig>>(nameof(List<ModConfig>.GetEnumerator)),
+                i => i.MatchCallvirt<List<ModConfig>>(nameof(List<>.GetEnumerator)),
                 i => i.MatchStloc(out _),
                 i => i.MatchBr(out addConfigSkipTarget));
 
@@ -273,7 +277,7 @@ public sealed class MenuControllerSystem : ModSystem
             RefreshAll();
     }
 
-        // For whatever reason ModSystem::UpdateUI does not run on the titlescreen ???
+        // For whatever reason ModSystem.UpdateUI does not run on the titlescreen ???
     private void UpdateInterface(On_Main.orig_UpdateUIStates orig, GameTime gameTime)
     {
         if (InUI)

@@ -32,7 +32,7 @@ Configs: {
 			Tooltip:
 				'''
 				If the moons shadow is transparent to replicate the look of the current terraria moon sprites. 
-				(sorry if you've just learnt about this now) 
+				(Sorry if you've just learnt about this now.) 
 				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
 				'''
 		}
@@ -46,9 +46,13 @@ Configs: {
 				'''
 		}
 
-		VanillaStyleStars: {
-			Label: "[i:184] Vanilla Styled Stars"
-			Tooltip: If stars are drawn with vanillas textures.
+		StarStyle: {
+			Label: "[i:184] Star Style"
+			Tooltip:
+				'''
+				Which of the four styles to draw stars with.
+				(Can look strange with 'Pixelated Sky' enabled.)
+				'''
 		}
 
 		DrawRealisticStars: {
@@ -177,6 +181,14 @@ Configs: {
 	}
 
 	Locked: - Locked
+
+	StarVisual: {
+		Vanilla.Label: Vanilla
+		Diamond.Label: Diamond
+		FourPointed.Label: Four Pointed
+		OuterWilds.Label: Circle
+		Tooltip: ""
+	}
 }
 
 MenuStyles.Eclipse: Eclipse

@@ -99,6 +99,13 @@ public static class MiscUtils
             Main.QueueMainThreadAction(() => action?.Invoke());
     }
 
+    /// <summary>
+    /// Shorthand for <c>MathHelper.Clamp(<paramref name="value"/>, 0, 1)</c>.
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns><paramref name="value"/> between 0-1.</returns>
+    public static float Saturate(float value) => MathHelper.Clamp(value, 0, 1);
+
     #region Lang
 
     /// <summary>

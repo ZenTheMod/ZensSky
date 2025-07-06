@@ -10,11 +10,11 @@ float4 shadowColor;
 float4 atmosphereColor;
 float4 atmosphereShadowColor;
 
-const float radius1 = .71;
-const float radius2 = .32;
+static const float radius1 = .71;
+static const float radius2 = .32;
 
-const float2 pos1 = float2(.24, -.24);
-const float2 pos2 = float2(-.6, .6);
+static const float2 pos1 = float2(.24, -.24);
+static const float2 pos2 = float2(-.6, .6);
 
 float calcdist(float2 uv)
 {

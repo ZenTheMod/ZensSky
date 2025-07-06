@@ -12,6 +12,7 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using ZensSky.Common.Registries;
+using ZensSky.Common.Utilities;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Config.Elements;
@@ -163,7 +164,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             spriteBatch.Draw(colorSlider, new Vector2(x + TheMagicNumber * perc, y + 4f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
 
         IngameOptions.inBar = isHovering;
-        ratio = MathHelper.Clamp((Main.mouseX - rectangle.X) / (float)rectangle.Width, 0, 1);
+        ratio = MiscUtils.Saturate((Main.mouseX - rectangle.X) / (float)rectangle.Width);
     }
 
     #endregion

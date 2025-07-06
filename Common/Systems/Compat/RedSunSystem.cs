@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using RedSunAndRealisticSky;
 using RedSunAndRealisticSky.Graphics;
 using System;
 using System.Reflection;
@@ -9,7 +10,6 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu;
-using ZensSky.Common.Utilities;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -61,6 +61,8 @@ public sealed class RedSunSystem : ModSystem
     public override void Unload() => SunAndMoonDrawing?.Dispose();
 
     #endregion
+
+    #region Drawing
 
     private void ModifyDrawing(ILContext il)
     {
@@ -265,24 +267,17 @@ public sealed class RedSunSystem : ModSystem
         spriteBatch.End(out var snapshot);
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
-        float centerX = MiscUtils.HalfScreenSize.X;
-        float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
-
-        float distanceFromTop = (SunPosition.Y + SunTopBuffer) / SceneAreaSize.Y;
-
-        Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
-
-        Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = MoonColor * MoonScale;
-        moonColor.A = 255;
-
         if (Main.dayTime && ShowSun)
-            DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
+            DrawSun(spriteBatch, device);
 
             // Draw the moon regardless* due to this mod.
         if (ShowMoon)
-            DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+            DrawMoon(spriteBatch, device);
 
         spriteBatch.Restart(in snapshot);
     }
+
+    #endregion
+
+    public static bool FlipSunAndMoon => ModContent.GetInstance<ClientConfig>().FlipSunAndMoon;
 }

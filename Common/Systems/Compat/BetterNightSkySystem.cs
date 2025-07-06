@@ -13,6 +13,7 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.SunAndMoon;
+using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
 
@@ -62,7 +63,7 @@ public sealed class BetterNightSkySystem : ModSystem
             // When using our moon rework the scale is derived from the texture for accuracy,
             // however this mods replaces every moon asset; This is also alarming as the resetting of these textures is derived from an unclamped asset replacement (https://github.com/IDGCaptainRussia94/BetterNightSky/blob/master/BetterNightSky.cs#L439).
             // Although I'm likely the only person in the world who cares about this.
-        MethodInfo? doUnloads = typeof(BetterNightSky.BetterNightSky.BetterNightSkySystem).GetMethod(nameof(BetterNightSky.BetterNightSky.BetterNightSkySystem.DoUnloads), Public | Instance);
+        MethodInfo? doUnloads = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.DoUnloads), Public | Instance);
 
         if (doUnloads is not null)
             UnloadSkip = new(doUnloads,
@@ -71,8 +72,7 @@ public sealed class BetterNightSkySystem : ModSystem
         if (!SkyConfig.Instance.SunAndMoonRework)
             return;
 
-            // TODO: Rename this class.
-        MethodInfo? onModLoad = typeof(BetterNightSky.BetterNightSky.BetterNightSkySystem).GetMethod(nameof(BetterNightSky.BetterNightSky.BetterNightSkySystem.OnModLoad), Public | Instance);
+        MethodInfo? onModLoad = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.OnModLoad), Public | Instance);
 
         if (onModLoad is not null)
             LoadSkip = new(onModLoad,

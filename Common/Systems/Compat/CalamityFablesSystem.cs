@@ -49,7 +49,7 @@ public sealed class CalamityFablesSystem : ModSystem
 
     #region Loading
 
-    public override void Load() 
+    public override void PostSetupContent() 
     {
         PriorMoonStyles = TextureAssets.Moon.Length;
 
