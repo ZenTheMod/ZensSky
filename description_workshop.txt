@@ -8,7 +8,7 @@ As well as including simple and easy to use menu configuration straight from the
 [list]
     [*]More dynamic sun in the style of 1.4.5 leaks.
     [*]More accurate moon, works for every vanilla moon style (Including Calamity Fables's 16 additional moon styles).
-    [*]Prettier stars.
+    [*]Prettier stars, with 5 styles to choose from.
     [*]Supernovae.
     [*]Fancy shooting stars.
     [*]Wind particles.

@@ -50,7 +50,7 @@ Configs: {
 			Label: "[i:184] Star Style"
 			Tooltip:
 				'''
-				Which of the four styles to draw stars with.
+				Which of the five styles to draw stars with.
 				(Can look strange with 'Pixelated Sky' enabled.)
 				'''
 		}
@@ -187,6 +187,7 @@ Configs: {
 		Diamond.Label: Diamond
 		FourPointed.Label: Four Pointed
 		OuterWilds.Label: Circle
+		Random.Label: Random
 		Tooltip: ""
 	}
 }

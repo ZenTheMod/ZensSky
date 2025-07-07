@@ -24,7 +24,8 @@ public enum StarVisual : byte
     Vanilla = 0,
     Diamond = 1,
     FourPointed = 2,
-    OuterWilds = 3
+    OuterWilds = 3,
+    Random = 4
 }
 
     // Thanks to jupiter.ryo for early help with this.
@@ -57,8 +58,8 @@ public record struct Star
     private const float DiamondSize = .124f;
     private const float DiamondAlpha = .75f;
 
-    private const float FlareSize = .3f;
-    private const float FlareAlpha = .67f;
+    private const float FlareSize = .14f;
+    private const float FlareInnerSize = .03f;
 
     private const float CircleSize = .3f;
     private const float CircleAlpha = .67f;
@@ -67,7 +68,7 @@ public record struct Star
 
     #region Public Properties
 
-    public required Vector2 Position { get; init; }
+    public required Vector2 Position { get; set; }
 
     public required Color BaseColor { get; init; }
 
@@ -95,6 +96,9 @@ public record struct Star
 
     public readonly void DrawVanilla(SpriteBatch spriteBatch, float alpha)
     {
+        if (SupernovaProgress == SupernovaProgress.Exploding)
+            return;
+
         Texture2D texture = TextureAssets.Star[VanillaStyle].Value;
         Vector2 origin = texture.Size() * .5f;
 
@@ -114,6 +118,9 @@ public record struct Star
 
     public readonly void DrawDiamond(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
+        if (SupernovaProgress == SupernovaProgress.Exploding)
+            return;
+
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha) * DiamondAlpha;
@@ -129,25 +136,31 @@ public record struct Star
 
     public readonly void DrawFlare(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
+        if (SupernovaProgress == SupernovaProgress.Exploding)
+            return;
+
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha);
-            // color.A = 0;
+        color.A = 0;
 
-        float scale = Scale * .14f;
+        float scale = Scale * FlareSize;
 
         spriteBatch.Draw(texture, position, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
 
         Color white = Color.White * GetAlpha(alpha);
-            // color.A = 0;
+        color.A = 0;
 
-        scale = Scale * .03f;
+        scale = Scale * FlareInnerSize;
 
         spriteBatch.Draw(texture, position, null, white, rotation, origin, scale, SpriteEffects.None, 0f);
     }
 
     public readonly void DrawCircle(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
+        if (SupernovaProgress == SupernovaProgress.Exploding)
+            return;
+
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha) * CircleAlpha;

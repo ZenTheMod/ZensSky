@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -50,7 +49,6 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Stars
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawStars(SpriteBatch spriteBatch, float alpha)
     {
         Texture2D texture;
@@ -78,6 +76,49 @@ public sealed class StarRenderingSystem : ModSystem
                 origin = texture.Size() * .5f;
                 Array.ForEach(StarSystem.Stars, s => s.DrawCircle(spriteBatch, texture, alpha, origin, -StarRotation));
                 break;
+
+                // TODO: Clean up this logic.
+            case StarVisual.Random:
+                for (int i = 0; i < StarCount; i++)
+                {
+                    Star star = StarSystem.Stars[i];
+
+                    int style = (i % 3) + 1;
+
+                    DrawStar(spriteBatch, alpha, -StarRotation, star, (StarVisual)style);
+                }
+                break;
+        }
+    }
+
+    public static void DrawStar(SpriteBatch spriteBatch, float alpha, float rotation, Star star, StarVisual style)
+    {
+        Texture2D texture;
+        Vector2 origin;
+
+        switch (style)
+        {
+            case StarVisual.Vanilla:
+                star.DrawVanilla(spriteBatch, alpha);
+                break;
+
+            case StarVisual.Diamond:
+                texture = Textures.DiamondStar.Value;
+                origin = texture.Size() * .5f;
+                star.DrawDiamond(spriteBatch, texture, alpha, origin, rotation);
+                break;
+
+            case StarVisual.FourPointed:
+                texture = Textures.Star.Value;
+                origin = texture.Size() * .5f;
+                star.DrawFlare(spriteBatch, texture, alpha, origin, rotation);
+                break;
+
+            case StarVisual.OuterWilds:
+                texture = Textures.OuterWildsStar.Value;
+                origin = texture.Size() * .5f;
+                star.DrawCircle(spriteBatch, texture, alpha, origin, rotation);
+                break;
         }
     }
 
@@ -85,7 +126,6 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Supernovae
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawSupernovae(SpriteBatch spriteBatch, float alpha)
     {
         Effect supernova = Shaders.Supernova.Value;

@@ -28,10 +28,6 @@ public sealed class SkyConfig : ModConfig
     [ReloadRequired]
     [DefaultValue(true)]
     public bool SunAndMoonRework;
-    
-    [DefaultValue(true)]
-    [CustomModConfigItem(typeof(EclipseLocalizedBoolElement))]
-    public bool EclipseMode;
 
     [DefaultValue(false)]
     [CustomModConfigItem(typeof(SunAndMoonReworkElement))]
@@ -44,6 +40,7 @@ public sealed class SkyConfig : ModConfig
     [Header("Stars")]
 
     [DefaultValue(StarVisual.Vanilla)]
+    [CustomModConfigItem(typeof(StarEnumElement))]
     public StarVisual StarStyle;
 
     [DefaultValue(true)]

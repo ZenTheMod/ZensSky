@@ -51,7 +51,7 @@ public abstract class LockedBoolElement : ConfigElement<bool>
         Vector2 textSize = font.MeasureString(text);
         Vector2 origin = new(textSize.X, 0);
 
-        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, new Vector2(dimensions.X + dimensions.Width - 36, dimensions.Y + 8f), Color.White, 0f, origin, new(0.8f));
+        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, new Vector2(dimensions.X + dimensions.Width - 36f, dimensions.Y + 8f), Color.White, 0f, origin, new(0.8f));
 
         Vector2 position = new(dimensions.X + dimensions.Width - 28, dimensions.Y + 4);
         Rectangle rectangle = texture.Frame(2, 2, Value.ToInt(), IsLocked.ToInt());

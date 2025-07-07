@@ -222,20 +222,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         for (int i = 0; i < EclipseBloomScales.Length; i++)
             spriteBatch.Draw(bloom, position, null, color * EclipseColorMultipliers[i], 0, bloomOrigin, scale * EclipseBloomScales[i], SpriteEffects.None, 0f);
 
-        if (SkyConfig.Instance.EclipseMode)
-        {
-            Effect coronaries = Eclipse.Value;
-
-            if (coronaries is null)
-                return;
-
-            coronaries.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-            coronaries.CurrentTechnique.Passes[0].Apply();
-
-            spriteBatch.Draw(bloom, position, null, Color.Black, 0, bloomOrigin, scale * EclipseTendrilsScale, SpriteEffects.None, 0f);
-        }
-        else
-            DrawMoon(spriteBatch, position, Color.Black, rotation, scale, Color.Black, Color.Black, device);
+        DrawMoon(spriteBatch, position, Color.Black, rotation, scale, Color.Black, Color.Black, device);
     }
 
     #endregion
