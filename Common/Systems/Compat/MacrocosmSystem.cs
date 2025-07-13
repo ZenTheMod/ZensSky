@@ -1,19 +1,17 @@
-﻿using Daybreak.Common.CIL;
-using Macrocosm.Common.Drawing.Sky;
+﻿using Macrocosm.Common.Drawing.Sky;
 using Macrocosm.Content.Skies.Moon;
-using Macrocosm.Content.Subworlds;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using SubworldLibrary;
 using System;
 using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Stars;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -21,17 +19,14 @@ using MacrocosmSky = Macrocosm.Common.Drawing.Sky;
 
 namespace ZensSky.Common.Systems.Compat;
 
-[JITWhenModsEnabled("Macrocosm")]
-[ExtendsFromMod("Macrocosm")]
+[JITWhenModsEnabled("Macrocosm", "SubworldLibrary")]
+[ExtendsFromMod("Macrocosm", "SubworldLibrary")]
 [Autoload(Side = ModSide.Client)]
 public sealed class MacrocosmSystem : ModSystem
 {
     #region Private Fields
 
     private static ILHook? InjectStarDrawing;
-
-    private delegate void orig_Update(MoonSky self, GameTime gameTime);
-    private static Hook? SunPosition;
 
     private delegate void orig_Rotate(CelestialBody self);
     private static Hook? ModifyRotation;
@@ -41,6 +36,17 @@ public sealed class MacrocosmSystem : ModSystem
     #region Public Properties
 
     public static bool IsEnabled { get; private set; }
+
+    public static bool InAnySubworld
+    {
+        get
+        {
+            if (!IsEnabled)
+                return false;
+
+            return SubworldSystem.AnyActive<Macrocosm.Macrocosm>();
+        }
+    }
 
     #endregion
 
@@ -56,18 +62,12 @@ public sealed class MacrocosmSystem : ModSystem
             InjectStarDrawing = new(draw,
                 DrawStars);
 
-        MethodInfo? update = typeof(MoonSky).GetMethod(nameof(MoonSky.Update), Public | Instance);
-
-        if (update is not null)
-            SunPosition = new(update,
-                MoonSkySunPosition);
-
             // Account for RedSun's reversal of the sun's orbit.
                 // This is probably fine lorewise.
         if (!RedSunSystem.IsEnabled || !RedSunSystem.FlipSunAndMoon)
             return;
 
-        MethodInfo? rotate = typeof(CelestialBody).GetMethod(nameof(CelestialBody.Rotate), NonPublic | Instance);
+        MethodInfo? rotate = typeof(CelestialBody).GetMethod(nameof(CelestialBody.Rotate), Public | Instance);
 
         if (rotate is not null)
             ModifyRotation = new(rotate,
@@ -90,9 +90,6 @@ public sealed class MacrocosmSystem : ModSystem
         try
         {
             ILCursor c = new(il);
-
-            VariableDefinition oldTargetsIndex = il.AddVariable<RenderTargetBinding[]>();
-
             ILLabel jumpStarDrawingTarget = c.DefineLabel();
 
             ILLabel jumpSunDrawingTarget = c.DefineLabel();
@@ -103,13 +100,8 @@ public sealed class MacrocosmSystem : ModSystem
 
             int brightnessIndex = -1;
 
-            c.EmitLdloca(oldTargetsIndex);
-
-            c.EmitDelegate(PixelateSkySystem.PrepareTarget);
-
                 // Skip over star drawing.
             c.GotoNext(MoveType.Before,
-                i => i.MatchNop(),
                 i => i.MatchLdarg(out selfIndex),
                 i => i.MatchLdfld<MoonSky>(nameof(MoonSky.starsDay)),
                 i => i.MatchLdarg(out spriteBatchIndex));
@@ -155,38 +147,22 @@ public sealed class MacrocosmSystem : ModSystem
                 {
                     GraphicsDevice device = Main.instance.GraphicsDevice;
 
+                    CelestialBody sun = self.sun;
+
+                    sun.Update();
+
+                    SetInfo(sun.Center, sun.Color, sun.Rotation, sun.Scale, true);
+
                         // EventSystem.DemonSun
-                    DrawSun(spriteBatch, device);
+                    if (sun.ShouldDraw())
+                        DrawSun(spriteBatch, device);
                 });
             }
-            else
-            {
-                c.GotoNext(MoveType.After,
-                    i => i.MatchLdarg(spriteBatchIndex),
-                    i => i.MatchCallvirt<CelestialBody>(nameof(CelestialBody.Draw)));
-            }
-
-            c.EmitLdloca(oldTargetsIndex);
-
-            c.EmitDelegate(PixelateSkySystem.DrawTarget);
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"MoonSky.Draw\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
-    }
-
-    #endregion
-
-    #region Sun Position
-
-    private void MoonSkySunPosition(orig_Update orig, MoonSky self, GameTime gameTime)
-    {
-        orig(self, gameTime);
-
-        FetchSunInfo(SceneArea, self.sun.Center, self.sun.Color, self.sun.Rotation, self.sun.Scale);
     }
 
     #endregion
@@ -205,6 +181,4 @@ public sealed class MacrocosmSystem : ModSystem
     }
 
     #endregion
-
-        // public static bool InAnySubworld => SubworldSystem.IsActive<Moon>();
 }

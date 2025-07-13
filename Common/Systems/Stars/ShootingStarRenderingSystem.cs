@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Core.Exceptions;
 using static ZensSky.Common.Systems.Stars.ShootingStarSystem;
 
 namespace ZensSky.Common.Systems.Stars;
@@ -59,9 +60,7 @@ public sealed class ShootingStarRenderingSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 

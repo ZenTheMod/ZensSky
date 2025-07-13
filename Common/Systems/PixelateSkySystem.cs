@@ -12,19 +12,32 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class PixelateSkySystem : ModSystem
 {
+    #region Private Fields
+
+    private static bool HasDrawn;
+
     private static RenderTarget2D? SkyTarget;
+
+    private static RenderTargetBinding[]? PreviousTargets;
+
+    #endregion
 
     #region Loading
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() => IL_Main.DoDraw += InjectDoDraw);
+        Main.QueueMainThreadAction(() => 
+        {
+            IL_Main.DoDraw += InjectDoDraw;
+            IL_Main.DrawSurfaceBG += InjectDrawSurfaceBG;
+        });
 
         IL_Main.DrawCapture += InjectDrawCapture;
     }
@@ -34,6 +47,7 @@ public sealed class PixelateSkySystem : ModSystem
         Main.QueueMainThreadAction(() =>
         {
             IL_Main.DoDraw -= InjectDoDraw;
+            IL_Main.DrawSurfaceBG -= InjectDrawSurfaceBG;
 
             SkyTarget?.Dispose();
         });
@@ -51,34 +65,21 @@ public sealed class PixelateSkySystem : ModSystem
         {
             ILCursor c = new(il);
 
-                // Being extra safe incase some other mod mucks with rendering like this.
-            VariableDefinition oldTargetsIndex = il.AddVariable<RenderTargetBinding[]>();
-
-                // Bit risky; match to after the base sky is draw.
+                // Swap to our pixelation target.
             c.GotoNext(MoveType.After,
                 i => i.MatchCall(typeof(TimeLogger).FullName ?? "Terraria.TimeLogger", nameof(TimeLogger.DetailedDrawTime)),
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
 
-            c.EmitLdloca(oldTargetsIndex);
-
             c.EmitDelegate(PrepareTarget);
 
+                // Fix the ugly background sampling.
             c.GotoNext(MoveType.After,
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchLdcI4(0),
                 i => i.MatchLdcI4(0),
                 i => i.MatchCallvirt<OverlayManager>(nameof(OverlayManager.Draw)));
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
-                i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
-
-            c.EmitLdloca(oldTargetsIndex);
-
-            c.EmitDelegate(DrawTarget);
-
-                // Fix the ugly background sampling.
             c.GotoNext(MoveType.After,
                 i => i.MatchLdsfld<SamplerState>(nameof(SamplerState.LinearClamp)));
 
@@ -87,13 +88,16 @@ public sealed class PixelateSkySystem : ModSystem
                 // Lazy.
             c.EmitDelegate(() => SamplerState.PointClamp);
 
-            MonoModHooks.DumpIL(Mod, il);
+                // Now handle a backup case just to make sure that when drawing goes wrong nothing explodes.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdarg(out _),
+                i => i.MatchCall<Main>(nameof(Main.DrawBG)));
+
+            c.EmitDelegate(DrawTarget);
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -107,52 +111,86 @@ public sealed class PixelateSkySystem : ModSystem
         {
             ILCursor c = new(il);
 
-                // Being extra safe incase some other mod mucks with rendering like this.
-            VariableDefinition oldTargetsIndex = il.AddVariable<RenderTargetBinding[]>();
-
+                // Swap to our pixelation target,
             c.GotoNext(MoveType.After,
                 i => i.MatchCall<Main>(nameof(Main.DrawSimpleSurfaceBackground)),
                 i => i.MatchLdsfld<Main>(nameof(Main.tileBatch)),
                 i => i.MatchCallvirt<TileBatch>(nameof(TileBatch.End)));
 
-            c.EmitLdloca(oldTargetsIndex);
-
             c.EmitDelegate(PrepareTarget);
 
-                // Fix the ugly background sampling. (Prolly not needed)
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdsfld<SamplerState>(nameof(SamplerState.AnisotropicClamp)));
-
-            c.EmitPop();
-
-                // Lazy.
-            c.EmitDelegate(() => SamplerState.PointClamp);
-
+                // Draw our pixelation target.
             c.GotoNext(MoveType.After,
                 i => i.MatchCall<Main>(nameof(Main.DrawSurfaceBG)),
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
 
-            c.EmitLdloca(oldTargetsIndex);
-
             c.EmitDelegate(DrawTarget);
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawCapture\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
     #endregion
 
-    public static void PrepareTarget(ref RenderTargetBinding[] oldTargets)
+    #region DrawSurfaceBG
+
+    private void InjectDrawSurfaceBG(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel jumpDepthResetTarget = c.DefineLabel();
+
+                // This is done to ensure that certain modded backgrounds that use CustomSky will still be pixelated correctly; assuming that they're checking for maxDepth >= float.MaxValue.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<Main>(nameof(Main.atmo)),
+                i => i.MatchMul(),
+                i => i.MatchStloc(out _));
+
+            c.EmitDelegate(() =>
+            {
+                SkyManager.Instance.ResetDepthTracker();
+
+                SkyManager.Instance.DrawToDepth(Main.spriteBatch, float.MaxValue - 1);
+
+                DrawTarget();
+            });
+
+                // Now jump over vanilla reseting it after clouds draw, just to avoid drawing backgrounds twice.
+            c.GotoNext(MoveType.Before, 
+                i => i.MatchLdsfld<SkyManager>(nameof(SkyManager.Instance)),
+                i => i.MatchCallvirt<SkyManager>(nameof(SkyManager.ResetDepthTracker)));
+
+            c.MoveAfterLabels();
+
+            c.EmitBr(jumpDepthResetTarget);
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<SkyManager>(nameof(SkyManager.Instance)),
+                i => i.MatchCallvirt<SkyManager>(nameof(SkyManager.ResetDepthTracker)));
+
+            c.MarkLabel(jumpDepthResetTarget);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    #endregion
+
+    private static void PrepareTarget()
     {
         Effect pixelate = Shaders.PixelateAndQuantize.Value;
 
         if (!SkyConfig.Instance.PixelatedSky || pixelate is null)
             return;
+
+        HasDrawn = false;
 
         SpriteBatch spriteBatch = Main.spriteBatch;
 
@@ -165,11 +203,11 @@ public sealed class PixelateSkySystem : ModSystem
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        oldTargets = device.GetRenderTargets();
+        PreviousTargets = device.GetRenderTargets();
 
             // Make sure that we can swap back to the previous targets without losing any information.
                 // Lolxd might purge me for meddling with this during drawing.
-        foreach (RenderTargetBinding oldTarg in oldTargets)
+        foreach (RenderTargetBinding oldTarg in PreviousTargets)
             if (oldTarg.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
@@ -184,12 +222,18 @@ public sealed class PixelateSkySystem : ModSystem
             spriteBatch.Begin(in snapshot);
     }
 
-    public static void DrawTarget(ref RenderTargetBinding[] oldTargets)
+    private static void DrawTarget()
     {
         Effect pixelate = Shaders.PixelateAndQuantize.Value;
 
-        if (!SkyConfig.Instance.PixelatedSky || SkyTarget is null || pixelate is null || Main.mapFullscreen)
+        if (!SkyConfig.Instance.PixelatedSky || 
+            SkyTarget is null || 
+            pixelate is null || 
+            Main.mapFullscreen || 
+            HasDrawn)
             return;
+
+        HasDrawn = true;
 
         SpriteBatch spriteBatch = Main.spriteBatch;
 
@@ -202,7 +246,7 @@ public sealed class PixelateSkySystem : ModSystem
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        device.SetRenderTargets(oldTargets);
+        device.SetRenderTargets(PreviousTargets);
 
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Matrix.Identity);
 
@@ -219,8 +263,7 @@ public sealed class PixelateSkySystem : ModSystem
 
         pixelate.CurrentTechnique.Passes[pass].Apply();
 
-        spriteBatch.Draw(SkyTarget, new Rectangle(0, 0, viewport.Width, viewport.Height), Color.White);
-
+        spriteBatch.Draw(SkyTarget, viewport.Bounds, Color.White);
 
         if (beginCalled)
             spriteBatch.Restart(in snapshot);

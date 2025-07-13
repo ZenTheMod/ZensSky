@@ -13,6 +13,7 @@ using Terraria.ModLoader.UI;
 using Terraria.UI;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Config.Elements;
@@ -76,9 +77,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"RangeElement.DrawSelf\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILEditException(ModContent.GetInstance<ZensSky>(), il, e);
         }
     }
 

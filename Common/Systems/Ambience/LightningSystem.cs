@@ -5,6 +5,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -103,9 +104,7 @@ public sealed class LightningSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.UpdateMenu\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 

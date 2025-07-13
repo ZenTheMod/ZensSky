@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.GameContent.Skies;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -41,9 +42,7 @@ public sealed class MeteorReplacementSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"AmbientSky.Spawn\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 }

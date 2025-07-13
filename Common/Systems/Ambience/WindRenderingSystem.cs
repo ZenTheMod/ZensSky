@@ -74,7 +74,6 @@ public sealed class WindRenderingSystem : ModSystem
 
     #region Drawing
 
-        // Surely someone will kill me for this right ?
     private static void DrawPixelated()
     {
         Effect pixelate = Shaders.PixelateAndQuantize.Value;

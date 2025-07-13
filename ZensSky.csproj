@@ -36,6 +36,9 @@
 		<Reference Include="Macrocosm">
 			<HintPath>..\ModAssemblies\Macrocosm.dll</HintPath>
 		</Reference>
+		<Reference Include="SubworldLibrary">
+			<HintPath>..\ModAssemblies\SubworldLibrary.dll</HintPath>
+		</Reference>
 
 		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">

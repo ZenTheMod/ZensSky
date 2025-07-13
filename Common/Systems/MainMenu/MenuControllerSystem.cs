@@ -18,6 +18,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.MainMenu;
@@ -170,9 +171,7 @@ public sealed class MenuControllerSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"MenuLoader.UpdateAndDrawModMenuInner\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -207,9 +206,7 @@ public sealed class MenuControllerSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawMenu\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -263,9 +260,7 @@ public sealed class MenuControllerSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"UIModConfigList.PopulateConfigs\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 

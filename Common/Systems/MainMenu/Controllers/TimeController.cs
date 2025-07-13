@@ -5,6 +5,7 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
@@ -109,9 +110,7 @@ public sealed class TimeController : SliderController
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.UpdateMenu\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILEditException(ModContent.GetInstance<ZensSky>(), il, e);
         }
     }
 

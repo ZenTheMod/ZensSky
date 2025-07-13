@@ -37,7 +37,7 @@ public sealed class LightsAndShadowsSystem : ModSystem
 
         if (getSunPos is not null)
             ModifySunPosition = new(getSunPos,
-                RealSunPosition);
+                SetPosition);
     }
 
     public override void Unload() => ModifySunPosition?.Dispose();
@@ -45,9 +45,9 @@ public sealed class LightsAndShadowsSystem : ModSystem
     #endregion
 
         // This gets a bit funky with RedSun as both then sun and moon can be visible but I'm hoping its not noticable.
-    private Vector2 RealSunPosition(orig_GetSunPos orig, RenderTarget2D render)
+    private Vector2 SetPosition(orig_GetSunPos orig, RenderTarget2D render)
     {
-        Vector2 position = Main.dayTime ? SunPosition : MoonPosition;
+        Vector2 position = Main.dayTime ? Info.SunPosition : Info.MoonPosition;
 
             // I tend to use this over checking the players gravity direction, as its much safer.
         if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))

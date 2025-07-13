@@ -9,6 +9,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.MainMenu.Elements;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
@@ -202,9 +203,7 @@ public sealed class ButtonColorController : MenuControllerElement
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.DrawMenu\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILEditException(ModContent.GetInstance<ZensSky>(), il, e);
         }
     }
 

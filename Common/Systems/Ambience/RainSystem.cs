@@ -7,6 +7,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -85,9 +86,7 @@ public sealed class RainSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DoUpdate\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -109,9 +108,7 @@ public sealed class RainSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -146,9 +143,7 @@ public sealed class RainSystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"Main.UpdateAudio\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 

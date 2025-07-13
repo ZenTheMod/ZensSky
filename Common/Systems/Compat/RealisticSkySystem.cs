@@ -20,6 +20,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
@@ -153,7 +154,7 @@ public sealed class RealisticSkySystem : ModSystem
 
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchLdsfld<Main>(nameof(Main.Rasterizer))))
-            throw new ILPatchFailureException(Mod, il, null);
+            throw new ILEditException(Mod, il, null);
 
         c.EmitPop();
         c.EmitDelegate(() => RasterizerState.CullNone);
@@ -166,7 +167,7 @@ public sealed class RealisticSkySystem : ModSystem
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchLdloca(2),
             i => i.MatchCall<SkyPlayerSnapshot>($"get_{nameof(SkyPlayerSnapshot.InvertedGravity)}")))
-            throw new ILPatchFailureException(Mod, il, null);
+            throw new ILEditException(Mod, il, null);
 
         c.EmitPop();
         c.EmitLdcI4(0);
@@ -179,7 +180,7 @@ public sealed class RealisticSkySystem : ModSystem
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchBr(out _),
             i => i.MatchCall<SunPositionSaver>($"get_{nameof(SunPositionSaver.SunPosition)}")))
-            throw new ILPatchFailureException(Mod, il, null);
+            throw new ILEditException(Mod, il, null);
 
         c.EmitDelegate((Vector2 sunPosition) =>
         {
@@ -200,7 +201,7 @@ public sealed class RealisticSkySystem : ModSystem
 
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchCall(typeof(RealisticSkyManager).FullName ?? "RealisticSky.Content.RealisticSkyManager", "get_StarViewRotation")))
-            throw new ILPatchFailureException(Mod, il, null);
+            throw new ILEditException(Mod, il, null);
 
         c.EmitPop();
         c.EmitDelegate(() => StarSystem.StarRotation);
@@ -211,7 +212,7 @@ public sealed class RealisticSkySystem : ModSystem
             i => i.MatchCall<Matrix>("op_Multiply"),
             i => i.MatchLdloc(out _),
             i => i.MatchCall<Matrix>("op_Multiply")))
-            throw new ILPatchFailureException(Mod, il, null);
+            throw new ILEditException(Mod, il, null);
 
         c.EmitDelegate((Matrix mat) =>
         {
@@ -241,9 +242,7 @@ public sealed class RealisticSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \'GalaxyRenderer.Render\'.");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -333,9 +332,7 @@ public sealed class RealisticSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \'RealisticSkyManager.Draw\'.");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -376,7 +373,7 @@ public sealed class RealisticSkySystem : ModSystem
         shader.Parameters["screenSize"]?.SetValue(MiscUtils.ScreenSize);
         shader.Parameters["distanceFadeoff"]?.SetValue(Main.eclipse ? 0.11f : 1f);
 
-        Vector2 sunPosition = SunAndMoonSystem.SunPosition;
+        Vector2 sunPosition = SunAndMoonSystem.Info.SunPosition;
 
         if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
             sunPosition.Y = MiscUtils.ScreenSize.Y - sunPosition.Y;

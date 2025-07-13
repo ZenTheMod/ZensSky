@@ -12,10 +12,10 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.SunAndMoon;
-using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
+using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
+using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -130,9 +130,7 @@ public sealed class BetterNightSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"BetterNightSky.BetterNightSkySystem.OnModLoad\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -173,9 +171,7 @@ public sealed class BetterNightSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawSunAndMoon\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -209,9 +205,7 @@ public sealed class BetterNightSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            ModContent.GetInstance<ZensSky>().Logger.Error("Failed to patch \"ConfigElement.OnBind\".");
-
-            throw new ILPatchFailureException(ModContent.GetInstance<ZensSky>(), il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -246,9 +240,7 @@ public sealed class BetterNightSkySystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"ModConfig.NeedsReload\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -268,8 +260,14 @@ public sealed class BetterNightSkySystem : ModSystem
         CountStars();
         drawStarPhase = 1;
 
-            // Can't ref a readonly.
-        Main.SceneArea sceneArea = SunAndMoonSystem.SceneArea;
+        Main.SceneArea sceneArea = new()
+        {
+            bgTopY = Main.instance.bgTopY,
+            totalHeight = Main.screenHeight,
+            totalWidth = Main.screenWidth,
+            SceneLocalScreenPositionOffset = Vector2.Zero
+        };
+
         foreach (Star star in Main.star.Where(s => s is not null && !s.hidden && SpecialStarType(s) && CanDrawSpecialStar(s)))
         {
             i++;

@@ -15,6 +15,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
@@ -96,8 +97,8 @@ public sealed class CloudSystem : ModSystem
 
                 lighting.Parameters["UseEdgeLighting"]?.SetValue(false);
 
-                Vector2 sunPosition = SunPosition;
-                Vector2 moonPosition = MoonPosition;
+                Vector2 sunPosition = Info.SunPosition;
+                Vector2 moonPosition = Info.MoonPosition;
 
                 if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
                 {
@@ -194,9 +195,7 @@ public sealed class CloudSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawSurfaceBG\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -266,12 +265,12 @@ public sealed class CloudSystem : ModSystem
     private static Color GetColor(bool day)
     {
             // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
-        Vector2 position = day ? SunPosition : MoonPosition;
+        Vector2 position = day ? Info.SunPosition : Info.MoonPosition;
         float centerX = MiscUtils.HalfScreenSize.X;
 
         float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
 
-        Color color = day ? SunColor : MoonColor;
+        Color color = day ? Info.SunColor : Info.MoonColor;
         color = color.MultiplyRGB(day ? SunMultiplier : MoonMultiplier);
 
             // Add a fadeinout effect so the color doesnt just suddenly pop up.

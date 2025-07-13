@@ -10,6 +10,7 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu;
+using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -155,14 +156,6 @@ public sealed class RedSunSystem : ModSystem
 
             c.MarkLabel(sunSkipTarget);
 
-            c.EmitLdarg3(); // SceneArea
-            c.EmitLdloc(sunPosition); // Position
-            c.EmitLdloc(sunColor); // Color
-            c.EmitLdloc(sunRotation); // Rotation
-            c.EmitLdloc(sunScale); // Scale
-
-            c.EmitDelegate(FetchSunInfo);
-
             #endregion
 
             #region Moon
@@ -209,8 +202,7 @@ public sealed class RedSunSystem : ModSystem
             if (SkipDrawing)
                 c.GotoNext(MoveType.Before,
                     i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
-                    i => i.MatchBrfalse(out _),
-                    i => i.MatchLdloc(out _));
+                    i => i.MatchBrfalse(out _));
             else
                 c.GotoNext(MoveType.After,
                     i => i.MatchLdarg3(),
@@ -220,15 +212,32 @@ public sealed class RedSunSystem : ModSystem
 
             c.MarkLabel(moonSkipTarget);
 
-            c.EmitLdarg3(); // SceneArea
-            c.EmitLdloc(moonPosition); // Position
-            c.EmitLdarg(moonColor); // Color
-            c.EmitLdloc(moonRotation); // Rotation
-            c.EmitLdloc(moonScale); // Scale
-
-            c.EmitDelegate(FetchMoonInfo);
-
             #endregion
+
+            c.Index--;
+
+                // Now actually grab the info.
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
+                i => i.MatchBrfalse(out _));
+
+            c.MoveAfterLabels();
+
+            c.EmitLdloc(sunPosition);
+            c.EmitLdloc(sunColor);
+            c.EmitLdloc(sunRotation);
+            c.EmitLdloc(sunScale);
+
+            c.EmitLdloc(moonPosition);
+            c.EmitLdarg(moonColor);
+            c.EmitLdloc(moonRotation);
+            c.EmitLdloc(moonScale);
+
+            c.EmitLdcI4(0); // This info is not forced.
+
+            c.EmitDelegate<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
+
+            #region Misc
 
                 // Make the player unable to grab the sun while hovering the panel.
             c.GotoNext(MoveType.After,
@@ -250,12 +259,12 @@ public sealed class RedSunSystem : ModSystem
 
                 c.EmitDelegate(BetterNightSkySystem.ModifyMoonScale);
             }
+
+            #endregion
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"GeneralLightingIL.ChangePositionAndDrawDayMoon\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -267,12 +276,7 @@ public sealed class RedSunSystem : ModSystem
         spriteBatch.End(out var snapshot);
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
-        if (Main.dayTime && ShowSun)
-            DrawSun(spriteBatch, device);
-
-            // Draw the moon regardless* due to this mod.
-        if (ShowMoon)
-            DrawMoon(spriteBatch, device);
+        DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, ShowMoon);
 
         spriteBatch.Restart(in snapshot);
     }

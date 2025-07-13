@@ -180,7 +180,8 @@ public sealed class StarRenderingSystem : ModSystem
 
     private void DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
-        if (!ZensSky.CanDrawSky)
+            // TODO: Better method of detecting when a mod uses custom sky to hide the visuals.
+        if (!ZensSky.CanDrawSky || MacrocosmSystem.InAnySubworld)
         {
             orig(self, sceneArea, artificial);
             return;

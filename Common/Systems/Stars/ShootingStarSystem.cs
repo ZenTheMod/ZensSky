@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -77,9 +78,7 @@ public sealed class ShootingStarSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.UpdateMenu\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -105,9 +104,7 @@ public sealed class ShootingStarSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.UpdateMenu\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 

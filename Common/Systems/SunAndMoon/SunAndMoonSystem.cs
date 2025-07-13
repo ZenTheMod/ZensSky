@@ -3,8 +3,10 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -24,30 +26,23 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #region Public Properties
 
-    public static Vector2 SunPosition { get; private set; }
-    public static Color SunColor { get; private set; }
-    public static float SunRotation { get; private set; }
-    public static float SunScale { get; private set; }
+    public static bool ForceInfo { get; set; }
 
     public static bool ShowSun { get; set; } = true;
 
-    public static Vector2 MoonPosition { get; private set; }
-    public static Color MoonColor { get; private set; }
-    public static float MoonRotation { get; private set; }
-    public static float MoonScale { get; private set; }
-
     public static bool ShowMoon { get; set; } = true;
 
-    public static Main.SceneArea SceneArea { get; private set; }
-    public static Vector2 SceneAreaSize => new(SceneArea.totalWidth, SceneArea.totalHeight);
+    public static SunAndMoonInfo Info { get; private set; }
 
     #endregion
 
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
+    public override void Load() => 
+        Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
+    public override void Unload() => 
+        Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
 
     private void ModifyDrawing(ILContext il)
     {
@@ -125,14 +120,6 @@ public sealed class SunAndMoonSystem : ModSystem
 
             c.MarkLabel(sunSkipTarget);
 
-            c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(sunPosition); // Position
-            c.EmitLdloc(sunColor); // Color
-            c.EmitLdloc(sunRotation); // Rotation
-            c.EmitLdloc(sunScale); // Scale
-
-            c.EmitDelegate(FetchSunInfo);
-
             #endregion
 
             #region Moon
@@ -150,6 +137,7 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
+            int moonColor = -1;
             int moonRotation = -1;
             int moonScale = -1;
 
@@ -167,7 +155,7 @@ public sealed class SunAndMoonSystem : ModSystem
                 // Fetch IDs from the Draw call.
             c.FindNext(out _, 
                 i => i.MatchNewobj<Rectangle?>(),
-                i => i.MatchLdarg2(),
+                i => i.MatchLdarg(out moonColor),
                 i => i.MatchLdloc(out moonRotation));
             c.FindNext(out _, 
                 i => i.MatchDiv(),
@@ -178,28 +166,44 @@ public sealed class SunAndMoonSystem : ModSystem
             if (SkipDrawing)
                 c.GotoNext(MoveType.Before,
                     i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
-                    i => i.MatchBrfalse(out _),
-                    i => i.MatchLdloc(out _));
+                    i => i.MatchBrfalse(out _));
             else
                 c.GotoNext(MoveType.After,
                     i => i.MatchLdarg1(),
                     i => i.MatchLdfld<Main.SceneArea>(nameof(Main.SceneArea.SceneLocalScreenPositionOffset)),
                     i => i.MatchCall<Vector2>("op_Addition"),
                     i => i.MatchStloc(moonPosition));
-            
+
             c.MarkLabel(moonSkipTarget);
-
-            c.EmitLdarg1(); // SceneArea
-            c.EmitLdloc(moonPosition); // Position
-            c.EmitLdarg2(); // Color
-            c.EmitLdloc(moonRotation); // Rotation
-            c.EmitLdloc(moonScale); // Scale
-
-            c.EmitDelegate(FetchMoonInfo);
 
             #endregion
 
-                // Make the player unable to grab the sun while hovering the panel.
+            c.Index--;
+
+                // Now actually grab the info.
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
+                i => i.MatchBrfalse(out _));
+
+            c.MoveAfterLabels();
+
+            c.EmitLdloc(sunPosition);
+            c.EmitLdloc(sunColor);
+            c.EmitLdloc(sunRotation);
+            c.EmitLdloc(sunScale); 
+
+            c.EmitLdloc(moonPosition);
+            c.EmitLdarg(moonColor);
+            c.EmitLdloc(moonRotation);
+            c.EmitLdloc(moonScale);
+
+            c.EmitLdcI4(0); // This info is not forced.
+
+            c.EmitDelegate<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
+
+            #region Misc
+
+                // Make the player unable to grab the sun while hovering the menu controller panel.
             c.GotoNext(MoveType.After,
                 i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
                 i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
@@ -207,12 +211,12 @@ public sealed class SunAndMoonSystem : ModSystem
             c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
 
             c.EmitBrtrue(jumpSunOrMoonGrabbing);
+
+            #endregion
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DrawSunAndMoon\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 
@@ -220,37 +224,30 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #region Public Methods
 
-    public static void FetchSunInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
+    /// <summary>
+    /// Updates sun and moon positions as well as updating other mod's values.
+    /// </summary>
+    /// <param name="forced">If the info provided should be prioritized over the vanilla data.</param>
+    public static void SetInfo(Vector2 sunPosition, Color sunColor, float sunRotation, float sunScale,
+        Vector2 moonPosition, Color moonColor, float moonRotation, float moonScale, bool forced = false)
     {
-        SunPosition = position;
-        SunColor = color;
-        SunRotation = rotation;
-        SunScale = scale;
+        ForceInfo |= forced;
 
-        SceneArea = sceneArea;
+        if (ForceInfo == forced)
+            Info = new(sunPosition, sunColor, sunRotation, sunScale,
+                moonPosition, moonColor, moonRotation, moonScale);
 
         if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(position);
+            RealisticSkySystem.UpdateSunAndMoonPosition(Main.dayTime ? sunPosition : moonPosition);
 
         if (WrathOfTheGodsSystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(position);
+            WrathOfTheGodsSystem.UpdateSunAndMoonPosition(Main.dayTime ? sunPosition : moonPosition);
     }
 
-    public static void FetchMoonInfo(Main.SceneArea sceneArea, Vector2 position, Color color, float rotation, float scale)
-    {
-        MoonPosition = position;
-        MoonColor = color;
-        MoonRotation = rotation;
-        MoonScale = scale;
-
-        SceneArea = sceneArea;
-
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateMoonPosition(position);
-
-        if (WrathOfTheGodsSystem.IsEnabled)
-            RealisticSkySystem.UpdateMoonPosition(position);
-    }
+    /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>
+    public static void SetInfo(Vector2 position, Color color, float rotation, float scale, bool forced = false) =>
+        SetInfo(position, color, rotation, scale, 
+            position, color, rotation, scale, forced);
 
     #endregion
 }

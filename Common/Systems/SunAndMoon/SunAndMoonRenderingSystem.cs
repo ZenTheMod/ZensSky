@@ -120,20 +120,24 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
+    public override void Load() => 
+        Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
+    public override void Unload() => 
+        Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
 
     #endregion
 
     #region Drawing
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void DrawSunAndMoon(SpriteBatch spriteBatch, GraphicsDevice device)
+    public static void DrawSunAndMoon(SpriteBatch spriteBatch, GraphicsDevice device, bool showSun, bool showMoon)
     {
-        if (Main.dayTime && ShowSun)
+        ForceInfo = false;
+
+        if (showSun)
             DrawSun(spriteBatch, device);
-        else if (ShowMoon)
+        if (showMoon)
             DrawMoon(spriteBatch, device);
     }
 
@@ -141,12 +145,14 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawSun(SpriteBatch spriteBatch, GraphicsDevice device)
     {
-        float centerX = MiscUtils.HalfScreenSize.X;
-        float distanceFromCenter = MathF.Abs(centerX - SunPosition.X) / centerX;
+        Viewport viewport = device.Viewport;
 
-        float distanceFromTop = (SunPosition.Y + SunTopBuffer) / SceneAreaSize.Y;
+        float centerX = viewport.Width * .5f;
+        float distanceFromCenter = MathF.Abs(centerX - Info.SunPosition.X) / centerX;
 
-        DrawSun(spriteBatch, SunPosition, SunColor, SunRotation, SunScale, distanceFromCenter, distanceFromTop, device);
+        float distanceFromTop = (Info.SunPosition.Y + SunTopBuffer) / viewport.Height;
+
+        DrawSun(spriteBatch, Info.SunPosition, Info.SunColor, Info.SunRotation, Info.SunScale, distanceFromCenter, distanceFromTop, device);
     }
 
     public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
@@ -236,10 +242,10 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
 
         Color moonShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent : skyColor;
-        Color moonColor = MoonColor * MoonScale;
+        Color moonColor = Info.MoonColor * Info.MoonScale;
         moonColor.A = 255;
 
-        DrawMoon(spriteBatch, MoonPosition, MoonColor, MoonRotation, MoonScale, moonColor, moonShadowColor, device);
+        DrawMoon(spriteBatch, Info.MoonPosition, Info.MoonColor, Info.MoonRotation, Info.MoonScale, moonColor, moonShadowColor, device);
     }
 
     public static void DrawMoon(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
@@ -387,7 +393,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
                 ShowMoon = true;
             }
 
-            if (RealisticSkySystem.IsEnabled)
+            if (RealisticSkySystem.IsEnabled && Main.dayTime)
                 RealisticSkySystem.DrawSun();
 
             orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
@@ -400,7 +406,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         spriteBatch.End(out var snapshot);
         spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
-        DrawSunAndMoon(spriteBatch, device);
+        DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, !Main.dayTime && ShowMoon);
 
         spriteBatch.Restart(in snapshot);
 

@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using MonoMod.Cil;
 using System;
-using System.IO;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.Localization;
@@ -41,40 +39,6 @@ public static class MiscUtils
         float r = radius * MathF.Sqrt(rand.NextFloat());
 
         return new Vector2(r * MathF.Cos(a), r * MathF.Sin(a));
-    }
-
-    #endregion
-
-    #region IL
-
-    /// <summary>
-    /// Safely umps the information about the given ILContext to a file in Logs/ILDumps/{ModName}/{Method Name}.txt, now accounting for file length and shortening it if it exceeds 255.
-    /// It may be useful to use a tool such as https://www.diffchecker.com/ to compare the IL before and after edits.
-    /// </summary>
-    /// <param name="mod"></param>
-    /// <param name="il"></param>
-    public static void SafeDumpIL(Mod mod, ILContext il)
-    {
-        string text = il.Method.FullName.Replace(':', '_').Replace('<', '[').Replace('>', ']');
-        if (text.Contains('?'))
-        {
-            string text2 = text;
-            int num = text.LastIndexOf('?') + 1;
-            text = text2[num..];
-        }
-
-        text = string.Join("_", text.Split(Path.GetInvalidFileNameChars()));
-
-            // Here we limit the size of the string as to not make poor windows cry.
-        text = text[..254];
-
-        string text3 = Path.Combine(Logging.LogDir, "ILDumps", mod.Name, text + ".txt");
-        string? directoryName = Path.GetDirectoryName(text3);
-        if (!Directory.Exists(directoryName) && directoryName is not null)
-            Directory.CreateDirectory(directoryName);
-
-        File.WriteAllText(text3, il.ToString());
-        Logging.tML.Debug($"Dumped ILContext \"{il.Method.FullName}\" to \"{text3}\"");
     }
 
     #endregion

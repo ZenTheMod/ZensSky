@@ -3,6 +3,7 @@ using System;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems;
 
@@ -40,9 +41,7 @@ public sealed class CaptureInMenuSystem : ModSystem
         }
         catch (Exception e)
         {
-            Mod.Logger.Error("Failed to patch \"Main.DoDraw\".");
-
-            throw new ILPatchFailureException(Mod, il, e);
+            throw new ILEditException(Mod, il, e);
         }
     }
 }
