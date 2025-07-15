@@ -76,16 +76,13 @@ public sealed class CloudSystem : ModSystem
         {
             ILCursor c = new(il);
 
-            VariableDefinition iHaveTrustIssues = c.AddVariable<SpriteBatchSnapshot>();
-            VariableDefinition lighting = c.AddVariable<Effect>();
+            VariableDefinition snapshot = c.AddVariable<SpriteBatchSnapshot>();
 
             #region Shader Parameters
 
-                // Setup the shaders parameters.
-            c.EmitLdloca(lighting);
-            c.EmitDelegate((ref Effect lighting) =>
+            c.EmitDelegate(() =>
             {
-                lighting = Shaders.Cloud.Value;
+                Effect lighting = Shaders.Cloud.Value;
 
                 if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
                     return;
@@ -134,8 +131,7 @@ public sealed class CloudSystem : ModSystem
                     i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
 
                     // Apply our shader.
-                c.EmitLdloca(iHaveTrustIssues);
-                c.EmitLdloc(lighting);
+                c.EmitLdloca(snapshot);
                 c.EmitDelegate(ApplyShader);
 
                     // Match to after the loop.
@@ -148,7 +144,7 @@ public sealed class CloudSystem : ModSystem
                     i => i.MatchLdcI4(200),
                     i => i.MatchBlt(out _));
 
-                c.EmitLdloc(iHaveTrustIssues);
+                c.EmitLdloc(snapshot);
                 c.EmitDelegate(ResetSpritebatch);
             }
 
@@ -166,8 +162,7 @@ public sealed class CloudSystem : ModSystem
                 i => i.MatchLdelemI4());
 
                 // Apply our shader.
-            c.EmitLdloca(iHaveTrustIssues);
-            c.EmitLdloc(lighting);
+            c.EmitLdloca(snapshot);
             c.EmitDelegate(ApplyShader);
 
                 // Match to after the loop of the other drawn cloud background.
@@ -181,7 +176,7 @@ public sealed class CloudSystem : ModSystem
                 i => i.MatchLdfld<Main>(nameof(Main.bgLoops)),
                 i => i.MatchBlt(out _));
 
-            c.EmitLdloc(iHaveTrustIssues);
+            c.EmitLdloc(snapshot);
             c.EmitDelegate(ResetSpritebatch);
 
             #endregion
@@ -233,8 +228,10 @@ public sealed class CloudSystem : ModSystem
         orig(cloudIndex, color, yOffset);
     }
 
-    private void ApplyShader(ref SpriteBatchSnapshot snapshot, Effect lighting)
+    private void ApplyShader(ref SpriteBatchSnapshot snapshot)
     {
+        Effect lighting = Shaders.Cloud.Value;
+
         if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || lighting is null)
             return;
 
@@ -250,7 +247,7 @@ public sealed class CloudSystem : ModSystem
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
             // Samples the moon texture to grab a more accurate color. (May not work correctly when not using the moon overhaul.)
-        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture;
+        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture.Value;
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
 

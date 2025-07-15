@@ -1,6 +1,5 @@
 ﻿using Macrocosm.Common.Drawing.Sky;
 using Macrocosm.Content.Skies.Moon;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -63,7 +62,6 @@ public sealed class MacrocosmSystem : ModSystem
                 DrawStars);
 
             // Account for RedSun's reversal of the sun's orbit.
-                // This is probably fine lorewise.
         if (!RedSunSystem.IsEnabled || !RedSunSystem.FlipSunAndMoon)
             return;
 
@@ -117,9 +115,13 @@ public sealed class MacrocosmSystem : ModSystem
             c.MarkLabel(jumpStarDrawingTarget);
 
             c.EmitLdarg(spriteBatchIndex);
-            c.EmitLdloc(brightnessIndex);
 
-            c.EmitDelegate(StarRenderingSystem.DrawStarsToSky);
+            c.EmitDelegate((SpriteBatch spriteBatch) =>
+            {
+                float alpha = MoonSky.ComputeBrightness(7200.0, 46800.0, .3f, 1f);
+
+                StarRenderingSystem.DrawStarsToSky(spriteBatch, alpha);
+            });
 
                 // Skip over sun drawing.
             c.GotoNext(MoveType.Before,
@@ -158,6 +160,8 @@ public sealed class MacrocosmSystem : ModSystem
                         DrawSun(spriteBatch, device);
                 });
             }
+
+                // TODO: High-res earth drawing, (Good luck with the flat earth model.)
         }
         catch (Exception e)
         {

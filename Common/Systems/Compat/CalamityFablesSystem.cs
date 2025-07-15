@@ -1,6 +1,7 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using System.Reflection;
 using Terraria;
@@ -11,6 +12,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Core.DataStructures;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -66,9 +68,15 @@ public sealed class CalamityFablesSystem : ModSystem
         FieldInfo? vanillaMoonCount = moddedMoons?.GetField("VanillaMoonCount", Public | Static);
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
+
+        for (int i = 0; i < Textures.FablesMoon.Length; i++)
+            AdditionalMoonStyles.Add(PriorMoonStyles + i, Textures.FablesMoon[i]);
+
+        AdditionalMoonDrawing.Add(DrawEdgeCases);
     }
 
-    public override void Unload() => Main.QueueMainThreadAction(() => ShatterTarget?.Dispose());
+    public override void Unload() => 
+        Main.QueueMainThreadAction(() => ShatterTarget?.Dispose());
 
     #endregion
 
@@ -90,20 +98,35 @@ public sealed class CalamityFablesSystem : ModSystem
     #region Drawing
 
         // Handle a bunch of edge cases for moons with non standard visuals.
-    public static void DrawMoon(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
+    private static bool DrawEdgeCases(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        Color moonColor,
+        Color shadowColor,
+        GraphicsDevice device,
+        bool edgeCase)
     {
+        if (!edgeCase || !IsEdgeCase())
+            return true;
+
         switch (Main.moonType - PriorMoonStyles)
         {
             case 1:
-                DrawDark(spriteBatch, moon, position, rotation, scale);
-                break;
+                DrawDark(spriteBatch, moon.Value, position, rotation, scale);
+                return false;
             case 8:
-                DrawShatter(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
-                break;
+                DrawShatter(spriteBatch, moon.Value, position, color, rotation, scale, moonColor, shadowColor, device);
+                return false;
             case 9:
-                DrawCyst(spriteBatch, moon, position, rotation, scale, moonColor, shadowColor);
-                break;
+                DrawCyst(spriteBatch, moon.Value, position, rotation, scale, moonColor, shadowColor);
+                return false;
         }
+
+        return true;
     }
 
         // To maintain consistency with Fables I've used the light atmosphere color to act as Dark's outline and decided to not show the shadow atmosphere color.

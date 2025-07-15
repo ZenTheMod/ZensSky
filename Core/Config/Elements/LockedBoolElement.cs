@@ -1,24 +1,42 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
+using tModPorter;
 using ZensSky.Common.Registries;
+using static System.Reflection.BindingFlags;
 
-namespace ZensSky.Common.Config.Elements;
+namespace ZensSky.Core.Config.Elements;
 
-public abstract class LockedBoolElement : ConfigElement<bool>
+public sealed class LockedBoolElement : ConfigElement<bool>
 {
     private const float LockedBackgroundMultiplier = 0.4f;
 
-    /// <summary>
-    /// The bool that can "lock" this bool.
-    /// </summary>
-    public abstract bool IsLocked { get; }
+    #region Properties
+
+    public object? TargetInstance { get; private set; }
+
+    public PropertyFieldWrapper? TargetMember { get; private set; }
+
+    public bool Mode { get; private set; } = false;
+
+    public bool IsLocked =>
+        (bool)(TargetMember?.GetValue(TargetInstance) ?? false) == Mode;
+
+    #endregion
+
+    #region Binding
 
     public override void OnBind()
     {
@@ -29,7 +47,35 @@ public abstract class LockedBoolElement : ConfigElement<bool>
             if (!IsLocked)
                 Value = !Value;
         };
+
+        LockedElementAttribute? attri = ConfigManager.GetCustomAttributeFromMemberThenMemberType<LockedElementAttribute>(MemberInfo, Item, List);
+
+        Type? type = attri?.TargetConfig;
+
+        string? name = attri?.MemberName;
+
+        bool? mode = attri?.Mode;
+
+        if (type is null || string.IsNullOrEmpty(name) || mode is null)
+            return;
+
+        FieldInfo? field = type.GetField(name, Static | Instance | Public | NonPublic);
+        PropertyInfo? property = type.GetProperty(name, Static | Instance | Public | NonPublic);
+
+        if (field is not null)
+            TargetMember = new(field);
+        else
+            TargetMember = new(property);
+
+        if (ConfigManager.Configs.TryGetValue(ModContent.GetInstance<ZensSky>(), out List<ModConfig>? value))
+            TargetInstance = value.Find(c => c.Name == type.Name);
+        else
+            TargetInstance = null;
+
+        Mode = mode ?? false;
     }
+
+    #endregion
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {

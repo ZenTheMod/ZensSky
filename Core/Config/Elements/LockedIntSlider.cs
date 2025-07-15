@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace ZensSky.Common.Config.Elements;
+namespace ZensSky.Core.Config.Elements;
 
-public abstract class LockedIntSlider : LockedSliderElement<int>
+public sealed class LockedIntSlider : LockedSliderElement<int>
 {
     #region Properties
 
-    public override int NumberTicks => ((Max - Min) / Increment) + 1;
+    public override int NumberTicks => (Max - Min) / Increment + 1;
 
     public override float TickIncrement => Increment / (Max - Min);
 

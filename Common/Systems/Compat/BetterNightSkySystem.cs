@@ -3,6 +3,7 @@ using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Common.Config;
+using ZensSky.Common.Registries;
+using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
@@ -52,6 +55,8 @@ public sealed class BetterNightSkySystem : ModSystem
     public override void Load()
     {
         IsEnabled = true;
+
+        SunAndMoonSystem.AdditionalMoonDrawing.Add(ModifyMoonTexture);
 
         MethodInfo? on_Main_DrawStarsInBackground = typeof(BetterNightSky.BetterNightSky).GetMethod(nameof(On_Main_DrawStarsInBackground), NonPublic | Static);
 
@@ -273,6 +278,26 @@ public sealed class BetterNightSkySystem : ModSystem
             i++;
             Main.instance.DrawStar(ref sceneArea, alpha, Main.ColorOfTheSkies, i, star, false, false);
         }
+    }
+
+    private static bool ModifyMoonTexture(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        Color moonColor,
+        Color shadowColor,
+        GraphicsDevice device,
+        bool edgeCase)
+    {
+        if (IsEnabled &&
+            UseBigMoon &&
+            edgeCase)
+            moon = Textures.BetterNightSkyMoon;
+
+        return true;
     }
 
     #endregion

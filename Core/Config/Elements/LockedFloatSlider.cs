@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ZensSky.Common.Config.Elements;
+namespace ZensSky.Core.Config.Elements;
 
-public abstract class LockedFloatSlider : LockedSliderElement<float>
+public sealed class LockedFloatSlider : LockedSliderElement<float>
 {
     #region Properties
 

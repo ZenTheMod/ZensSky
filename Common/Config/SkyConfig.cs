@@ -1,20 +1,15 @@
-﻿using RealisticSky.Common.DataStructures;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using ZensSky.Common.Config.Elements;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Core.Config.Elements;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.
+#pragma warning disable CA1822 // Member does not access data and can be marked as static.
 
 namespace ZensSky.Common.Config;
-
-internal sealed class SunAndMoonReworkElement : LockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.SunAndMoonRework; }
-internal sealed class RealisticSkyElement : LockedBoolElement { public override bool IsLocked => !RealisticSkySystem.IsEnabled; }
-internal sealed class WindOpacityElement : LockedFloatSlider { public override bool IsLocked => !SkyConfig.Instance.WindParticles; }
-internal sealed class ColorStepsElement : LockedIntSlider { public override bool IsLocked => !SkyConfig.Instance.PixelatedSky; }
-internal sealed class CloudEdgeLightingElement : LockedBoolElement { public override bool IsLocked => !SkyConfig.Instance.CloudsEnabled; }
 
 public sealed class SkyConfig : ModConfig
 {
@@ -30,11 +25,13 @@ public sealed class SkyConfig : ModConfig
     public bool SunAndMoonRework;
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(SunAndMoonReworkElement))]
+    [LockedElement(typeof(SkyConfig), nameof(SunAndMoonRework), false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool TransparentMoonShadow;
 
     [DefaultValue(false)]
-    [CustomModConfigItem(typeof(RealisticSkyElement))]
+    [LockedElement(typeof(RealisticSkySystem), nameof(RealisticSkySystem.IsEnabled), false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool RealisticSun;
 
     [Header("Stars")]
@@ -44,7 +41,8 @@ public sealed class SkyConfig : ModConfig
     public StarVisual StarStyle;
 
     [DefaultValue(true)]
-    [CustomModConfigItem(typeof(RealisticSkyElement))]
+    [LockedElement(typeof(RealisticSkySystem), nameof(RealisticSkySystem.IsEnabled), false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool DrawRealisticStars;
 
     [Header("Pixelation")]
@@ -53,7 +51,8 @@ public sealed class SkyConfig : ModConfig
     public bool PixelatedSky;
 
     [DefaultValue(16)]
-    [CustomModConfigItem(typeof(ColorStepsElement))]
+    [LockedElement(typeof(SkyConfig), nameof(PixelatedSky), false)]
+    [CustomModConfigItem(typeof(LockedIntSlider))]
     [SliderColor(240, 103, 135)]
     [Range(8, 255)]
     public int ColorSteps;
@@ -64,7 +63,8 @@ public sealed class SkyConfig : ModConfig
     public bool CloudsEnabled;
 
     [DefaultValue(true)]
-    [CustomModConfigItem(typeof(CloudEdgeLightingElement))]
+    [LockedElement(typeof(SkyConfig), nameof(CloudsEnabled), false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool CloudsEdgeLighting;
 
     [Header("Ambient")]
@@ -73,7 +73,8 @@ public sealed class SkyConfig : ModConfig
     public bool WindParticles;
 
     [DefaultValue(0.85f)]
-    [CustomModConfigItem(typeof(WindOpacityElement))]
+    [LockedElement(typeof(SkyConfig), nameof(WindParticles), false)]
+    [CustomModConfigItem(typeof(LockedFloatSlider))]
     [SliderColor(148, 203, 227)]
     [Range(0f, 1f)]
     public float WindOpacity;

@@ -421,14 +421,11 @@ public sealed class RealisticSkySystem : ModSystem
     public static Color GetRainColor(Color color, Rain rain) => 
         RainReplacementManager.CalculateRainColor(color, rain);
 
-    public static void UpdateSunAndMoonPosition(Vector2 position)
+    public static void UpdateSunAndMoonPosition(Vector2 sunPosition, Vector2 moonPosition)
     {
-        SetSunPosition?.Invoke(null, [position]);
-        SetMoonPosition?.Invoke(null, [position]);
+        SetSunPosition?.Invoke(null, [sunPosition]);
+        SetMoonPosition?.Invoke(null, [moonPosition]);
     }
-
-    public static void UpdateMoonPosition(Vector2 position) =>
-        SetMoonPosition?.Invoke(null, [position]);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool CanDraw() =>

@@ -7,7 +7,8 @@ As well as including simple and easy to use menu configuration straight from the
 [b]Currently adds:[/b]
 [list]
     [*]More dynamic sun in the style of 1.4.5 leaks.
-    [*]More accurate moon, works for every vanilla moon style (Including Calamity Fables's 16 additional moon styles).
+    [*]High-res dynamic moon, works for every vanilla moon style (Including Calamity Fables's 16 additional moon styles).
+    [*]Additional support for adding your own high-res textures to this mod with simple crossmodding.
     [*]Prettier stars, with 5 styles to choose from.
     [*]Supernovae.
     [*]Fancy shooting stars.
@@ -17,7 +18,8 @@ As well as including simple and easy to use menu configuration straight from the
 [/list]
 
 [b]Compatibility with big mods like:[/b]
-'Macrocosm [BETA]' by MechanicPluto24
+*'Macrocosm [BETA]' by MechanicPluto24
+    (Currently no high-res earth assets, read below if you would like to contribute)
 'Realistic Sky' by Lucille Karma,
 *'Wrath of the Gods' by Lucille Karma
     (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),
@@ -36,6 +38,9 @@ As well as including simple and easy to use menu configuration straight from the
 Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url].
 
 If you would like to contribute to this mod, please send me a DM on Discord: [b]@z_e_n_.[/b].
+    (Setting up the project for contributing to this mod can be a tad annoying due to many project references.)
+
+
 
 [h2]✦ Credits ✦[/h2]
 

@@ -155,7 +155,7 @@ public sealed class PixelateSkySystem : ModSystem
             {
                 SkyManager.Instance.ResetDepthTracker();
 
-                SkyManager.Instance.DrawToDepth(Main.spriteBatch, float.MaxValue - 1);
+                SkyManager.Instance.DrawToDepth(Main.spriteBatch, float.MaxValue * .5f);
 
                 DrawTarget();
             });
@@ -168,6 +168,8 @@ public sealed class PixelateSkySystem : ModSystem
             c.MoveAfterLabels();
 
             c.EmitBr(jumpDepthResetTarget);
+
+            c.Index--;
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdsfld<SkyManager>(nameof(SkyManager.Instance)),

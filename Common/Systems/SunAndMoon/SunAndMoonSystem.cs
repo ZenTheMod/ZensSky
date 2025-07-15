@@ -1,5 +1,8 @@
-﻿using MonoMod.Cil;
+﻿using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
+using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -24,6 +27,28 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #endregion
 
+    #region Delegates
+
+    /// <summary>
+    /// Used for moon styles that may require custom drawing to create an high-res counterpart.
+    /// </summary>
+    /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
+    /// <param name="edgeCase">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
+    /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
+    public delegate bool PreDrawMoon(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        Color moonColor,
+        Color shadowColor,
+        GraphicsDevice device,
+        bool edgeCase);
+
+    #endregion
+
     #region Public Properties
 
     public static bool ForceInfo { get; set; }
@@ -33,6 +58,14 @@ public sealed class SunAndMoonSystem : ModSystem
     public static bool ShowMoon { get; set; } = true;
 
     public static SunAndMoonInfo Info { get; private set; }
+
+    /// <summary>
+    /// Additional moon styles based on an index.
+    /// </summary>
+    public static Dictionary<int, Asset<Texture2D>> AdditionalMoonStyles { get; private set; } = [];
+
+    /// <inheritdoc cref="PreDrawMoon"/>
+    public static List<PreDrawMoon> AdditionalMoonDrawing { get; private set; } = [];
 
     #endregion
 
@@ -238,10 +271,10 @@ public sealed class SunAndMoonSystem : ModSystem
                 moonPosition, moonColor, moonRotation, moonScale);
 
         if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(Main.dayTime ? sunPosition : moonPosition);
+            RealisticSkySystem.UpdateSunAndMoonPosition(sunPosition, moonPosition);
 
         if (WrathOfTheGodsSystem.IsEnabled)
-            WrathOfTheGodsSystem.UpdateSunAndMoonPosition(Main.dayTime ? sunPosition : moonPosition);
+            WrathOfTheGodsSystem.UpdateSunAndMoonPosition(sunPosition, moonPosition);
     }
 
     /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>

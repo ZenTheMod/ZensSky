@@ -1,7 +1,9 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
@@ -75,27 +77,23 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Public Properties
 
-    public static Texture2D MoonTexture
+    public static Asset<Texture2D> MoonTexture
     {
         get
         {
-            Texture2D ret = Moon[Math.Min(Main.moonType, Moon.Length - 1)].Value;
+            Asset<Texture2D> ret = Moon[Math.Min(Main.moonType, Moon.Length - 1)];
 
-            if (CalamityFablesSystem.IsEnabled &&
-                Main.moonType >= CalamityFablesSystem.PriorMoonStyles)
-                ret = FablesMoon[Math.Min(Main.moonType - CalamityFablesSystem.PriorMoonStyles, FablesMoon.Length - 1)].Value;
-
-            if (BetterNightSkySystem.IsEnabled &&
-                BetterNightSkySystem.UseBigMoon)
-                ret = BetterNightSkyMoon.Value;
+            if (AdditionalMoonStyles.TryGetValue(Main.moonType,
+                out Asset<Texture2D>? style))
+                ret = style;
 
             if (WorldGen.drunkWorldGen)
-                ret = Moon[0].Value;
+                ret = Moon[0];
 
             if (Main.pumpkinMoon)
-                ret = PumpkinMoon.Value;
+                ret = PumpkinMoon;
             else if (Main.snowMoon)
-                ret = SnowMoon.Value;
+                ret = SnowMoon;
 
             return ret;
         }
@@ -105,7 +103,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         get
         {
-            if (BetterNightSkySystem.IsEnabled &&
+            if (CanDrawEdgeCases &&
+                BetterNightSkySystem.IsEnabled &&
                 BetterNightSkySystem.UseBigMoon)
                 return BigMoonSize;
 
@@ -250,23 +249,20 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void DrawMoon(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-        Texture2D moon = MoonTexture;
+        Asset<Texture2D> moon = MoonTexture;
 
         bool canDrawEdgeCases = CanDrawEdgeCases;
 
+        if (AdditionalMoonDrawing.FindIndex(m => !m(spriteBatch, ref moon, position, color, rotation, scale, moonColor, shadowColor, device, CanDrawEdgeCases)) != -1)
+            return;
+
         if (WorldGen.drunkWorldGen)
         {
-            DrawSmiley(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor);
+            DrawSmiley(spriteBatch, moon.Value, position, color, rotation, scale, moonColor, shadowColor);
             return;
         }
 
-        if (CalamityFablesSystem.IsEdgeCase() && canDrawEdgeCases)
-        {
-            CalamityFablesSystem.DrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device);
-            return;
-        }
-
-        Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
+        Vector2 size = new Vector2(MoonSize * scale) / moon.Value.Size();
 
             // Handle various vanilla moons with additional visuals.
         switch (canDrawEdgeCases ? Main.moonType : 0)
@@ -278,20 +274,20 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
                 ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
 
-                spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
 
                 DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 1), rotation - Moon2ExtraRingRotation, new(rings.Width * .5f, 0f), scale, moonColor, shadowColor);
                 break;
             case 8:
                 ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
 
-                DrawMoon8Extras(spriteBatch, moon, position, rotation, scale, moonColor);
+                DrawMoon8Extras(spriteBatch, moon.Value, position, rotation, scale, moonColor);
 
-                spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
                 break;
             default:
                 ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
-                spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
+                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
                 break;
         }
     }
