@@ -12,6 +12,7 @@ using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.Utilities;
 using ZensSky.Common.Registries;
+using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 
 namespace ZensSky.Common.Systems.ModIcon;
@@ -49,7 +50,8 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     #region Loading
 
-    public override void Unload() => Main.QueueMainThreadAction(() => PanelTarget?.Dispose());
+    public override void Unload() => 
+        MainThreadSystem.Enqueue(() => PanelTarget?.Dispose());
 
     #endregion
 

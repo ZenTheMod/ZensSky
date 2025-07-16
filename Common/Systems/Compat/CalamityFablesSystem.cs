@@ -9,6 +9,7 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
+using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
@@ -75,8 +76,8 @@ public sealed class CalamityFablesSystem : ModSystem
         AdditionalMoonDrawing.Add(DrawEdgeCases);
     }
 
-    public override void Unload() => 
-        Main.QueueMainThreadAction(() => ShatterTarget?.Dispose());
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => ShatterTarget?.Dispose());
 
     #endregion
 

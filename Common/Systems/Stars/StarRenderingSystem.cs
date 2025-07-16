@@ -10,8 +10,9 @@ using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Utilities;
-using Star = ZensSky.Common.DataStructures.Star;
+using ZensSky.Core;
 using static ZensSky.Common.Systems.Stars.StarSystem;
+using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -39,9 +40,11 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => On_Main.DrawStarsInBackground += DrawStarsInBackground);
+    public override void Load() => 
+        MainThreadSystem.Enqueue(() => On_Main.DrawStarsInBackground += DrawStarsInBackground);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DrawStarsInBackground -= DrawStarsInBackground);
+    public override void Unload() => 
+        MainThreadSystem.Enqueue(() => On_Main.DrawStarsInBackground -= DrawStarsInBackground);
 
     #endregion
 

@@ -4,6 +4,7 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
@@ -26,9 +27,11 @@ public sealed class ParallaxController : SliderController
 
     #region Loading
 
-    public override void OnLoad() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu += ChangeParallaxDirection);
+    public override void OnLoad() => 
+        MainThreadSystem.Enqueue(() => IL_Main.DrawMenu += ChangeParallaxDirection);
 
-    public override void OnUnload() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu -= ChangeParallaxDirection);
+    public override void OnUnload() => 
+        MainThreadSystem.Enqueue(() => IL_Main.DrawMenu -= ChangeParallaxDirection);
 
     private void ChangeParallaxDirection(ILContext il)
     {

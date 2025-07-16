@@ -12,6 +12,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems;
@@ -33,7 +34,7 @@ public sealed class PixelateSkySystem : ModSystem
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() => 
+        MainThreadSystem.Enqueue(() => 
         {
             IL_Main.DoDraw += InjectDoDraw;
             IL_Main.DrawSurfaceBG += InjectDrawSurfaceBG;
@@ -44,7 +45,7 @@ public sealed class PixelateSkySystem : ModSystem
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() =>
+        MainThreadSystem.Enqueue(() =>
         {
             IL_Main.DoDraw -= InjectDoDraw;
             IL_Main.DrawSurfaceBG -= InjectDrawSurfaceBG;

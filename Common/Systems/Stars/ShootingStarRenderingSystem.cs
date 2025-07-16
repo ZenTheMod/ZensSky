@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using static ZensSky.Common.Systems.Stars.ShootingStarSystem;
 
@@ -31,14 +32,14 @@ public sealed class ShootingStarRenderingSystem : ModSystem
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() => IL_Main.DoDraw += DrawAfterSunAndMoon);
+        MainThreadSystem.Enqueue(() => IL_Main.DoDraw += DrawAfterSunAndMoon);
 
         IL_Main.DrawCapture += DrawAfterSunAndMoon;
     }
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() => IL_Main.DoDraw -= DrawAfterSunAndMoon);
+        MainThreadSystem.Enqueue(() => IL_Main.DoDraw -= DrawAfterSunAndMoon);
 
         IL_Main.DrawCapture -= DrawAfterSunAndMoon;
     }

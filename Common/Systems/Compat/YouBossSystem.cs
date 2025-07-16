@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using YouBoss.Content.NPCs.Bosses.TerraBlade.SpecificEffectManagers;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
+using ZensSky.Core;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -15,9 +16,11 @@ public sealed class YouBossSystem : ModSystem
 {
     #region Loading
 
-    public override void Load() => Main.QueueMainThreadAction(() => On_Main.DoDraw += HideSky);
+    public override void Load() => 
+        MainThreadSystem.Enqueue(() => On_Main.DoDraw += HideSky);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DoDraw -= HideSky);
+    public override void Unload() => 
+        MainThreadSystem.Enqueue(() => On_Main.DoDraw -= HideSky);
 
     #endregion
 

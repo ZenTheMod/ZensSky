@@ -18,6 +18,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
@@ -61,7 +62,7 @@ public sealed class MenuControllerSystem : ModSystem
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() =>
+        MainThreadSystem.Enqueue(() =>
         {
             MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod(nameof(MenuLoader.UpdateAndDrawModMenuInner), Static | NonPublic);
 
@@ -91,7 +92,7 @@ public sealed class MenuControllerSystem : ModSystem
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() =>
+        MainThreadSystem.Enqueue(() =>
         {
             AddMenuControllerToggle?.Dispose();
 

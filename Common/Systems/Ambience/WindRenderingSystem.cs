@@ -8,6 +8,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
+using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 
 namespace ZensSky.Common.Systems.Ambience;
@@ -27,15 +28,15 @@ public sealed class WindRenderingSystem : ModSystem
 
     public override void Load() 
     {
-        Main.QueueMainThreadAction(() => On_Main.DrawBackgroundBlackFill += MenuDraw);
+        MainThreadSystem.Enqueue(() => On_Main.DrawBackgroundBlackFill += MenuDraw);
 
         On_Main.DrawInfernoRings += InGameDraw;
     }
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() => {
-            On_Main.DrawInfernoRings -= InGameDraw;
+        MainThreadSystem.Enqueue(() => 
+        {
             On_Main.DrawBackgroundBlackFill -= MenuDraw;
 
             WindTarget?.Dispose();

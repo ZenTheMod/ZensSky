@@ -9,6 +9,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.MainMenu.Elements;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
@@ -97,9 +98,11 @@ public sealed class ButtonColorController : MenuControllerElement
 
     #region Loading
 
-    public override void OnLoad() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu += ModifyColors);
+    public override void OnLoad() => 
+        MainThreadSystem.Enqueue(() => IL_Main.DrawMenu += ModifyColors);
 
-    public override void OnUnload() => Main.QueueMainThreadAction(() => IL_Main.DrawMenu -= ModifyColors);
+    public override void OnUnload() => 
+        MainThreadSystem.Enqueue(() => IL_Main.DrawMenu -= ModifyColors);
 
     private void ModifyColors(ILContext il)
     {

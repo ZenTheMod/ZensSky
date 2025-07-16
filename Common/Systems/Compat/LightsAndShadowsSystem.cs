@@ -40,7 +40,8 @@ public sealed class LightsAndShadowsSystem : ModSystem
                 SetPosition);
     }
 
-    public override void Unload() => ModifySunPosition?.Dispose();
+    public override void Unload() => 
+        ModifySunPosition?.Dispose();
 
     #endregion
 

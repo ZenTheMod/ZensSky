@@ -59,7 +59,8 @@ public sealed class RedSunSystem : ModSystem
                 ModifyDrawing);
     }
 
-    public override void Unload() => SunAndMoonDrawing?.Dispose();
+    public override void Unload() => 
+        SunAndMoonDrawing?.Dispose();
 
     #endregion
 

@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Stars;
@@ -37,7 +38,7 @@ public sealed class ShootingStarSystem : ModSystem
     {
         Array.Clear(ShootingStars);
 
-        Main.QueueMainThreadAction(() => {
+        MainThreadSystem.Enqueue(() => {
             IL_Main.DoUpdate += ModifyInGameStarFall;
             IL_Main.UpdateMenu += ModifyMenuStarFall;
             On_Star.StarFall += ModifyFallingStarSpawn;
@@ -46,7 +47,7 @@ public sealed class ShootingStarSystem : ModSystem
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() => {
+        MainThreadSystem.Enqueue(() => {
             IL_Main.DoUpdate -= ModifyInGameStarFall;
             IL_Main.UpdateMenu -= ModifyMenuStarFall;
             On_Star.StarFall -= ModifyFallingStarSpawn;

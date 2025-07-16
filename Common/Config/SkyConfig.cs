@@ -7,7 +7,6 @@ using ZensSky.Core.Config.Elements;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.
-#pragma warning disable CA1822 // Member does not access data and can be marked as static.
 
 namespace ZensSky.Common.Config;
 

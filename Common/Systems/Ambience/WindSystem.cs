@@ -5,6 +5,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -33,10 +34,11 @@ public sealed class WindSystem : ModSystem
     public override void Load() 
     { 
         Array.Clear(Winds);
-        Main.QueueMainThreadAction(() => On_Main.DoUpdate += UpdateWind);
+        MainThreadSystem.Enqueue(() => On_Main.DoUpdate += UpdateWind);
     }
 
-    public override void Unload() => Main.QueueMainThreadAction(() => On_Main.DoUpdate -= UpdateWind);
+    public override void Unload() => 
+        MainThreadSystem.Enqueue(() => On_Main.DoUpdate -= UpdateWind);
 
     #endregion
 

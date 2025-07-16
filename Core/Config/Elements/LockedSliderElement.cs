@@ -20,7 +20,6 @@ using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
 
-    // Pure raw hate.
 [Autoload(Side = ModSide.Client)]
 public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadable where T : IComparable<T>
 {
@@ -28,7 +27,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
 
     private const float TheMagicNumber = 167f;
 
-    private const float LockedBackgroundMultiplier = 0.4f;
+    private const float LockedBackgroundMultiplier = .4f;
 
     private static readonly Color LockedGradient = new(40, 40, 40);
 

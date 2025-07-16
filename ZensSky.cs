@@ -1,13 +1,28 @@
 using ReLogic.Content.Sources;
 using Terraria;
 using Terraria.ModLoader;
+using ZensSky.Core;
 using ZensSky.Core.AssetReaders;
 
 namespace ZensSky;
 
 public sealed class ZensSky : Mod
 {
+    #region Public Properties
+
     public static bool CanDrawSky { get; private set; }
+
+    public static bool Unloading { get; private set; }
+
+    #endregion
+
+    public override void Close()
+    {
+        Unloading = true;
+        MainThreadSystem.ClearQueue();
+
+        base.Close();
+    }
 
     public override void PostSetupContent() => CanDrawSky = true;
 
@@ -19,7 +34,8 @@ public sealed class ZensSky : Mod
         return base.CreateDefaultContentSource();
     }
 
-    // TODO: Mod.Call implementation.
+
+        // TODO: Mod.Call implementation.
 
     /*
         private static IOrderedLoadable?[]? Cache;

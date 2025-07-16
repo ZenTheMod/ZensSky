@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.Localization;
-using Terraria.ModLoader;
 using Terraria.UI;
 using Terraria.Utilities;
 
@@ -44,31 +44,28 @@ public static class MiscUtils
     #endregion
 
     /// <summary>
-    /// Safely invokes <paramref name="action"/> with <see cref="Main.QueueMainThreadAction"/> if it is ran on a client; otherwise it is invoked normally.<br/>
-    /// — This is intended to be used for the application of IL edits/Detours;<br/>
-    /// and is irrelevant for client-sided Mods or classes using <see cref="AutoloadAttribute"/> with <see cref="AutoloadAttribute.Side"/> set to <see cref="ModSide.Client"/> —<br/><br/>
-    /// On servers with no clients connected <see cref="Main.QueueMainThreadAction"/> is not ran.<br/>
-    /// The usage of <see cref="Main.QueueMainThreadAction"/> is to prevent a recent obscure MonoMod race condition issue.<br/>
-    /// This seems to be the safest as it avoids hot paths like <see cref="Main.DoUpdate"/> and <see cref="Main.DoDraw"/>.<br/><br/>
-    /// <code>
-    /// System.ArgumentException: Referenced cell no longer exists (Parameter 'cellRef')
-    /// </code>
-    /// </summary>
-    /// <param name="action"></param>
-    public static void SafeMainThreadAction(Action action)
-    {
-        if (Main.dedServ)
-            action?.Invoke();
-        else
-            Main.QueueMainThreadAction(() => action?.Invoke());
-    }
-
-    /// <summary>
     /// Shorthand for <c>MathHelper.Clamp(<paramref name="value"/>, 0, 1)</c>.
     /// </summary>
     /// <param name="value"></param>
     /// <returns><paramref name="value"/> between 0-1.</returns>
     public static float Saturate(float value) => MathHelper.Clamp(value, 0, 1);
+
+    /// <summary>
+    /// Blocks thread until <paramref name="condition"/> returns <see cref="true"/> or timeout occurs.
+    /// </summary>
+    /// <param name="frequency">The frequency at which <paramref name="condition"/> will be checked, in milliseconds.</param>
+    /// <param name="timeout">The timeout in milliseconds.</param>
+    public static async Task WaitUntil(Func<bool> condition, int frequency = 1, int timeout = -1)
+    {
+        Task? waitTask = Task.Run(async () =>
+        {
+            while (!condition())
+                await Task.Delay(frequency);
+        });
+
+        if (waitTask != await Task.WhenAny(waitTask, Task.Delay(timeout)))
+            throw new TimeoutException();
+    }
 
     #region Lang
 

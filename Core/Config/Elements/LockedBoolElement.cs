@@ -2,7 +2,6 @@
 using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
@@ -13,7 +12,6 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using tModPorter;
 using ZensSky.Common.Registries;
 using static System.Reflection.BindingFlags;
 

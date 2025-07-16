@@ -15,6 +15,7 @@ using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -48,8 +49,9 @@ public sealed class CloudSystem : ModSystem
     #region Loading
 
     public override void Load() 
-    { 
-        Main.QueueMainThreadAction(() => {
+    {
+        MainThreadSystem.Enqueue(() =>
+        {
             IL_Main.DrawSurfaceBG += ApplyCloudLighting;
 
             MethodInfo? drawCloud = typeof(Main).GetMethod($"<{nameof(Main.DrawSurfaceBG)}>g__DrawCloud|1826_0", Static | NonPublic);
@@ -62,7 +64,8 @@ public sealed class CloudSystem : ModSystem
 
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() => {
+        MainThreadSystem.Enqueue(() =>
+        {
             IL_Main.DrawSurfaceBG -= ApplyCloudLighting;
             EdgeLighting?.Dispose();
         });

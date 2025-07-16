@@ -5,6 +5,7 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
@@ -28,9 +29,11 @@ public sealed class TimeController : SliderController
 
     #region Loading
 
-    public override void OnLoad() => Main.QueueMainThreadAction(() => IL_Main.UpdateMenu += ModifyMenuTime);
+    public override void OnLoad() => 
+        MainThreadSystem.Enqueue(() => IL_Main.UpdateMenu += ModifyMenuTime);
 
-    public override void OnUnload() => Main.QueueMainThreadAction(() => IL_Main.UpdateMenu -= ModifyMenuTime);
+    public override void OnUnload() => 
+        MainThreadSystem.Enqueue(() => IL_Main.UpdateMenu -= ModifyMenuTime);
 
     private void ModifyMenuTime(ILContext il)
     {

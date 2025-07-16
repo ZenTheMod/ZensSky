@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
@@ -12,6 +11,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Utilities;
+using ZensSky.Core;
 using static ZensSky.Common.Registries.Shaders;
 using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -119,11 +119,11 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => 
-        Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
+    public override void Load() =>
+        MainThreadSystem.Enqueue(() => On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
 
-    public override void Unload() => 
-        Main.QueueMainThreadAction(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
 
     #endregion
 

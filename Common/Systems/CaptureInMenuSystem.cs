@@ -3,6 +3,7 @@ using System;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems;
@@ -10,9 +11,11 @@ namespace ZensSky.Common.Systems;
 [Autoload(Side = ModSide.Client)]
 public sealed class CaptureInMenuSystem : ModSystem
 {
-    public override void Load() => Main.QueueMainThreadAction(() => IL_Main.DoDraw += AllowCapturingOnMainMenu);
+    public override void Load() =>
+        MainThreadSystem.Enqueue(() => IL_Main.DoDraw += AllowCapturingOnMainMenu);
 
-    public override void Unload() => Main.QueueMainThreadAction(() => IL_Main.DoDraw -= AllowCapturingOnMainMenu);
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => IL_Main.DoDraw -= AllowCapturingOnMainMenu);
 
     private void AllowCapturingOnMainMenu(ILContext il)
     {

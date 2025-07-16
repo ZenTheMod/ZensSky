@@ -7,6 +7,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Systems.Compat;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Ambience;
@@ -26,7 +27,8 @@ public sealed class RainSystem : ModSystem
 
     public override void Load()
     {
-        Main.QueueMainThreadAction(() => {
+        MainThreadSystem.Enqueue(() =>
+        {
             IL_Main.DoUpdate += SpawnMenuRain;
             IL_Main.DoDraw += DontDegradeRain;
             IL_Main.UpdateAudio += RainWindAmbience;
@@ -36,7 +38,8 @@ public sealed class RainSystem : ModSystem
     }
     public override void Unload()
     {
-        Main.QueueMainThreadAction(() => {
+        MainThreadSystem.Enqueue(() =>
+        {
             IL_Main.DoUpdate -= SpawnMenuRain;
             IL_Main.DoDraw -= DontDegradeRain;
             IL_Main.UpdateAudio -= RainWindAmbience;

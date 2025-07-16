@@ -1,16 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
-using Terraria.ModLoader.IO;
-using Terraria.ModLoader;
-using Terraria.Utilities;
-using Terraria;
-using ZensSky.Common.DataStructures;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using Terraria;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
+using Terraria.Utilities;
+using ZensSky.Common.DataStructures;
 using ZensSky.Common.Utilities;
-using Star = ZensSky.Common.DataStructures.Star;
+using ZensSky.Core;
 using static ZensSky.Common.DataStructures.Star;
+using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -61,10 +62,11 @@ public sealed class StarSystem : ModSystem
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
-        MiscUtils.SafeMainThreadAction(() => On_Star.UpdateStars += UpdateStars);
+        MainThreadSystem.Enqueue(() => On_Star.UpdateStars += UpdateStars);
     }
 
-    public override void Unload() => MiscUtils.SafeMainThreadAction(() => On_Star.UpdateStars -= UpdateStars);
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => On_Star.UpdateStars -= UpdateStars);
 
     #endregion
 

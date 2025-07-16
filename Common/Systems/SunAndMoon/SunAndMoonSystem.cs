@@ -9,6 +9,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
@@ -71,11 +72,11 @@ public sealed class SunAndMoonSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => 
-        Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
+    public override void Load() =>
+        MainThreadSystem.Enqueue(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
 
-    public override void Unload() => 
-        Main.QueueMainThreadAction(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
 
     private void ModifyDrawing(ILContext il)
     {
