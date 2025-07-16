@@ -1,12 +1,9 @@
-﻿using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Utilities;
-using ZensSky.Common.Registries;
-using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Utilities;
 
 namespace ZensSky.Common.DataStructures;

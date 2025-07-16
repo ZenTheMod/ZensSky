@@ -1,8 +1,6 @@
-﻿using Daybreak.Common.CIL;
-using Daybreak.Common.Rendering;
+﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using Terraria;
