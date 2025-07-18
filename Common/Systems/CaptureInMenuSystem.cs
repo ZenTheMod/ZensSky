@@ -3,8 +3,8 @@ using System;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems;
 

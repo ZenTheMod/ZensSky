@@ -6,6 +6,7 @@ using MonoMod.RuntimeDetour;
 using SubworldLibrary;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -38,14 +39,10 @@ public sealed class MacrocosmSystem : ModSystem
 
     public static bool InAnySubworld
     {
-        get
-        {
-            if (!IsEnabled)
-                return false;
-
-            return SubworldSystem.AnyActive<Macrocosm.Macrocosm>();
-        }
-    }
+            // Although unlikely certain steps taken with reloading mods might cause inlined code refering to other assemblies to throw.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        get => SubworldSystem.AnyActive<Macrocosm.Macrocosm>();
+    } 
 
     #endregion
 

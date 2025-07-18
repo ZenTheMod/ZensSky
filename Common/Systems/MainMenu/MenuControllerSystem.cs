@@ -18,8 +18,8 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.MainMenu;

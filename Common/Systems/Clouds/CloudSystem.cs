@@ -14,11 +14,11 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.SunAndMoon;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -266,7 +266,7 @@ public sealed class CloudSystem : ModSystem
     {
             // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
         Vector2 position = day ? Info.SunPosition : Info.MoonPosition;
-        float centerX = MiscUtils.HalfScreenSize.X;
+        float centerX = Utilities.HalfScreenSize.X;
 
         float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
 
@@ -276,7 +276,7 @@ public sealed class CloudSystem : ModSystem
             // Add a fadeinout effect so the color doesnt just suddenly pop up.
         color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
             // And lessen it at the lower part of the screen.
-        color *= 1 - (position.Y / MiscUtils.ScreenSize.Y);
+        color *= 1 - (position.Y / Utilities.ScreenSize.Y);
 
             // Decrease the intensity at noon to make the clouds not just be pure white.
         if (day)

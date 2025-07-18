@@ -9,8 +9,9 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.MainMenu;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -54,9 +55,21 @@ public sealed class SunAndMoonSystem : ModSystem
 
     public static bool ForceInfo { get; set; }
 
-    public static bool ShowSun { get; set; } = true;
+    public static bool ShowSun
+    {
+        [ModCall("GetShowSun")]
+        get;
+        [ModCall("SetShowSun")]
+        set; 
+    } = true;
 
-    public static bool ShowMoon { get; set; } = true;
+    public static bool ShowMoon
+    {
+        [ModCall("GetShowMoon")]
+        get;
+        [ModCall("SetShowMoon")]
+        set;
+    } = true;
 
     public static SunAndMoonInfo Info { get; private set; }
 
@@ -262,6 +275,7 @@ public sealed class SunAndMoonSystem : ModSystem
     /// Updates sun and moon positions as well as updating other mod's values.
     /// </summary>
     /// <param name="forced">If the info provided should be prioritized over the vanilla data.</param>
+    [ModCall("SetSunAndMoonInfo")]
     public static void SetInfo(Vector2 sunPosition, Color sunColor, float sunRotation, float sunScale,
         Vector2 moonPosition, Color moonColor, float moonRotation, float moonScale, bool forced = false)
     {
@@ -279,9 +293,14 @@ public sealed class SunAndMoonSystem : ModSystem
     }
 
     /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>
+    [ModCall("SetSunInfo")]
     public static void SetInfo(Vector2 position, Color color, float rotation, float scale, bool forced = false) =>
         SetInfo(position, color, rotation, scale, 
             position, color, rotation, scale, forced);
+
+    [ModCall]
+    public static void AddMoonStyle(int index, Asset<Texture2D> texture) => 
+        AdditionalMoonStyles.Add(index, texture);
 
     #endregion
 }

@@ -14,7 +14,7 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
@@ -109,6 +109,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
         if (type is null || string.IsNullOrEmpty(name) || mode is null)
             return;
 
+            // TODO: Switch to using a MemberInfo based impl.
         FieldInfo? field = type.GetField(name, Static | Instance | Public | NonPublic);
         PropertyInfo? property = type.GetProperty(name, Static | Instance | Public | NonPublic);
 
@@ -207,7 +208,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             spriteBatch.Draw(colorSlider, new Vector2(x + TheMagicNumber * perc, y + 4f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
 
         IngameOptions.inBar = isHovering;
-        ratio = MiscUtils.Saturate((Main.mouseX - rectangle.X) / (float)rectangle.Width);
+        ratio = Utilities.Saturate((Main.mouseX - rectangle.X) / (float)rectangle.Width);
     }
 
     #endregion

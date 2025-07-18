@@ -1,18 +1,14 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace ZensSky.Common.Utilities;
+namespace ZensSky.Core.Utils;
 
-public static class DrawingUtils
+public static partial class Utilities
 {
     #region RenderTargets
-    
+
     /// <summary>
     /// Reinitializes <paramref name="target"/> if needed.
     /// </summary>
-    /// <param name="target"></param>
-    /// <param name="device"></param>
-    /// <param name="width"></param>
-    /// <param name="height"></param>
     public static void ReintializeTarget(ref RenderTarget2D? target, 
         GraphicsDevice device,
         int width,

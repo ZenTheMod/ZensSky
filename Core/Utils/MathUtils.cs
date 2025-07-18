@@ -1,38 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Threading.Tasks;
 using Terraria;
-using Terraria.GameInput;
-using Terraria.Localization;
 using Terraria.UI;
 using Terraria.Utilities;
 
-namespace ZensSky.Common.Utilities;
+namespace ZensSky.Core.Utils;
 
-public static class MiscUtils
+public static partial class Utilities
 {
-    #region Public Properties
-
-    public static Rectangle ScreenDimensions => new(0, 0, Main.screenWidth, Main.screenHeight);
-
-    public static Vector2 ScreenSize => new(Main.screenWidth, Main.screenHeight);
-
-    public static Vector2 HalfScreenSize => ScreenSize * 0.5f;
-
-    public static Vector2 MousePosition => new(PlayerInput.MouseX, PlayerInput.MouseY);
-
-    public static Vector2 UIMousePosition => UserInterface.ActiveInstance.MousePosition;
-
-    #endregion
-
-    #region RNG
+    #region Random
 
     /// <summary>
     /// Generate a <see cref="Vector2"/> uniformly in a circle with <paramref name="radius"/> as the radius.
     /// </summary>
-    /// <param name="rand"></param>
-    /// <param name="radius"></param>
-    /// <returns></returns>
     public static Vector2 NextUniformVector2Circular(this UnifiedRandom rand, float radius)
     {
         float a = rand.NextFloat() * 2 * MathHelper.Pi;
@@ -43,42 +23,8 @@ public static class MiscUtils
 
     #endregion
 
-    /// <summary>
-    /// Shorthand for <c>MathHelper.Clamp(<paramref name="value"/>, 0, 1)</c>.
-    /// </summary>
-    /// <param name="value"></param>
     /// <returns><paramref name="value"/> between 0-1.</returns>
     public static float Saturate(float value) => MathHelper.Clamp(value, 0, 1);
-
-    /// <summary>
-    /// Blocks thread until <paramref name="condition"/> returns <see cref="true"/> or timeout occurs.
-    /// </summary>
-    /// <param name="frequency">The frequency at which <paramref name="condition"/> will be checked, in milliseconds.</param>
-    /// <param name="timeout">The timeout in milliseconds.</param>
-    public static async Task WaitUntil(Func<bool> condition, int frequency = 1, int timeout = -1)
-    {
-        Task? waitTask = Task.Run(async () =>
-        {
-            while (!condition())
-                await Task.Delay(frequency);
-        });
-
-        if (waitTask != await Task.WhenAny(waitTask, Task.Delay(timeout)))
-            throw new TimeoutException();
-    }
-
-    #region Lang
-
-    /// <summary>
-    /// Retrieves the text value for a specified localization key — but with glyph support via <see cref="Lang.SupportGlyphs"/>, allowing the use of <c>&lt;left&gt;</c> and <c>&lt;right&gt;</c> —. <br/>
-    /// The text returned will be for the currently selected language.
-    /// </summary>
-    /// <param name="key"></param>
-    /// <returns></returns>
-    public static string GetTextValueWithGlyphs(string key) =>
-        Lang.SupportGlyphs(Language.GetTextValue(key));
-
-    #endregion
 
     #region Triangles
 
@@ -95,10 +41,6 @@ public static class MiscUtils
         return !(hasNegative && hasPositive);
     }
 
-    /// <summary>
-    /// </summary>
-    /// <param name="point"></param>
-    /// <param name="points"></param>
     /// <returns><see cref="true"/> if <c>points.Length >= 3</c> and <paramref name="point"/> is inside of the triangle created by <paramref name="points"/>.</returns>
     public static bool IsPointInTriangle(Vector2 point, Vector2[] points) =>
         points.Length >= 3 && IsPointInTriangle(point, points[0], points[1], points[2]);
@@ -132,8 +74,6 @@ public static class MiscUtils
     /// <summary>
     /// Clamps a point to the bounds of a triangle created by <paramref name="points"/>.
     /// </summary>
-    /// <param name="point"></param>
-    /// <param name="points"></param>
     /// <returns>The closest point on the triangle — returns <paramref name="point"/> if its already inside the triangle —, and <see cref="Vector2.Zero"/> if <c>points.Length &lt; 3</c></returns>
     public static Vector2 ClosestPointOnTriangle(Vector2 point, Vector2[] points) =>
         points.Length >= 3 ? ClosestPointOnTriangle(point, points[0], points[1], points[2]) : Vector2.Zero;
@@ -141,9 +81,6 @@ public static class MiscUtils
     /// <summary>
     /// Iterpolates between <paramref name="colors"/> — using cartesian coordinates — based on <paramref name="point"/> and the triangle formed by <paramref name="points"/>.
     /// </summary>
-    /// <param name="point"></param>
-    /// <param name="points"></param>
-    /// <param name="colors"></param>
     /// <returns>Resulting color after interpolation, <see cref="Color.Transparent"/> if <c>points.Length  &lt; 3 || colors.Length &lt; 3</c></returns>
     public static Color LerpTriangle(Vector2 point, Vector2[] points, Color[] colors)
     {

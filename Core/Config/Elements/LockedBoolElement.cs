@@ -56,7 +56,8 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
         if (type is null || string.IsNullOrEmpty(name) || mode is null)
             return;
-
+        
+            // TODO: Switch to using a MemberInfo based impl.
         FieldInfo? field = type.GetField(name, Static | Instance | Public | NonPublic);
         PropertyInfo? property = type.GetProperty(name, Static | Instance | Public | NonPublic);
 

@@ -6,7 +6,7 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.UI;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
@@ -74,8 +74,8 @@ public sealed class UISlider : UIElement
             // Dispite how impossible it should be I'm doing this to be extra safe.
         if (IsHeld && !Main.alreadyGrabbingSunOrMoon)
         {
-            float num = MiscUtils.UIMousePosition.X - dims.X;
-            Ratio = MiscUtils.Saturate(num / dims.Width);
+            float num = Utilities.UIMousePosition.X - dims.X;
+            Ratio = Utilities.Saturate(num / dims.Width);
         }
 
         Texture2D slider = Textures.Slider.Value;

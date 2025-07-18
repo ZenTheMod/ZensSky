@@ -5,7 +5,7 @@ using Terraria.Audio;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.UI;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
@@ -16,7 +16,7 @@ public sealed class FixedScrollbar : UIScrollbar
         CalculatedStyle dimensions = GetDimensions();
         CalculatedStyle innerDimensions = GetInnerDimensions();
 
-        Vector2 mousePosition = MiscUtils.UIMousePosition;
+        Vector2 mousePosition = Utilities.UIMousePosition;
 
         if (_isDragging)
         {

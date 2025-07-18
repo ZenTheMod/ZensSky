@@ -8,8 +8,8 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
-using ZensSky.Core;
 using ZensSky.Core.DataStructures;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Ambience;
 

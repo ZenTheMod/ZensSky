@@ -4,8 +4,8 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -74,7 +74,7 @@ public sealed class WindSystem : ModSystem
         if (index == -1)
             return;
 
-        Vector2 screensize = MiscUtils.ScreenSize;
+        Vector2 screensize = Utilities.ScreenSize;
 
         Rectangle spawn = new((int)(Main.screenPosition.X - screensize.X * Main.WindForVisuals * 0.5f), (int)Main.screenPosition.Y,
             (int)screensize.X, (int)screensize.Y);

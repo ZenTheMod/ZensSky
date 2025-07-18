@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Utilities;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.DataStructures;
 
@@ -192,5 +192,5 @@ public record struct Star
     }
 
     public readonly float GetAlpha(float a) =>
-        MiscUtils.Saturate(MathF.Pow(a + MathF.Pow(SupernovaTimer, 3) + BaseSize, 2) * a);
+        Utilities.Saturate(MathF.Pow(a + MathF.Pow(SupernovaTimer, 3) + BaseSize, 2) * a);
 }

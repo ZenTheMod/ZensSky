@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
@@ -45,7 +46,11 @@ public sealed class BetterNightSkySystem : ModSystem
 
     public static bool IsEnabled { get; private set; }
 
-    public static bool UseBigMoon => NightConfig.Config.UseHighResMoon;
+    public static bool UseBigMoon 
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        get => NightConfig.Config.UseHighResMoon;
+    }
 
     #endregion
 
@@ -254,6 +259,7 @@ public sealed class BetterNightSkySystem : ModSystem
     #region Drawing
 
         // TODO: Include other non 'Special' star drawing.
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawSpecialStars(float alpha)
     {
         Main.spriteBatch.End(out var snapshot);

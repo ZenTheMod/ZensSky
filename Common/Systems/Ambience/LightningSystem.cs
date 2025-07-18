@@ -5,8 +5,8 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Ambience;
 

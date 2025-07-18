@@ -9,8 +9,8 @@ using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 using static ZensSky.Common.Systems.Stars.ShootingStarSystem;
 
 namespace ZensSky.Common.Systems.Stars;

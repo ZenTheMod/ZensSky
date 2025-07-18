@@ -9,7 +9,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.MainMenu.Elements;
 
@@ -38,7 +38,7 @@ public sealed class ColorTriangle : UIElement
     #region Properties
 
     private bool Hovering =>
-        ContainsPoint(MiscUtils.UIMousePosition) && !Main.alreadyGrabbingSunOrMoon && Parent.IsMouseHovering;
+        ContainsPoint(Utilities.UIMousePosition) && !Main.alreadyGrabbingSunOrMoon && Parent.IsMouseHovering;
 
     #endregion
 
@@ -94,7 +94,7 @@ public sealed class ColorTriangle : UIElement
     }
 
     public override bool ContainsPoint(Vector2 point) =>
-        MiscUtils.IsPointInTriangle(point, Points);
+        Utilities.IsPointInTriangle(point, Points);
 
     public override void Recalculate()
     {
@@ -124,7 +124,7 @@ public sealed class ColorTriangle : UIElement
 
         CalculatedStyle dims = GetDimensions();
 
-        Vector2 position = MiscUtils.ClosestPointOnTriangle(MiscUtils.UIMousePosition, Points) - dims.Center();
+        Vector2 position = Utilities.ClosestPointOnTriangle(Utilities.UIMousePosition, Points) - dims.Center();
 
         PickerPosition = position / dims.Size();
     }

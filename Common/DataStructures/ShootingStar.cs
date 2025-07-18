@@ -3,7 +3,7 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.Utilities;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 using Terraria.ID;
 
 namespace ZensSky.Common.DataStructures;
@@ -68,14 +68,14 @@ public record struct ShootingStar
     {
         Update();
 
-        if (Hit || Position.DistanceSQ(MiscUtils.MousePosition) >= StarGameDistance)
+        if (Hit || Position.DistanceSQ(Utilities.MousePosition) >= StarGameDistance)
             return;
 
         Main.starsHit++;
 
         float magnitude = Velocity.Length();
 
-        Velocity = Position - MiscUtils.MousePosition;
+        Velocity = Position - Utilities.MousePosition;
         Velocity = Vector2.Normalize(Velocity) * magnitude * StarGameReflect;
 
         Hit = true;

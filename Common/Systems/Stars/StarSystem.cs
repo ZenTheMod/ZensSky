@@ -7,10 +7,11 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using static ZensSky.Common.DataStructures.Star;
 using Star = ZensSky.Common.DataStructures.Star;
+using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -49,9 +50,19 @@ public sealed class StarSystem : ModSystem
 
     public static float StarRotation { get; private set; }
 
-    public static float StarAlpha { get; private set; }
+    public static float StarAlpha
+    {
+        [ModCall("GetStarAlpha")]
+        get; 
+        private set; 
+    }
 
-    public static float StarAlphaOverride { get; set; } = -1;
+    public static float StarAlphaOverride
+    {
+        get;
+        [ModCall("SetStarAlpha")]
+        set;
+    } = -1;
 
     #endregion
 
@@ -303,13 +314,14 @@ public sealed class StarSystem : ModSystem
 
         float atmosphericBoost = MathF.Pow(1f - Main.atmo, 3f);
 
-        return MathF.Pow(MiscUtils.Saturate(alpha + atmosphericBoost), 3f);
+        return MathF.Pow(Utilities.Saturate(alpha + atmosphericBoost), 3f);
     }
 
     #endregion
 
     #region Public Methods
 
+    [ModCall]
     public static void ExplodeStar(int index) => 
         Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
 

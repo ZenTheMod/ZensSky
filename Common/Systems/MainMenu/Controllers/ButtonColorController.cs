@@ -8,9 +8,9 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.MainMenu.Elements;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 
@@ -270,7 +270,7 @@ public sealed class ButtonColorController : MenuControllerElement
         }
 
         ColorDisplay.InnerColor = SettingHover ? ButtonHoverColor : ButtonColor;
-        ColorDisplay.HoverText = MiscUtils.GetTextValueWithGlyphs(DisplayHover + SettingHover);
+        ColorDisplay.HoverText = Utilities.GetTextValueWithGlyphs(DisplayHover + SettingHover);
     }
 
     public override void Recalculate()
@@ -288,7 +288,7 @@ public sealed class ButtonColorController : MenuControllerElement
     #region Private Methods
 
     private static Color GetColor(Vector3 pos) =>
-        MiscUtils.LerpTriangle(new(pos.X, pos.Y), ColorTriangle.NormalizedPoints, ColorTriangle.GetColors(pos.Z));
+        Utilities.LerpTriangle(new(pos.X, pos.Y), ColorTriangle.NormalizedPoints, ColorTriangle.GetColors(pos.Z));
 
     #endregion
 }

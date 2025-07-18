@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.DataStructures;
 
@@ -54,7 +54,7 @@ public readonly ref struct RenderTargetSwap
             if (oldTarget.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
-        DrawingUtils.ReintializeTarget(ref target,
+        Utilities.ReintializeTarget(ref target,
             device,
             width,
             height,

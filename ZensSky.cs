@@ -1,8 +1,13 @@
 using ReLogic.Content.Sources;
+using System;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
-using ZensSky.Core;
 using ZensSky.Core.AssetReaders;
+using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
+
+#pragma warning disable CS8603 // Possible null reference return.
 
 namespace ZensSky;
 
@@ -34,8 +39,16 @@ public sealed class ZensSky : Mod
         return base.CreateDefaultContentSource();
     }
 
+    public override object Call(params object[] args)
+    {
+        if (args.Length <= 0)
+            throw new ArgumentException("Zero arguments provided!");
 
-        // TODO: Mod.Call implementation.
+        if (args[0] is not string name)
+            throw new ArgumentException("Argument zero was not a string!");
+
+        return ModCallSystem.HandleCall(name, [.. args.Skip(1)]);
+    }
 
     /*
         private static IOrderedLoadable?[]? Cache;

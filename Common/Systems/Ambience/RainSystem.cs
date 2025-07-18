@@ -7,8 +7,8 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Ambience;
 

@@ -9,8 +9,9 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
+using ZensSky.Core.Utils;
 using static ZensSky.Common.Systems.Stars.StarSystem;
 using Star = ZensSky.Common.DataStructures.Star;
 
@@ -52,6 +53,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Stars
 
+    [ModCall]
     public static void DrawStars(SpriteBatch spriteBatch, float alpha)
     {
         Texture2D texture;
@@ -129,6 +131,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Supernovae
 
+    [ModCall]
     public static void DrawSupernovae(SpriteBatch spriteBatch, float alpha)
     {
         Effect supernova = Shaders.Supernova.Value;
@@ -167,7 +170,7 @@ public sealed class StarRenderingSystem : ModSystem
             supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
             supernova.Parameters["longTime"]?.SetValue(time);
 
-            supernova.Parameters["offset"]?.SetValue(position / MiscUtils.ScreenSize);
+            supernova.Parameters["offset"]?.SetValue(position / Utilities.ScreenSize);
 
             supernova.CurrentTechnique.Passes[0].Apply();
 
@@ -184,7 +187,7 @@ public sealed class StarRenderingSystem : ModSystem
     private void DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
             // TODO: Better method of detecting when a mod uses custom sky to hide the visuals.
-        if (!ZensSky.CanDrawSky || MacrocosmSystem.InAnySubworld)
+        if (!ZensSky.CanDrawSky || (MacrocosmSystem.IsEnabled && MacrocosmSystem.InAnySubworld))
         {
             orig(self, sceneArea, artificial);
             return;
@@ -231,10 +234,12 @@ public sealed class StarRenderingSystem : ModSystem
         spriteBatch.Restart(in snapshot);
     }
 
+
+    [ModCall("GetStarRotation")]
     public static Matrix RotationMatrix()
     {
         Matrix rotation = Matrix.CreateRotationZ(StarRotation);
-        Matrix offset = Matrix.CreateTranslation(new(MiscUtils.HalfScreenSize, 0f));
+        Matrix offset = Matrix.CreateTranslation(new(Utilities.HalfScreenSize, 0f));
 
         return rotation * offset; // * Main.BackgroundViewMatrix.EffectMatrix;
     }

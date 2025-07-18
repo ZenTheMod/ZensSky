@@ -10,11 +10,11 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using static ZensSky.Common.Registries.Shaders;
 using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 

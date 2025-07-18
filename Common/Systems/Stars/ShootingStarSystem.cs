@@ -4,9 +4,9 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -129,7 +129,7 @@ public sealed class ShootingStarSystem : ModSystem
         if (index == -1)
             return;
 
-        Vector2 screensize = MiscUtils.ScreenSize;
+        Vector2 screensize = Utilities.ScreenSize;
 
         Rectangle spawn = new(0, 0,
             (int)screensize.X, (int)screensize.Y);

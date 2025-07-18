@@ -6,6 +6,7 @@ using RedSunAndRealisticSky;
 using RedSunAndRealisticSky.Graphics;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -43,11 +44,17 @@ public sealed class RedSunSystem : ModSystem
 
     public static bool IsEnabled { get; private set; }
 
+    public static bool FlipSunAndMoon
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        get => ModContent.GetInstance<ClientConfig>().FlipSunAndMoon;
+    }
+
     #endregion
 
     #region Loading
 
-        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
+    // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
@@ -283,6 +290,4 @@ public sealed class RedSunSystem : ModSystem
     }
 
     #endregion
-
-    public static bool FlipSunAndMoon => ModContent.GetInstance<ClientConfig>().FlipSunAndMoon;
 }

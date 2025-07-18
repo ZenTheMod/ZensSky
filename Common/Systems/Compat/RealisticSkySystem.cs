@@ -19,7 +19,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
@@ -185,7 +185,7 @@ public sealed class RealisticSkySystem : ModSystem
         c.EmitDelegate((Vector2 sunPosition) =>
         {
             if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
-                sunPosition.Y = MiscUtils.ScreenSize.Y - sunPosition.Y;
+                sunPosition.Y = Utilities.ScreenSize.Y - sunPosition.Y;
 
             return sunPosition;
         });
@@ -343,8 +343,6 @@ public sealed class RealisticSkySystem : ModSystem
     /// <summary>
     /// Apply a star masking shader if <see cref="RealisticSky"/> is enabled and is active.
     /// </summary>
-    /// <returns></returns>
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Effect? ApplyStarShader()
     {
         if (!IsEnabled)
@@ -370,13 +368,13 @@ public sealed class RealisticSkySystem : ModSystem
     {
         shader.Parameters["usesAtmosphere"]?.SetValue(true);
 
-        shader.Parameters["screenSize"]?.SetValue(MiscUtils.ScreenSize);
+        shader.Parameters["screenSize"]?.SetValue(Utilities.ScreenSize);
         shader.Parameters["distanceFadeoff"]?.SetValue(Main.eclipse ? 0.11f : 1f);
 
         Vector2 sunPosition = SunAndMoonSystem.Info.SunPosition;
 
         if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
-            sunPosition.Y = MiscUtils.ScreenSize.Y - sunPosition.Y;
+            sunPosition.Y = Utilities.ScreenSize.Y - sunPosition.Y;
 
         shader.Parameters["sunPosition"]?.SetValue(Main.dayTime ? sunPosition : (Vector2.One * 50000f));
 
@@ -384,7 +382,6 @@ public sealed class RealisticSkySystem : ModSystem
             Main.instance.GraphicsDevice.Textures[1] = AtmosphereRenderer.AtmosphereTarget.GetTarget();
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawStars() 
     {
         if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
@@ -393,7 +390,6 @@ public sealed class RealisticSkySystem : ModSystem
         StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity); 
     }
 
-    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawGalaxy() 
     {
         if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
@@ -404,20 +400,15 @@ public sealed class RealisticSkySystem : ModSystem
 
         GalaxyRenderer.Render();
     }
-
     public static void DrawSun()
     {
-        if (!IsEnabled)
-            return;
-
-            // Runtime does not like it if these ifs are combined.
         if (!CanDraw())
             return;
 
         SunRenderer.Render(1f - RealisticSkyManager.SunlightIntensityByTime);
     }
 
-
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Color GetRainColor(Color color, Rain rain) => 
         RainReplacementManager.CalculateRainColor(color, rain);
 
@@ -427,7 +418,7 @@ public sealed class RealisticSkySystem : ModSystem
         SetMoonPosition?.Invoke(null, [moonPosition]);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static bool CanDraw() =>
         RealisticSkyManager.CanRender && !RealisticSkyManager.TemporarilyDisabled && 
         !(!RealisticSkyConfig.Instance.ShowInMainMenu && Main.gameMenu);

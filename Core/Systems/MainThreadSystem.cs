@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
-using ZensSky.Common.Utilities;
+using ZensSky.Core.Utils;
 
-namespace ZensSky.Core;
+namespace ZensSky.Core.Systems;
 
 public sealed class MainThreadSystem : ModSystem
 {
@@ -34,7 +34,7 @@ public sealed class MainThreadSystem : ModSystem
         Main.QueueMainThreadAction(() => On_Main.DoUpdate += DequeueActions);
 
             // Block loading thread until all items have been dequeued. (Bad idea.)
-        MiscUtils.WaitUntil(() => MainThreadActions.Count <= 0, 1).GetAwaiter().GetResult();
+        Utilities.WaitUntil(() => MainThreadActions.Count <= 0, 1).GetAwaiter().GetResult();
     }
 
     public override void OnModUnload() =>

@@ -5,7 +5,7 @@ using Terraria.ModLoader;
 using YouBoss.Content.NPCs.Bosses.TerraBlade.SpecificEffectManagers;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
-using ZensSky.Core;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Compat;
 

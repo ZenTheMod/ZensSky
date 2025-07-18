@@ -5,8 +5,8 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.MainMenu.Elements;
-using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.MainMenu.Controllers;
 

@@ -9,9 +9,9 @@ using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Utilities;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems;
 
@@ -214,7 +214,7 @@ public sealed class PixelateSkySystem : ModSystem
 
         Viewport viewport = device.Viewport;
 
-        DrawingUtils.ReintializeTarget(ref SkyTarget, device, viewport.Width, viewport.Height);
+        Utilities.ReintializeTarget(ref SkyTarget, device, viewport.Width, viewport.Height);
 
         device.SetRenderTarget(SkyTarget);
         device.Clear(Color.Transparent);
