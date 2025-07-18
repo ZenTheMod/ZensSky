@@ -19,10 +19,10 @@ As well as including simple and easy to use menu configuration straight from the
 
 [b]Compatibility with big mods like:[/b]
 *'Macrocosm [BETA]' by MechanicPluto24
-    (Currently no high-res earth assets, read below if you would like to contribute)
+    (Currently no high-res earth assets, read below if you would like to contribute.)
 'Realistic Sky' by Lucille Karma,
 *'Wrath of the Gods' by Lucille Karma
-    (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute),
+    (Currently no changes to telescope/stargazing scenes, read below if you would like to contribute.),
 'Lights And Shadows' by yiyang233,
 'Calamity Fables' by IbanPlay.
 
@@ -35,12 +35,15 @@ As well as including simple and easy to use menu configuration straight from the
 
 [u]This mod is client-sided*. But will sync over data if both the server and client have it enabled.[/u]
 
-Report any issues [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url].
+This mod provides a number of miscellaneous Mod.Call implementations for simpler compat;
+You can find classes anotated with ModCall [url=https://github.com/search?q=repo%3AZenTheMod%2FZensSky%20ModCall&type=code]​Here[/url].
 
-If you would like to contribute to this mod, please send me a DM on Discord: [b]@z_e_n_.[/b].
+You can report any issues with the mod [url=https://github.com/ZenTheMod/ZensSky/issues]​Here[/url].
+
+✦ Contributing ✦
+
+If you would like to contribute to this mod, please send me a DM on Discord: [b]@z_e_n_.[/b]; or you can fork the repository to pr any changes youd like.
     (Setting up the project for contributing to this mod can be a tad annoying due to many project references.)
-
-
 
 [h2]✦ Credits ✦[/h2]
 
