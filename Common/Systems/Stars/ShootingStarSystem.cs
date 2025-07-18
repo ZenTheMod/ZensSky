@@ -3,10 +3,12 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.Utilities;
+using ZensSky.Common.Commands;
 using ZensSky.Common.DataStructures;
-using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -28,7 +30,13 @@ public sealed class ShootingStarSystem : ModSystem
 
     #region Public Properties
 
-    public static bool ShowShootingStars {  get; set; }
+    public static bool ShowShootingStars
+    {
+        [ModCall(nameof(ShowShootingStars), "GetShowShootingStars")]
+        get;
+        [ModCall("SetShowShootingStars")]
+        set;
+    }
 
     #endregion
 
@@ -122,6 +130,7 @@ public sealed class ShootingStarSystem : ModSystem
         SpawnShootingStar();
     }
 
+    [ModCall("SpawnRandomShootingStar")]
     public static void SpawnShootingStar()
     {
         int index = Array.FindIndex(ShootingStars, s => !s.IsActive);

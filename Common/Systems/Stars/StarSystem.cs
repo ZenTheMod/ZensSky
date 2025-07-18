@@ -52,7 +52,7 @@ public sealed class StarSystem : ModSystem
 
     public static float StarAlpha
     {
-        [ModCall("GetStarAlpha")]
+        [ModCall(nameof(StarAlpha), "GetStarAlpha")]
         get; 
         private set; 
     }
@@ -321,10 +321,11 @@ public sealed class StarSystem : ModSystem
 
     #region Public Methods
 
-    [ModCall]
+    [ModCall("TriggerSupernova", "DestroyStar")]
     public static void ExplodeStar(int index) => 
         Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
 
+    [ModCall("RegenStars")]
     public static void GenerateStars()
     {
         if (Main.dedServ)

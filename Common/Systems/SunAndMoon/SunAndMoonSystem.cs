@@ -57,7 +57,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
     public static bool ShowSun
     {
-        [ModCall("GetShowSun")]
+        [ModCall(nameof(ShowSun), "GetShowSun")]
         get;
         [ModCall("SetShowSun")]
         set; 
@@ -65,7 +65,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
     public static bool ShowMoon
     {
-        [ModCall("GetShowMoon")]
+        [ModCall(nameof(ShowMoon), "GetShowMoon")]
         get;
         [ModCall("SetShowMoon")]
         set;
@@ -275,7 +275,7 @@ public sealed class SunAndMoonSystem : ModSystem
     /// Updates sun and moon positions as well as updating other mod's values.
     /// </summary>
     /// <param name="forced">If the info provided should be prioritized over the vanilla data.</param>
-    [ModCall("SetSunAndMoonInfo")]
+    [ModCall("SetSunAndMoonInfo", "SetSunInfo")]
     public static void SetInfo(Vector2 sunPosition, Color sunColor, float sunRotation, float sunScale,
         Vector2 moonPosition, Color moonColor, float moonRotation, float moonScale, bool forced = false)
     {
@@ -293,12 +293,12 @@ public sealed class SunAndMoonSystem : ModSystem
     }
 
     /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>
-    [ModCall("SetSunInfo")]
+    [ModCall("SetSunAndMoonInfo", "SetSunInfo")]
     public static void SetInfo(Vector2 position, Color color, float rotation, float scale, bool forced = false) =>
         SetInfo(position, color, rotation, scale, 
             position, color, rotation, scale, forced);
 
-    [ModCall]
+    [ModCall("CreateMoonStyle", "AddMoonTexture")]
     public static void AddMoonStyle(int index, Asset<Texture2D> texture) => 
         AdditionalMoonStyles.Add(index, texture);
 
