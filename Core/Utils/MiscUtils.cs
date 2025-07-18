@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameInput;
@@ -37,5 +39,18 @@ public static partial class Utilities
 
         if (waitTask != await Task.WhenAny(waitTask, Task.Delay(timeout)))
             throw new TimeoutException();
+    }
+
+    public static bool MatchesArguments(this MethodInfo methodInfo, object?[]? arguments)
+    {
+        ParameterInfo[] parameters = methodInfo.GetParameters();
+
+        if (parameters.Length != (arguments?.Length ?? 0))
+            return false;
+
+        if (parameters.Length <= 0)
+            return true;
+
+        return !parameters.Any(p => p.ParameterType != arguments?.GetType());
     }
 }

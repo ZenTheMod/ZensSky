@@ -5,11 +5,11 @@ namespace ZensSky.Core.Systems.ModCall;
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class ModCallAttribute : Attribute
 {
-    public string AlternameName;
+    public string[] AlternameNames;
 
     public ModCallAttribute() =>
-        AlternameName = string.Empty;
+        AlternameNames = [];
 
-    public ModCallAttribute(string alternameName) =>
-        AlternameName = alternameName;
+    public ModCallAttribute(params string[] alternameNames) =>
+        AlternameNames = alternameNames;
 }

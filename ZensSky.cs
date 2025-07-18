@@ -29,7 +29,8 @@ public sealed class ZensSky : Mod
         base.Close();
     }
 
-    public override void PostSetupContent() => CanDrawSky = true;
+    public override void PostSetupContent() => 
+        CanDrawSky = true;
 
     public override IContentSource CreateDefaultContentSource()
     {

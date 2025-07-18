@@ -9,7 +9,7 @@ namespace ZensSky.Core.Systems.ModCall;
 public sealed class ModCallSystem : ModSystem
 {
         // TODO: Have multiple names refer to multiple methods.
-    private readonly static Dictionary<string, MethodInfo> Handlers = [];
+    private readonly static List<ModCallAlias> Handlers = [];
 
     public override void Load()
     {
@@ -26,14 +26,19 @@ public sealed class ModCallSystem : ModSystem
             if (attribute is null)
                 return;
 
-            string name;
+            string[] names;
 
-            if (string.IsNullOrEmpty(attribute.AlternameName))
-                name = m.Name;
+            if (attribute.AlternameNames.Length <= 0)
+                names = [m.Name];
             else
-                name = attribute.AlternameName;
+                names = [m.Name, .. attribute.AlternameNames];
 
-            Handlers.Add(name, m);
+            int inList = Handlers.FindIndex(a => a.Names == names);
+
+            if (inList != -1)
+                Handlers[inList].Add(m);
+            else
+                Handlers.Add(new(names, m));
         }
     }
 
@@ -42,9 +47,11 @@ public sealed class ModCallSystem : ModSystem
 
     public static object? HandleCall(string name, object?[]? arguments)
     {
-        if (!Handlers.TryGetValue(name, out MethodInfo? m))
-            throw new ArgumentException($"{name} did not refer to a valid handler.");
+        int matching = Handlers.FindIndex(a => a.Names.Contains(name));
 
-        return m?.Invoke(null, arguments);
+        if (matching != -1)
+            return Handlers[matching].Invoke(arguments);
+
+        throw new ArgumentException($"{name} does not match any know method alias!");
     }
 }
