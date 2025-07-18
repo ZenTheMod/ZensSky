@@ -19,6 +19,9 @@ public sealed class ModCallSystem : ModSystem
             .SelectMany(t => t.GetMethods())
             .Where(m => m.GetCustomAttributes(typeof(ModCallAttribute), false).Length > 0 && m.IsStatic)];
 
+
+        Handlers.Clear();
+
         foreach (MethodInfo m in methods)
         {
             ModCallAttribute? attribute = m.GetCustomAttribute<ModCallAttribute>();
@@ -33,7 +36,7 @@ public sealed class ModCallSystem : ModSystem
             else
                 names = [m.Name, .. attribute.AlternameNames];
 
-            int inList = Handlers.FindIndex(a => a.Names == names);
+            int inList = Handlers.FindIndex(a => a.Names[0] == names[0]);
 
             if (inList != -1)
                 Handlers[inList].Add(m);
@@ -52,6 +55,6 @@ public sealed class ModCallSystem : ModSystem
         if (matching != -1)
             return Handlers[matching].Invoke(arguments);
 
-        throw new ArgumentException($"{name} does not match any know method alias!");
+        throw new ArgumentException($"{name} does not match any known method alias!");
     }
 }

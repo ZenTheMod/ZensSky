@@ -51,6 +51,10 @@ public static partial class Utilities
         if (parameters.Length <= 0)
             return true;
 
-        return !parameters.Any(p => p.ParameterType != arguments?.GetType());
+        for (int i = 0; i < parameters.Length; i++)
+            if (parameters[i].ParameterType != arguments?[i]?.GetType())
+                return false;
+
+        return true;
     }
 }
