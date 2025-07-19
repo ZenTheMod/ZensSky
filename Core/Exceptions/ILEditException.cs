@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using Terraria.ModLoader;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.Exceptions;
 
@@ -29,7 +30,7 @@ public class ILEditException : Exception
         text = string.Join("_", text.Split(Path.GetInvalidFileNameChars()));
 
             // Here we limit the size of the file name as to not make poor windows cry.
-        text = text[..250] + ".txt";
+        text = text.Truncate(250, ".txt");
 
         string text3 = Path.Combine(Logging.LogDir, "ILDumps", mod.Name, text);
 
