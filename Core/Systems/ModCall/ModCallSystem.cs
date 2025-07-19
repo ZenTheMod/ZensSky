@@ -8,7 +8,6 @@ namespace ZensSky.Core.Systems.ModCall;
 
 public sealed class ModCallSystem : ModSystem
 {
-        // TODO: Have multiple names refer to multiple methods.
     private readonly static List<ModCallAlias> Handlers = [];
 
     public override void Load()
@@ -19,9 +18,6 @@ public sealed class ModCallSystem : ModSystem
             .SelectMany(t => t.GetMethods())
             .Where(m => m.GetCustomAttributes(typeof(ModCallAttribute), false).Length > 0 && m.IsStatic)];
 
-
-        Handlers.Clear();
-
         foreach (MethodInfo m in methods)
         {
             ModCallAttribute? attribute = m.GetCustomAttribute<ModCallAttribute>();
@@ -31,10 +27,10 @@ public sealed class ModCallSystem : ModSystem
 
             string[] names;
 
-            if (attribute.AlternameNames.Length <= 0)
+            if (attribute.NameAliases.Length <= 0)
                 names = [m.Name];
             else
-                names = [m.Name, .. attribute.AlternameNames];
+                names = [m.Name, .. attribute.NameAliases];
 
             int inList = Handlers.FindIndex(a => a.Names[0] == names[0]);
 

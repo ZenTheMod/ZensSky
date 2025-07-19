@@ -2,14 +2,17 @@
 
 namespace ZensSky.Core.Systems.ModCall;
 
+/// <summary>
+/// Adds this method to <see cref="ModCallSystem.Handlers"/> under its name and <see cref="NameAliases"/> if provided.
+/// </summary>
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class ModCallAttribute : Attribute
 {
-    public string[] AlternameNames;
+    public string[] NameAliases;
 
     public ModCallAttribute() =>
-        AlternameNames = [];
+        NameAliases = [];
 
-    public ModCallAttribute(params string[] alternameNames) =>
-        AlternameNames = alternameNames;
+    public ModCallAttribute(params string[] nameAliases) =>
+        NameAliases = nameAliases;
 }

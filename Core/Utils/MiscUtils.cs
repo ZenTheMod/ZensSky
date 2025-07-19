@@ -41,6 +41,9 @@ public static partial class Utilities
             throw new TimeoutException();
     }
 
+    /// <summary>
+    /// Checks if <paramref name="methodInfo"/>'s arguments matches the types of <paramref name="arguments"/>.
+    /// </summary>
     public static bool MatchesArguments(this MethodInfo methodInfo, object?[]? arguments)
     {
         ParameterInfo[] parameters = methodInfo.GetParameters();
