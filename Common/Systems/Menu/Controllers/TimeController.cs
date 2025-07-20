@@ -4,11 +4,11 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Common.Systems.Menu.Elements;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 
-namespace ZensSky.Common.Systems.MainMenu.Controllers;
+namespace ZensSky.Common.Systems.Menu.Controllers;
 
 public sealed class TimeController : SliderController
 {

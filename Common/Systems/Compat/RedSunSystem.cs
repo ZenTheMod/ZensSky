@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.MainMenu;
+using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;

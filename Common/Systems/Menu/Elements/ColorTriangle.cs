@@ -11,7 +11,7 @@ using Terraria.UI;
 using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.Menu.Elements;
 
 public sealed class ColorTriangle : UIElement
 {
@@ -157,7 +157,7 @@ public sealed class ColorTriangle : UIElement
 
         Vector2 pickerOrigin = picker.Size() * .5f;
 
-        Vector2 position = (PickerPosition * dims.Size()) + dims.Center();
+        Vector2 position = PickerPosition * dims.Size() + dims.Center();
 
         spriteBatch.Draw(picker, Utils.Round(position), null, Color.White, 0f, pickerOrigin, 1f, SpriteEffects.None, 0f);
     }

@@ -8,7 +8,7 @@ using Terraria.Localization;
 using Terraria.UI;
 using ZensSky.Common.Registries;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.Menu.Elements;
 
 public sealed class HoverImageButton : UIElement
 {

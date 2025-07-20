@@ -7,12 +7,12 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Systems.MainMenu.Elements;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
+using ZensSky.Common.Systems.Menu.Elements;
 
-namespace ZensSky.Common.Systems.MainMenu.Controllers;
+namespace ZensSky.Common.Systems.Menu.Controllers;
 
 public sealed class ButtonColorController : MenuControllerElement
 {

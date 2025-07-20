@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.UI;
 using ZensSky.Core.Utils;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.Menu.Elements;
 
 public sealed class FixedScrollbar : UIScrollbar
 {
@@ -33,7 +33,7 @@ public sealed class FixedScrollbar : UIScrollbar
             SoundEngine.PlaySound(SoundID.MenuTick);
 
         DrawBar(spriteBatch, _texture.Value, dimensions.ToRectangle(), Color.White);
-        DrawBar(spriteBatch, _innerTexture.Value, handleRectangle, Color.White * ((_isDragging || _isHoveringOverHandle) ? 1f : 0.85f));
+        DrawBar(spriteBatch, _innerTexture.Value, handleRectangle, Color.White * (_isDragging || _isHoveringOverHandle ? 1f : 0.85f));
     }
 
     public override void LeftMouseDown(UIMouseEvent evt)

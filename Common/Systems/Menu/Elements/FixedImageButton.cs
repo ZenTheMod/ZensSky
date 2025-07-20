@@ -6,7 +6,7 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.UI;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.Menu.Elements;
 
 public sealed class FixedImageButton(Asset<Texture2D> texture) : UIImageButton(texture)
 {

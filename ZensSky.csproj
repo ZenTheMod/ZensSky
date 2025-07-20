@@ -33,6 +33,9 @@
 		<Reference Include="YouBoss">
 			<HintPath>..\ModAssemblies\YouBoss.dll</HintPath>
 		</Reference>
+		<Reference Include="Sloprain">
+			<HintPath>..\ModAssemblies\Sloprain.dll</HintPath>
+		</Reference>
 		<Reference Include="Macrocosm">
 			<HintPath>..\ModAssemblies\Macrocosm.dll</HintPath>
 		</Reference>

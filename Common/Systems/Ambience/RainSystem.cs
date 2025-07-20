@@ -6,6 +6,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Default;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
@@ -133,7 +134,8 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchBrfalse(out jumpMenuCheck),
                 i => i.MatchLdcR4(0));
 
-            c.EmitBr(jumpMenuCheck);
+            c.EmitDelegate(UsingDefaultMenu);
+            c.EmitBrtrue(jumpMenuCheck);
 
                 // Wind.
             c.GotoNext(MoveType.After,
@@ -142,12 +144,23 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)));
 
             c.EmitPop();
-            c.EmitLdcI4(0);
+            c.EmitDelegate(UsingDefaultMenu);
         }
         catch (Exception e)
         {
             throw new ILEditException(Mod, il, e);
         }
+    }
+
+    private static bool UsingDefaultMenu()
+    {
+        ModMenu menu = MenuLoader.currentMenu;
+
+            // Because most mods completely cover up the background - and credits text <3 - with their own visuals;
+            // I'm being safe and only playing ambience on the vanilla menus.
+        return menu is MenutML ||
+            menu is MenuJourneysEnd ||
+            menu is MenuOldVanilla;
     }
 
     private void DrawMenuRain(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
@@ -162,11 +175,13 @@ public sealed class RainSystem : ModSystem
 
     private static void DrawRain()
     {
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
         Rectangle frame = new(0, 0, 2, 40);
 
         Color sky = Main.ColorOfTheSkies * .9f;
 
-        Color baseColor = new(Math.Max(sky.R, (byte)80), Math.Max(sky.G, (byte)110), Math.Max(sky.B, (byte)130), sky.A);
+        Color baseColor = new(Math.Max(sky.R, (byte)105), Math.Max(sky.G, (byte)115), Math.Max(sky.B, (byte)125), sky.A);
 
         foreach (Rain rain in Main.rain.Where(r => r.active))
         {
@@ -182,7 +197,13 @@ public sealed class RainSystem : ModSystem
             if (rain.waterStyle >= 15)
                 texture = LoaderManager.Get<WaterStylesLoader>().Get(rain.waterStyle).GetRainTexture().Value;
 
-            Main.spriteBatch.Draw(texture, rain.position - Main.screenPosition, frame, color, rain.rotation, Vector2.Zero, rain.scale, SpriteEffects.None, 0f);
+            Vector2 position = rain.position - Main.screenPosition;
+
+            if (SloprainSystem.IsEnabled)
+                SloprainSystem.QueueRain(() =>
+                    spriteBatch.Draw(texture, position, frame, color, rain.rotation, Vector2.Zero, rain.scale, SpriteEffects.None, 0f));
+            else
+                spriteBatch.Draw(texture, position, frame, color, rain.rotation, Vector2.Zero, rain.scale, SpriteEffects.None, 0f);
 
             rain.Update();
         }

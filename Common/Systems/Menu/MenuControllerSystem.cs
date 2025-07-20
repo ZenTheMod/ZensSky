@@ -17,12 +17,12 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Common.Systems.Menu.Elements;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
 
-namespace ZensSky.Common.Systems.MainMenu;
+namespace ZensSky.Common.Systems.Menu;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class MenuControllerSystem : ModSystem

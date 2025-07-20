@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Systems.MainMenu;
+using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;

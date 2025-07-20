@@ -9,9 +9,9 @@ using Terraria.ModLoader.Config;
 using Terraria.UI;
 using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
-using ZensSky.Common.Systems.MainMenu.Elements;
+using ZensSky.Common.Systems.Menu.Elements;
 
-namespace ZensSky.Common.Systems.MainMenu;
+namespace ZensSky.Common.Systems.Menu;
 
 public sealed class MenuControllerUIState : UIState
 {

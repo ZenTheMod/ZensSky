@@ -8,7 +8,7 @@ using Terraria.UI;
 using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 
-namespace ZensSky.Common.Systems.MainMenu.Elements;
+namespace ZensSky.Common.Systems.Menu.Elements;
 
 public sealed class UISlider : UIElement
 {
@@ -93,7 +93,7 @@ public sealed class UISlider : UIElement
         Texture2D blip = TextureAssets.ColorSlider.Value;
 
         Vector2 blipOrigin = blip.Size() * 0.5f;
-        Vector2 blipPosition = new(size.X + (Ratio * size.Width), size.Center.Y);
+        Vector2 blipPosition = new(size.X + Ratio * size.Width, size.Center.Y);
 
         spriteBatch.Draw(blip, blipPosition, null, Color.White, 0f, blipOrigin, 1f, 0, 0f);
     }
