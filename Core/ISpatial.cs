@@ -1,4 +1,4 @@
-﻿namespace ZensSky.Common.DataStructures;
+﻿namespace ZensSky.Core;
 
 public interface ISpatial
 {

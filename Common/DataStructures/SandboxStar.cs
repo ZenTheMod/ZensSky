@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.Utilities;
 using ZensSky.Common.Registries;
+using ZensSky.Core;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.DataStructures;
