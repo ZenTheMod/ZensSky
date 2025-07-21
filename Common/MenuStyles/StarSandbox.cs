@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
@@ -14,7 +15,7 @@ public sealed class StarSandbox : ModMenu
 {
     #region Private Fields
 
-    private const float DetectionRange = 70f;
+    private const float DetectionRange = 40f;
 
     private const int StarCount = 600;
     private static readonly SandboxStar[] Stars = new SandboxStar[StarCount];
@@ -40,17 +41,23 @@ public sealed class StarSandbox : ModMenu
 
         for (int i = 0; i < StarCount; i++)
         {
-            SandboxStar[] near = starTree.Query(Utils.CenteredRectangle(Stars[i].Position, new(DetectionRange * 2f)));
+            HashSet<SandboxStar> near = starTree.Query(Utils.CenteredRectangle(Stars[i].Position, new(DetectionRange * 2f)), Stars[i]);
 
-            near = [.. near.Where(s => s.Position != Stars[i].Position || 
-                s.Position.WithinRange(Stars[i].Position, DetectionRange))];
+            Stars[i].Velocity *= .9f;
 
-            SandboxStar nearest = near.CompareFor(s => s.Position.DistanceSQ(Stars[i].Position));
+            if (near.Count > 0)
+            {
+                SandboxStar nearest = near.CompareFor(s => s.Position.DistanceSQ(Stars[i].Position), false);
 
-            Stars[i].Velocity += Utils.SafeNormalize(Stars[i].Position - nearest.Position, Vector2.Zero) *
-                (DetectionRange - nearest.Position.Distance(Stars[i].Position));
+                Stars[i].Velocity += Utils.SafeNormalize(Stars[i].Position - nearest.Position, Vector2.Zero) *
+                    (DetectionRange - nearest.Position.Distance(Stars[i].Position)) * .05f;
+            }
 
-            Stars[i].Velocity *= .005f;
+            if (Stars[i].Position.Distance(Utilities.MousePosition) < 120) 
+            {
+                Stars[i].Velocity += Utils.SafeNormalize(Stars[i].Position - Utilities.MousePosition, Vector2.Zero) *
+                    (120 - Utilities.MousePosition.Distance(Stars[i].Position)) * .02f;
+            }
 
             Stars[i].Position += Stars[i].Velocity;
 

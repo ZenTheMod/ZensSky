@@ -96,26 +96,23 @@ public static partial class Utilities
     ///     <see cref="false"/> – The instance should be found based on preceding order.<br/>
     ///     <see cref="true"/> – The instance should be found based on accending order.<br/>
     /// </param>
-    public static T CompareFor<T>(this List<T> list, Func<T, IComparable> getComparable, bool accending = true)
+    public static T CompareFor<T>(this IEnumerable<T> collection, Func<T, IComparable> getComparable, bool accending = true)
     {
-        int index = 0;
+        T matching = collection.First();
+        IComparable lastcomparison = getComparable(matching);
 
-        IComparable lastcomparison = getComparable(list[0]);
-
-        for (int i = 1; i < list.Count; i++)
+        foreach (T item in collection)
         {
-            T item = list[i];
-
             IComparable compare = getComparable(item);
 
             if ((compare.CompareTo(lastcomparison) >= 0) == accending)
             {
-                index = i;
+                matching = item;
                 lastcomparison = compare;
             }
         }
 
-        return list[index];
+        return matching;
     }
 
     #endregion

@@ -89,7 +89,7 @@ public sealed class QuadTree<T> where T : ISpatial
     /// Grabs all objects within <paramref name="queryArea"/>.
     /// </summary>
     /// <param name="queryArea">The area to search.</param>
-    public T[] Query(Rectangle queryArea)
+    public HashSet<T> Query(Rectangle queryArea)
     {
         List<T> foundObjects = [];
         if (HasChildren)
@@ -105,7 +105,17 @@ public sealed class QuadTree<T> where T : ISpatial
         HashSet<T> result = [];
         result.UnionWith(foundObjects);
 
-        return [.. result];
+        return result;
+    }
+
+    /// <inheritdoc cref="Query(Rectangle)"/>
+    /// <param name="ignore">Item to remove; typically at the center of <paramref name="queryArea"/>.</param>
+    public HashSet<T> Query(Rectangle queryArea, T ignore)
+    {
+        HashSet<T> result = Query(queryArea);
+        result.Remove(ignore);
+
+        return result;
     }
 
     #endregion
