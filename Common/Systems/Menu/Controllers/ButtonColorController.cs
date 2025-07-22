@@ -125,8 +125,6 @@ public sealed class ButtonColorController : MenuControllerElement
 
             ILLabel jumpColorCtorTarget = c.DefineLabel();
 
-            ILLabel? jumpHoverColorTarget = c.DefineLabel();
-
             for (int i = 0; i < 5; i++)
             {
                     // Grab relevant color indices.
@@ -175,7 +173,7 @@ public sealed class ButtonColorController : MenuControllerElement
                 i => i.MatchBneUn(out _),
                 i => i.MatchLdloc(out _),
                 i => i.MatchLdcI4(4),
-                i => i.MatchBneUn(out jumpHoverColorTarget),
+                i => i.MatchBneUn(out _),
                 i => i.MatchLdloc(out interpolatorIndex));
 
             c.MoveAfterLabels();
