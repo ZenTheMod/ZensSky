@@ -3,7 +3,6 @@ using System;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.Utilities;
-using ZensSky.Common.Commands;
 using ZensSky.Common.DataStructures;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;

@@ -8,7 +8,6 @@ using Terraria.Graphics;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
@@ -186,9 +185,7 @@ public sealed class PixelateSkySystem : ModSystem
 
     private static void PrepareTarget()
     {
-        Effect pixelate = Shaders.PixelateAndQuantize.Value;
-
-        if (!SkyConfig.Instance.PixelatedSky || pixelate is null)
+        if (!SkyConfig.Instance.PixelatedSky || !SkyEffects.PixelateAndQuantize.IsReady)
             return;
 
         HasDrawn = false;
@@ -225,11 +222,9 @@ public sealed class PixelateSkySystem : ModSystem
 
     private static void DrawTarget()
     {
-        Effect pixelate = Shaders.PixelateAndQuantize.Value;
-
         if (!SkyConfig.Instance.PixelatedSky || 
-            SkyTarget is null || 
-            pixelate is null || 
+            SkyTarget is null ||
+            !SkyEffects.PixelateAndQuantize.IsReady || 
             Main.mapFullscreen || 
             HasDrawn)
             return;
@@ -255,14 +250,14 @@ public sealed class PixelateSkySystem : ModSystem
 
         Vector2 screenSize = new(viewport.Width, viewport.Height);
 
-        pixelate.Parameters["screenSize"]?.SetValue(screenSize);
-        pixelate.Parameters["pixelSize"]?.SetValue(new Vector2(2));
+        SkyEffects.PixelateAndQuantize.ScreenSize = screenSize;
+        SkyEffects.PixelateAndQuantize.PixelSize = new(2);
 
-        pixelate.Parameters["steps"]?.SetValue(SkyConfig.Instance.ColorSteps);
+        SkyEffects.PixelateAndQuantize.Steps = SkyConfig.Instance.ColorSteps;
 
         int pass = (SkyConfig.Instance.ColorSteps == 255).ToInt();
 
-        pixelate.CurrentTechnique.Passes[pass].Apply();
+        SkyEffects.PixelateAndQuantize.Apply(pass);
 
         spriteBatch.Draw(SkyTarget, viewport.Bounds, Color.White);
 

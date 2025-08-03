@@ -11,8 +11,8 @@ float scale;
 
 float fbm1(float2 uv)
 {
-    float freq = 1.0;
-    float ret = 0.;
+    float freq = 1;
+    float ret = 0;
    
     for (float i = 0; i < 3; i++)
     {

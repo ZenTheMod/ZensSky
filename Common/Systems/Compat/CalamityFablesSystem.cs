@@ -142,9 +142,7 @@ public sealed class CalamityFablesSystem : ModSystem
         // To maintain consitency with Fables I have implemented a .obj filetype reader to import 3D models into terraria.
     private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
-        Effect shatter = Shaders.Shatter.Value;
-
-        if (shatter is null)
+        if (!CompatEffects.Shatter.IsReady)
             return;
 
         spriteBatch.End(out var snapshot);
@@ -163,27 +161,27 @@ public sealed class CalamityFablesSystem : ModSystem
 
             Viewport viewport = device.Viewport;
             Vector2 screenSize = new(viewport.Width, viewport.Height);
-            shatter.Parameters["screenSize"]?.SetValue(screenSize);
+            CompatEffects.Shatter.ScreenSize = screenSize;
 
             Matrix projection = CalculateShatterMatrix();
-            shatter.Parameters["projection"]?.SetValue(projection);
+            CompatEffects.Shatter.Projection = projection;
 
-            shatter.Parameters["color"]?.SetValue(color.ToVector4());
-            shatter.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
+            CompatEffects.Shatter.Color = color.ToVector4();
+            CompatEffects.Shatter.ShadowColor = shadowColor.ToVector4();
 
-            shatter.Parameters["innerColor"]?.SetValue(Color.Red.ToVector4());
+            CompatEffects.Shatter.InnerColor = Color.Red.ToVector4();
 
             float shadowAngle = Main.moonPhase * SingleMoonPhase;
-            shatter.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
+            CompatEffects.Shatter.ShadowRotation = -shadowAngle * MathHelper.TwoPi;
 
-            shatter.CurrentTechnique.Passes[0]?.Apply();
+            CompatEffects.Shatter.Apply();
 
-            Models.Shatter.Value?.Draw(device, 0);
+            Models.Shatter.DrawCrackedMoon(device);
 
                 // The "Black Hole" in the center.
             device.Textures[0] = Textures.Pixel.Value;
 
-                // Models.Shatter.Value?.Draw(device, 1);
+            Models.Shatter.DrawPlane(device);
         }
 
         spriteBatch.Begin(in snapshot);
@@ -196,26 +194,24 @@ public sealed class CalamityFablesSystem : ModSystem
         Matrix.CreateLookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY) *
         Matrix.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
 
-    // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method.
+        // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method. (Scrapped in favour of Sourcegen implementaion(?))
     private static void DrawCyst(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale, Color moonColor, Color shadowColor)
     {
-        Effect planet = Shaders.Cyst.Value;
-
-        if (planet is null)
+        if (!CompatEffects.Cyst.IsReady)
             return;
 
-        planet.Parameters["atmosphereRange"]?.SetValue(CystAtmosphere);
+        CompatEffects.Cyst.AtmosphereRange = CystAtmosphere;
 
         float shadowAngle = Main.moonPhase * SingleMoonPhase;
-        planet.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
+        CompatEffects.Cyst.ShadowRotation = -shadowAngle * MathHelper.TwoPi;
 
-        planet.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
-        planet.Parameters["atmosphereColor"]?.SetValue(AtmosphereColor);
+        CompatEffects.Cyst.ShadowColor = shadowColor.ToVector4();
+        CompatEffects.Cyst.AtmosphereColor = AtmosphereColor;
 
         Vector4 atmoShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent.ToVector4() : AtmosphereShadowColor;
-        planet.Parameters["atmosphereShadowColor"]?.SetValue(atmoShadowColor);
+        CompatEffects.Cyst.AtmosphereShadowColor = atmoShadowColor;
 
-        planet.CurrentTechnique.Passes[0].Apply();
+        CompatEffects.Cyst.Apply();
 
         Vector2 size = new Vector2(MoonSize * scale) / moon.Size();
         spriteBatch.Draw(moon, position, null, moonColor, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);

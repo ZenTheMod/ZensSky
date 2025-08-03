@@ -45,7 +45,7 @@ VSOutput VertexShaderFunction(in VSInput input)
 
 float4 PixelShaderFunction(VSOutput input) : COLOR0
 {
-    float2 coords = input.TextureCoordinates;
+    float2 coords = input.TextureCoordinates.xy;
     float2 position = input.Position.xy;
     float2 screenCoords = position.xy / screenSize;
     float3 world = input.WorldPosition.xyz;

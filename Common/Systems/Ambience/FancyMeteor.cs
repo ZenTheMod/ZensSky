@@ -26,12 +26,9 @@ public sealed class FancyMeteor(Player player, FastRandom random) : AmbientSky.M
     {
         Depth = 5.5f;
 
-        if (Depth <= minDepth || Depth > maxDepth)
-            return;
-
-        Effect meteor = Shaders.Meteor.Value;
-
-        if (meteor is null)
+        if (Depth <= minDepth ||
+            Depth > maxDepth ||
+            !SkyEffects.Meteor.IsReady)
             return;
 
         spriteBatch.End(out var snapshot);
@@ -39,14 +36,14 @@ public sealed class FancyMeteor(Player player, FastRandom random) : AmbientSky.M
 
         float alpha = Utils.Remap(StarSystem.StarAlpha, 0f, 1f, 0.3f, 0.55f);
 
-        meteor.Parameters["startColor"]?.SetValue(StartColor * alpha);
-        meteor.Parameters["endColor"]?.SetValue(EndColor * alpha);
+        SkyEffects.Meteor.StartColor = StartColor * alpha;
+        SkyEffects.Meteor.EndColor = EndColor * alpha;
 
-        meteor.Parameters["time"]?.SetValue(Main.GlobalTimeWrappedHourly * .3f);
+        SkyEffects.Meteor.Time = Main.GlobalTimeWrappedHourly * .3f;
 
-        meteor.Parameters["scale"]?.SetValue(5f);
+        SkyEffects.Meteor.Scale = 5f;
 
-        meteor.CurrentTechnique.Passes[0].Apply();
+        SkyEffects.Meteor.Apply();
 
         Texture2D noise = Textures.LoopingNoise.Value;
 

@@ -16,7 +16,6 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
@@ -352,9 +351,9 @@ public sealed class RealisticSkySystem : ModSystem
         if (!CanDraw())
             return null;
 
-        Effect star = Shaders.StarAtmosphere.Value;
+        Effect star = CompatEffects.StarAtmosphere.Value;
 
-        if (star is null)
+        if (!CompatEffects.StarAtmosphere.IsReady)
             return null;
 
         SetAtmosphereParams(star);

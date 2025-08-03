@@ -145,14 +145,12 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     private static void DrawPanel(UIModItem element, SpriteBatch spriteBatch, GraphicsDevice device, Rectangle source)
     {
-        Effect panel = Shaders.Panel.Value;
-
-        if (panel is null)
+        if (!UIEffects.Panel.IsReady)
             return;
 
-        panel.Parameters["Source"]?.SetValue(new Vector4(source.Width, source.Height, source.X, source.Y));
+        UIEffects.Panel.Source = new(source.Width, source.Height, source.X, source.Y);
 
-        panel.CurrentTechnique.Passes[0].Apply();
+        UIEffects.Panel.Apply();
 
         device.Textures[1] = PanelTarget ?? TextureAssets.MagicPixel.Value;
 
@@ -201,28 +199,26 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     private static void DrawPlanet(SpriteBatch spriteBatch, Rectangle source)
     {
-        Effect planet = Shaders.Planet.Value;
-
-        if (planet is null)
+        if (!SkyEffects.Planet.IsReady)
             return;
 
-        planet.Parameters["radius"]?.SetValue(PlanetRadius);
-        planet.Parameters["atmosphereRange"]?.SetValue(PlanetAtmosphere);
+        SkyEffects.Planet.Radius = PlanetRadius;
+        SkyEffects.Planet.AtmosphereRange = PlanetAtmosphere;
 
-        planet.Parameters["shadowRotation"]?.SetValue(Main.GlobalTimeWrappedHourly * PlanetTimeMultiplier);
+        SkyEffects.Planet.ShadowRotation = Main.GlobalTimeWrappedHourly * PlanetTimeMultiplier;
 
-        // Remember this is inverted.
-        planet.Parameters["shadowColor"]?.SetValue(Color.Black.ToVector4());
+            // Remember this is inverted.
+        SkyEffects.Planet.ShadowColor = Color.Black.ToVector4();
 
-        // Don't bother with an atmosphere.
-        planet.Parameters["atmosphereColor"]?.SetValue(Color.Transparent.ToVector4());
-        planet.Parameters["atmosphereShadowColor"]?.SetValue(Color.Transparent.ToVector4());
+            // Don't bother with an atmosphere.
+        SkyEffects.Planet.AtmosphereColor = Color.Transparent.ToVector4();
+        SkyEffects.Planet.AtmosphereShadowColor = Color.Transparent.ToVector4();
 
-        planet.CurrentTechnique.Passes[0].Apply();
+        SkyEffects.Planet.Apply();
 
         Texture2D texture = Textures.Pixel.Value;
 
-        Vector2 origin = texture.Size() * 0.5f;
+        Vector2 origin = texture.Size() * .5f;
 
         Vector2 position = new(PlanetHorizontalOffset, source.Height * .5f);
 

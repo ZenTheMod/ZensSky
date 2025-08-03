@@ -77,9 +77,9 @@ public sealed class WindRenderingSystem : ModSystem
 
     private static void DrawPixelated()
     {
-        Effect pixelate = Shaders.PixelateAndQuantize.Value;
-
-        if (!SkyConfig.Instance.PixelatedSky || pixelate is null || Main.mapFullscreen)
+        if (!SkyConfig.Instance.PixelatedSky || 
+            !SkyEffects.PixelateAndQuantize.IsReady || 
+            Main.mapFullscreen)
             return;
 
         GraphicsDevice device = Main.graphics.GraphicsDevice;
@@ -104,12 +104,14 @@ public sealed class WindRenderingSystem : ModSystem
 
         Vector2 screenSize = new(viewport.Width, viewport.Height);
 
-        pixelate.Parameters["screenSize"]?.SetValue(screenSize);
-        pixelate.Parameters["pixelSize"]?.SetValue(new Vector2(2));
+        SkyEffects.PixelateAndQuantize.ScreenSize = screenSize;
+        SkyEffects.PixelateAndQuantize.PixelSize = new(2);
 
-        pixelate.Parameters["steps"]?.SetValue(SkyConfig.Instance.ColorSteps);
+        SkyEffects.PixelateAndQuantize.Steps = SkyConfig.Instance.ColorSteps;
 
-        pixelate.CurrentTechnique.Passes[0].Apply();
+        int pass = (SkyConfig.Instance.ColorSteps == 255).ToInt();
+
+        SkyEffects.PixelateAndQuantize.Apply(pass);
 
         spriteBatch.Draw(WindTarget, viewport.Bounds, Color.White);
 

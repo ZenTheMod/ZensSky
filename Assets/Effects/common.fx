@@ -60,7 +60,7 @@ static const float3x3 kLMStoCONE = float3x3(
 
 float3 toOklab(float3 rgb)
 {
-    return pow(mul(kCONEtoLMS, rgb), 0.33333);
+    return pow(saturate(mul(kCONEtoLMS, rgb)), 0.33333);
 }
 
 float3 toRGB(float3 oklab)
@@ -79,7 +79,7 @@ float4 oklabLerp(float4 colA, float4 colB, float h)
 }
 
     // https://www.shadertoy.com/view/4dKcWK
-const float EPSILON = 1e-10;
+static const float EPSILON = 1e-10;
 
 float3 HUEtoRGB(float hue)
 {

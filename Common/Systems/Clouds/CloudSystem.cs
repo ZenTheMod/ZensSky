@@ -11,7 +11,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
@@ -30,7 +29,7 @@ public sealed class CloudSystem : ModSystem
     private const float FlareEdgeFallOffStart = 1f;
     private const float FlareEdgeFallOffEnd = 1.11f;
 
-    private const float NoonAlpha = .2f;
+    private const float NoonAlpha = .35f;
 
     private static readonly Color SunMultiplier = new(255, 245, 225);
     private static readonly Color MoonMultiplier = new(40, 40, 50);
@@ -85,17 +84,16 @@ public sealed class CloudSystem : ModSystem
 
             c.EmitDelegate(() =>
             {
-                Effect lighting = Shaders.Cloud.Value;
-
-                if (!SkyConfig.Instance.CloudsEnabled || lighting is null)
+                if (!SkyConfig.Instance.CloudsEnabled ||
+                    !SkyEffects.CloudLighting.IsReady)
                     return;
 
                 Viewport viewport = Main.instance.GraphicsDevice.Viewport;
 
                 Vector2 viewportSize = viewport.Bounds.Size();
-                lighting.Parameters["ScreenSize"]?.SetValue(viewportSize);
+                SkyEffects.CloudLighting.ScreenSize = viewportSize;
 
-                lighting.Parameters["UseEdgeLighting"]?.SetValue(false);
+                SkyEffects.CloudLighting.UseEdgeLighting = false;
 
                 Vector2 sunPosition = Info.SunPosition;
                 Vector2 moonPosition = Info.MoonPosition;
@@ -106,17 +104,17 @@ public sealed class CloudSystem : ModSystem
                     moonPosition.Y = viewportSize.Y - moonPosition.Y;
                 }
 
-                lighting.Parameters["SunPosition"]?.SetValue(sunPosition);
-                lighting.Parameters["MoonPosition"]?.SetValue(moonPosition);
+                SkyEffects.CloudLighting.SunPosition = sunPosition;
+                SkyEffects.CloudLighting.MoonPosition = moonPosition;
 
                 Color sunColor = GetColor(true);
-                lighting.Parameters["SunColor"]?.SetValue(sunColor.ToVector4());
+                SkyEffects.CloudLighting.SunColor = sunColor.ToVector4();
 
                 Color moonColor = GetColor(false);
-                lighting.Parameters["MoonColor"]?.SetValue(moonColor.ToVector4());
+                SkyEffects.CloudLighting.MoonColor = moonColor.ToVector4();
 
-                lighting.Parameters["DrawSun"]?.SetValue(Main.dayTime && ShowSun);
-                lighting.Parameters["DrawMoon"]?.SetValue((RedSunSystem.IsEnabled || !Main.dayTime) && ShowMoon);
+                SkyEffects.CloudLighting.DrawSun = Main.dayTime && ShowSun;
+                SkyEffects.CloudLighting.DrawMoon = (RedSunSystem.IsEnabled || !Main.dayTime) && ShowMoon;
             });
 
             #endregion
@@ -199,15 +197,17 @@ public sealed class CloudSystem : ModSystem
 
     private void ApplyEdgeLighting(orig_DrawCloud orig, int cloudIndex, Color color, float yOffset)
     {
-        Effect lighting = Shaders.Cloud.Value;
-
-        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || !SkyConfig.Instance.CloudsEdgeLighting || lighting is null)
+        if (!ZensSky.CanDrawSky || 
+            !LightClouds || 
+            !SkyConfig.Instance.CloudsEnabled || 
+            !SkyConfig.Instance.CloudsEdgeLighting || 
+            !SkyEffects.CloudLighting.IsReady)
         {
             orig(cloudIndex, color, yOffset);
             return;
         }
 
-        lighting.Parameters["UseEdgeLighting"]?.SetValue(true);
+        SkyEffects.CloudLighting.UseEdgeLighting = true;
 
         Cloud cloud = Main.cloud[cloudIndex];
 
@@ -217,7 +217,7 @@ public sealed class CloudSystem : ModSystem
         Vector2 pixelSize = new Vector2(2) / cloudTexture.Size();
         pixelSize /= cloud.scale;
 
-        lighting.Parameters["Pixel"]?.SetValue(pixelSize);
+        SkyEffects.CloudLighting.Pixel = pixelSize;
 
             // Account for the sprite direction.
         SpriteEffects dir = cloud.spriteDir;
@@ -226,26 +226,27 @@ public sealed class CloudSystem : ModSystem
             dir.HasFlag(SpriteEffects.FlipHorizontally) ? -1 : 1,
             dir.HasFlag(SpriteEffects.FlipVertically) ? -1 : 1);
 
-        lighting.Parameters["Flipped"]?.SetValue(flip);
+        SkyEffects.CloudLighting.Flipped = flip;
 
         orig(cloudIndex, color, yOffset);
     }
 
     private void ApplyShader(ref SpriteBatchSnapshot snapshot)
     {
-        Effect lighting = Shaders.Cloud.Value;
-
-        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled || lighting is null)
+        if (!ZensSky.CanDrawSky || 
+            !LightClouds || 
+            !SkyConfig.Instance.CloudsEnabled || 
+            !SkyEffects.CloudLighting.IsReady)
             return;
 
-        lighting.Parameters["UseEdgeLighting"]?.SetValue(false);
+        SkyEffects.CloudLighting.UseEdgeLighting = false;
 
-        lighting.CurrentTechnique.Passes[0].Apply();
+        SkyEffects.CloudLighting.Apply();
 
         bool edgeLighting = SkyConfig.Instance.CloudsEdgeLighting;
 
         Main.spriteBatch.End(out snapshot);
-        Main.spriteBatch.Begin(edgeLighting ? SpriteSortMode.Immediate : snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, lighting, snapshot.TransformMatrix);
+        Main.spriteBatch.Begin(edgeLighting ? SpriteSortMode.Immediate : snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, SkyEffects.CloudLighting.Value, snapshot.TransformMatrix);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 

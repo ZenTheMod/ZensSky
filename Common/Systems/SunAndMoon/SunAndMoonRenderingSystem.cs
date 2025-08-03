@@ -11,7 +11,6 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Registries.Shaders;
 using static ZensSky.Common.Registries.Textures;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using ZensSky.Core.Systems;
@@ -319,18 +318,16 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private static void DrawMoon2Rings(SpriteBatch spriteBatch, Texture2D texture, Vector2 position, Rectangle frame, float rotation, Vector2 origin, float scale, Color moonColor, Color shadowColor)
     {
-        Effect rings = Rings.Value;
-
-        if (rings is null)
+        if (!SkyEffects.Rings.IsReady)
             return;
 
-        rings.Parameters["uAngle"]?.SetValue(Main.moonPhase * SingleMoonPhase * MathHelper.TwoPi);
+        SkyEffects.Rings.Angle = Main.moonPhase * SingleMoonPhase * MathHelper.TwoPi;
 
-        rings.Parameters["ShadowColor"]?.SetValue(shadowColor.ToVector4());
-        rings.Parameters["ShadowExponent"]?.SetValue(Moon2ExtraShadowExponent);
-        rings.Parameters["ShadowSize"]?.SetValue(Moon2ExtraShadowSize);
+        SkyEffects.Rings.ShadowColor = shadowColor.ToVector4();
+        SkyEffects.Rings.ShadowExponent = Moon2ExtraShadowExponent;
+        SkyEffects.Rings.ShadowSize = Moon2ExtraShadowSize;
 
-        rings.CurrentTechnique.Passes[0].Apply();
+        SkyEffects.Rings.Apply();
 
         spriteBatch.Draw(texture, position, frame, moonColor, rotation, origin, Moon2ExtraRingSize * scale, SpriteEffects.None, 0f);
     }
@@ -355,23 +352,23 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     public static void ApplyPlanetShader(float shadowAngle, Color shadowColor, Color? atmosphereColor = null, Color? atmosphereShadowColor = null)
     {
-        Effect planet = Planet.Value;
-
-        if (planet is null)
+        if (!SkyEffects.Planet.IsReady)
             return;
 
-        planet.Parameters["radius"]?.SetValue(MoonRadius);
-        planet.Parameters["atmosphereRange"]?.SetValue(MoonAtmosphere);
+        SkyEffects.Planet.Radius = MoonRadius;
+        SkyEffects.Planet.AtmosphereRange = MoonAtmosphere;
 
-        planet.Parameters["shadowRotation"]?.SetValue(-shadowAngle * MathHelper.TwoPi);
+        SkyEffects.Planet.ShadowRotation = -shadowAngle * MathHelper.TwoPi;
 
-        planet.Parameters["shadowColor"]?.SetValue(shadowColor.ToVector4());
-        planet.Parameters["atmosphereColor"]?.SetValue(atmosphereColor?.ToVector4() ?? AtmosphereColor);
+        SkyEffects.Planet.ShadowColor = shadowColor.ToVector4();
+        SkyEffects.Planet.AtmosphereColor = atmosphereColor?.ToVector4() ?? AtmosphereColor;
 
-        Vector4 atmoShadowColor = SkyConfig.Instance.TransparentMoonShadow ? Color.Transparent.ToVector4() : (atmosphereShadowColor?.ToVector4() ?? AtmosphereShadowColor);
-        planet.Parameters["atmosphereShadowColor"]?.SetValue(atmoShadowColor);
+        Vector4 atmoShadowColor = SkyConfig.Instance.TransparentMoonShadow ? 
+            Color.Transparent.ToVector4() : 
+            (atmosphereShadowColor?.ToVector4() ?? AtmosphereShadowColor);
+        SkyEffects.Planet.AtmosphereShadowColor = atmoShadowColor;
 
-        planet.CurrentTechnique.Passes[0].Apply();
+        SkyEffects.Planet.Apply();
     }
 
     #endregion

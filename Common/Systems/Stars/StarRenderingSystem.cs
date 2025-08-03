@@ -134,23 +134,19 @@ public sealed class StarRenderingSystem : ModSystem
     [ModCall]
     public static void DrawSupernovae(SpriteBatch spriteBatch, float alpha)
     {
-        Effect supernova = Shaders.Supernova.Value;
-
-        if (supernova is null)
+        if (!SkyEffects.Supernova.IsReady)
             return;
 
-            // supernova.CurrentTechnique.Passes[0].Apply();
-
             // Set all of the generic color info.
-        supernova.Parameters["background"]?.SetValue(Background);
+        SkyEffects.Supernova.Background=Background;
 
-        supernova.Parameters["ringStartColor"]?.SetValue(RingStart);
-        supernova.Parameters["ringEndColor"]?.SetValue(RingEnd);
+        SkyEffects.Supernova.RingStartColor = RingStart;
+        SkyEffects.Supernova.RingEndColor = RingEnd;
 
-        supernova.Parameters["globalTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+        SkyEffects.Supernova.GlobalTime = Main.GlobalTimeWrappedHourly;
 
         if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.SetAtmosphereParams(supernova);
+            RealisticSkySystem.SetAtmosphereParams(SkyEffects.Supernova.Value);
 
         Texture2D texture = Textures.SupernovaNoise.Value;
 
@@ -162,17 +158,17 @@ public sealed class StarRenderingSystem : ModSystem
             Vector2 position = star.Position;
 
                 // Multiply the Vector4 and not the Color to give values past 1.
-            supernova.Parameters["startColor"]?.SetValue(star.BaseColor.ToVector4() * ExplosionStart);
-            supernova.Parameters["endColor"]?.SetValue(star.BaseColor.ToVector4() * ExplosionEnd);
+            SkyEffects.Supernova.StartColor = star.BaseColor.ToVector4() * ExplosionStart;
+            SkyEffects.Supernova.EndColor = star.BaseColor.ToVector4() * ExplosionEnd;
 
-            supernova.Parameters["quickTime"]?.SetValue(MathF.Min(time * QuickTimeMultiplier, 1f));
-            supernova.Parameters["expandTime"]?.SetValue(MathF.Min(time * ExpandTimeMultiplier, 1f));
-            supernova.Parameters["ringTime"]?.SetValue(MathF.Min(time * RingTimeMultiplier, 1f));
-            supernova.Parameters["longTime"]?.SetValue(time);
+            SkyEffects.Supernova.QuickTime = MathF.Min(time * QuickTimeMultiplier, 1f);
+            SkyEffects.Supernova.ExpandTime = MathF.Min(time * ExpandTimeMultiplier, 1f);
+            SkyEffects.Supernova.RingTime = MathF.Min(time * RingTimeMultiplier, 1f);
+            SkyEffects.Supernova.LongTime = time;
 
-            supernova.Parameters["offset"]?.SetValue(position / Utilities.ScreenSize);
+            SkyEffects.Supernova.Offset = position / Utilities.ScreenSize;
 
-            supernova.CurrentTechnique.Passes[0].Apply();
+            SkyEffects.Supernova.Apply();
 
             float opacity = alpha + (MinimumSupernovaAlpha / star.BaseSize);
 
@@ -215,12 +211,13 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.DrawStars();
 
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix * RotationMatrix());
-
-        RealisticSkySystem.ApplyStarShader();
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix * RotationMatrix());
 
         if (alpha > 0)
             DrawStars(spriteBatch, alpha);
+
+        spriteBatch.End();
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix * RotationMatrix());
 
         if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
             DrawSupernovae(spriteBatch, alpha);

@@ -18,7 +18,7 @@ float longTime;
 
 float globalTime;
 
-float offset;
+float2 offset;
 
 float2 screenSize;
 float2 sunPosition;
@@ -58,7 +58,7 @@ float4 supernova(float2 coords)
     
         // Interpolate using the oklap colorspace for a better transition.
     color = oklabLerp(color, outer, saturate(shellinterpolator - longTime) * outCubic(ringTime) * interpolator);
-        
+    
         // Add a small glowing "star" at its center
     color = oklabLerp(color, startColor, (1 - longTime) * quickTime * saturate(inCubic(1 - dist * 7)));
         
