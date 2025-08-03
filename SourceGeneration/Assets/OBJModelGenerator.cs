@@ -94,7 +94,7 @@ public static class {modelName}
                     }
 
                     writer.AppendLine(@$"
-    public static void Draw{meshName}(GraphicsDevice device) => Value.Draw(device, {i})");
+    public static void Draw{meshName}(GraphicsDevice device) => Value.Draw(device, {i});");
                 }
 
                 writer.Append(@$"}}");
