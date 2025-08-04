@@ -25,6 +25,27 @@ This mod features cross compatibility with a large amount of popular mods that m
 - 'Red Sun and Realistic Sky by Waffles22
 - 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^7]
 
+This mod also allows for other mod creators to very easily include their own compat;
+There are two methods to do so.
+
+1. Mod.Call
+   Mod.Call can be used when it may be unnecessary to use a project reference.
+   
+   Example:
+   ```cs
+   if (!ModLoader.TryGetMod("ZensSky", out Mod zensSky))
+       return;
+
+   zensSky.Call({MethodAlias}, {Arguments});
+   ```
+   Where {MethodAlias} would be the name of the method you wish to call, and {Arguments} would be the full arguments of that method.
+
+   A full list of the available methods and their aliases can be found [here](https://github.com/search?q=repo%3AZenTheMod%2FZensSky%20ModCall&type=code), or by searching this repository for the ModCall attribute.
+2. At times Mod.Call may not allow you the features you want, in which case you may want to use the `weakReferences` build property, you can find specifics [here](https://github.com/tModLoader/tModLoader/wiki/build.txt).
+   This will alow you more customization if you require that, most notably with the ability to use `AdditionalMoonDrawing` over `AdditionalMoonStyles`.
+
+If you feel any feature lacks certain cross compatibility that you'd like, please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
+
 ### Footnotes
 [^1]: Includes five different star visual styles to choose from.
 [^2]: Unique high definition visuals for every vanilla [Moon Style](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
