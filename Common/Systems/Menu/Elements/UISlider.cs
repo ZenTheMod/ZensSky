@@ -5,7 +5,6 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.UI;
-using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Menu.Elements;
@@ -33,7 +32,7 @@ public sealed class UISlider : UIElement
 
         InnerColor = Color.Gray;
 
-        InnerTexture = Textures.Gradient;
+        InnerTexture = MiscTextures.Gradient;
     }
 
     #endregion
@@ -78,8 +77,8 @@ public sealed class UISlider : UIElement
             Ratio = Utilities.Saturate(num / dims.Width);
         }
 
-        Texture2D slider = Textures.Slider.Value;
-        Texture2D sliderOutline = Textures.SliderHighlight.Value;
+        Texture2D slider = UITextures.Slider;
+        Texture2D sliderOutline = UITextures.SliderHighlight;
 
         Rectangle size = dims.ToRectangle();
 

@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Terraria.ModLoader;
+using ZensSky.Core.DataStructures;
 
 namespace ZensSky.Core.Systems.ModCall;
 
 public sealed class ModCallSystem : ModSystem
 {
-    private readonly static List<ModCallAlias> Handlers = [];
+    private readonly static ModCallHandlers Handlers = [];
 
     public override void Load()
     {
@@ -32,12 +32,7 @@ public sealed class ModCallSystem : ModSystem
             else
                 names = [m.Name, .. attribute.NameAliases];
 
-            int inList = Handlers.FindIndex(a => a.Names[0] == names[0]);
-
-            if (inList != -1)
-                Handlers[inList].Add(m);
-            else
-                Handlers.Add(new(names, m));
+            Handlers.Add([.. names], m);
         }
     }
 
@@ -46,10 +41,7 @@ public sealed class ModCallSystem : ModSystem
 
     public static object? HandleCall(string name, object?[]? arguments)
     {
-        int matching = Handlers.FindIndex(a => a.Names.Contains(name));
-
-        if (matching != -1)
-            return Handlers[matching].Invoke(arguments);
+        return Handlers.Invoke(name, arguments);
 
         throw new ArgumentException($"{name} does not match any known method alias!");
     }

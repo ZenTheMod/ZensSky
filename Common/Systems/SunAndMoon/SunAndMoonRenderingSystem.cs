@@ -8,12 +8,10 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Registries.Textures;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using ZensSky.Core.Systems;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -80,19 +78,19 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         get
         {
-            Asset<Texture2D> ret = Moon[Math.Min(Main.moonType, Moon.Length - 1)];
+            Asset<Texture2D> ret = SkyTextures.Moon[Math.Min(Main.moonType, SkyTextures.Moon.Length - 1)];
 
             if (AdditionalMoonStyles.TryGetValue(Main.moonType,
                 out Asset<Texture2D>? style))
                 ret = style;
 
             if (WorldGen.drunkWorldGen)
-                ret = Moon[0];
+                ret = SkyTextures.Moon[0];
 
             if (Main.pumpkinMoon)
-                ret = PumpkinMoon;
+                ret = SkyTextures.MoonPumpkin;
             else if (Main.snowMoon)
-                ret = SnowMoon;
+                ret = SkyTextures.MoonSnow;
 
             return ret;
         }
@@ -173,7 +171,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #region Bloom
 
-        Texture2D bloom = Bloom.Value;
+        Texture2D bloom = SkyTextures.SunBloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
         Color outerGlowColor = color * SunOuterGlowOpacity;
@@ -204,10 +202,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
         #region Sungls
 
-            // Not ideal to check every frame.
         if (!Main.gameMenu && Main.LocalPlayer.head == 12)
         {
-            Texture2D sunglasses = Sunglasses.Value;
+            Texture2D sunglasses = SkyTextures.Sunglasses.Value;
             spriteBatch.Draw(sunglasses, position, null, Color.White, rotation, sunglasses.Size() * .5f, SunglassesScale * scale, SpriteEffects.None, 0f);
         }
 
@@ -218,7 +215,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private static void DrawEclipse(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, GraphicsDevice device)
     {
-        Texture2D bloom = Bloom.Value;
+        Texture2D bloom = SkyTextures.SunBloom.Value;
         Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
         color.A = 0;
@@ -267,7 +264,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         switch (canDrawEdgeCases ? Main.moonType : 0)
         {
             case 2:
-                Texture2D rings = Moon2Rings.Value;
+                Texture2D rings = SkyTextures.Rings.Value;
 
                 DrawMoon2Rings(spriteBatch, rings, position, rings.Frame(1, 2, 0, 0), rotation - Moon2ExtraRingRotation, rings.Size() * .5f, scale, moonColor, shadowColor);
 
@@ -295,7 +292,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private static void DrawSmiley(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor)
     {
-        Texture2D star = Textures.Star.Value;
+        Texture2D star = StarTextures.FourPointedStar.Value;
 
         Vector2 starLeftOffset = SmileyLeftEyePosition.RotatedBy(rotation) * scale;
         Vector2 starRightOffset = SmileyRightEyePosition.RotatedBy(rotation) * scale;

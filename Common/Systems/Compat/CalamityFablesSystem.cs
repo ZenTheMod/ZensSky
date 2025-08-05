@@ -8,7 +8,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
@@ -70,8 +69,9 @@ public sealed class CalamityFablesSystem : ModSystem
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
 
-        for (int i = 0; i < Textures.FablesMoon.Length; i++)
-            AdditionalMoonStyles.Add(PriorMoonStyles + i, Textures.FablesMoon[i]);
+            // Annoyingly does negate the use of LazyAsset in the first place.
+        for (int i = 0; i < FablesTextures.Moon.Length; i++)
+            AdditionalMoonStyles.Add(PriorMoonStyles + i, FablesTextures.Moon[i]);
 
         AdditionalMoonDrawing.Add(DrawEdgeCases);
     }
@@ -179,7 +179,7 @@ public sealed class CalamityFablesSystem : ModSystem
             Models.Shatter.DrawCrackedMoon(device);
 
                 // The "Black Hole" in the center.
-            device.Textures[0] = Textures.Pixel.Value;
+            device.Textures[0] = MiscTextures.Pixel;
 
             Models.Shatter.DrawPlane(device);
         }

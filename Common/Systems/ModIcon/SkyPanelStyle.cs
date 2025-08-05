@@ -11,7 +11,6 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.Utilities;
-using ZensSky.Common.Registries;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 
@@ -77,10 +76,10 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     public override Dictionary<TextureKind, Asset<Texture2D>> TextureOverrides { get; } = new()
     {
-        { TextureKind.ModInfo, Textures.ModInfo },
-        { TextureKind.ModConfig, Textures.ModConfig },
-        { TextureKind.Deps, Textures.ModDeps },
-        { TextureKind.InnerPanel, Textures.Invis }
+        { TextureKind.ModInfo, PanelTextures.ModInfo },
+        { TextureKind.ModConfig, PanelTextures.ModConfig },
+        { TextureKind.Deps, PanelTextures.ModDeps },
+        { TextureKind.InnerPanel, MiscTextures.Invis }
     };
 
     public override Color ModifyEnabledTextColor(bool enabled, Color color) => enabled ? EnabledColor : DisabledColor;
@@ -118,7 +117,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
 
                 // I don't trust clear to work on all devices.
-            spriteBatch.Draw(Textures.Pixel.Value, new Rectangle(0, 0, (int)size.X, (int)size.Y), ClearColor);
+            spriteBatch.Draw(MiscTextures.Pixel, new Rectangle(0, 0, (int)size.X, (int)size.Y), ClearColor);
 
             DrawStars(spriteBatch, source);
 
@@ -152,9 +151,9 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
         UIEffects.Panel.Apply();
 
-        device.Textures[1] = PanelTarget ?? TextureAssets.MagicPixel.Value;
+        device.Textures[1] = PanelTarget ?? MiscTextures.Invis.Value;
 
-        device.Textures[2] = Textures.PanelGradient.Value;
+        device.Textures[2] = PanelTextures.PanelGradient;
         device.SamplerStates[2] = SamplerState.PointClamp;
 
         element.DrawPanel(spriteBatch, element._backgroundTexture.Value, element.BackgroundColor);
@@ -170,7 +169,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
         float time = Main.GlobalTimeWrappedHourly * StarTimeMultiplier;
 
-        Texture2D star = Textures.Star.Value;
+        Texture2D star = StarTextures.FourPointedStar;
         Vector2 starOrigin = star.Size() * 0.5f;
 
         for (int i = 0; i < starCount; i++)
@@ -216,7 +215,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
         SkyEffects.Planet.Apply();
 
-        Texture2D texture = Textures.Pixel.Value;
+        Texture2D texture = MiscTextures.Pixel;
 
         Vector2 origin = texture.Size() * .5f;
 
@@ -231,10 +230,10 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     private void DrawCreases(SpriteBatch spriteBatch, Rectangle source)
     {
-        UnifiedRandom rand = new("Ebon will never steal my code.".GetHashCode());
+        UnifiedRandom rand = new("#slay".GetHashCode());
 
-        Texture2D crease = Textures.Bloom.Value;
-        Vector2 creaseOrigin = crease.Size() * 0.5f;
+        Texture2D crease = SkyTextures.SunBloom.Value;
+        Vector2 creaseOrigin = crease.Size() * .5f;
 
         Color color = (Color.White * CreaseOpacity) with { A = 0 };
 

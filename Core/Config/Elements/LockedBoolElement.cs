@@ -12,7 +12,6 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
-using ZensSky.Common.Registries;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
@@ -82,7 +81,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
         backgroundColor = IsLocked ? UICommon.DefaultUIBlue * LockedBackgroundMultiplier : UICommon.DefaultUIBlue;
         base.DrawSelf(spriteBatch);
 
-        Texture2D texture = Textures.LockedToggle.Value;
+        Texture2D texture = UITextures.LockedSettingsToggle;
 
         CalculatedStyle dimensions = GetDimensions();
 

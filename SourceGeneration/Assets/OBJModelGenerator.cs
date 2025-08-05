@@ -38,10 +38,7 @@ using {ModName}.Core.DataStructures;
 
             foreach (AdditionalText model in path)
             {
-                string modelName = Path.GetFileNameWithoutExtension(model.Path);
-
-                    // Make sure the shader name is capitalized.
-                modelName = modelName[0].ToString().ToUpper() + modelName[1..];
+                string modelName = Capitalize(CleanName(model.Path));
 
                 string? source = model.GetText()?.ToString();
 
@@ -54,20 +51,18 @@ using {ModName}.Core.DataStructures;
                 string outputPath = Regex.Match(model.Path, @"(?<=(Models[\\/])).*?(?=\.([a-z]+)$)").Value;
 
                     // Match for everything inbetween (and including) '{ModName}/' where {ModName} is SourceGeneration.ModName, and the file extension.
-                string assetPath = Regex.Match(model.Path, @$"(?=({ModName}[\\/])).*?(?=\.([a-z]+)$)").Value;
+                string assetPath = AssetPath(model.Path);
 
                 writer.AppendLine(@$"
-namespace {Regex.Replace(assetPath, @"[\\/]", ".").Replace($".{modelName}", string.Empty)};
+namespace {Namespace(assetPath, modelName)};
 
 public static class {modelName}
 {{
-    private static readonly Lazy<Asset<OBJModel>> _model = new(() => ModContent.Request<OBJModel>(""{Regex.Replace(assetPath, @"[\\/]", "/")}""));
-
-    public static Asset<OBJModel> Model => _model.Value;
+    public static LazyAsset<OBJModel> Model => new(""{assetPath}"");
 
     public static OBJModel Value => Model.Value;
 
-    public static bool IsReady => Model.IsLoaded && Value is not null;");
+    public static bool IsReady => Model.IsReady;");
 
                     // Only grab lines corresponding to mesh names.
                 string[] lines = [.. source.Split(["\r\n", "\r", "\n"], StringSplitOptions.None)
@@ -90,7 +85,7 @@ public static class {modelName}
                         if (part.Length <= 2)
                             continue;
 
-                        meshName += part[0].ToString().ToUpper() + part[1..];
+                        meshName += Capitalize(part);
                     }
 
                     writer.AppendLine(@$"

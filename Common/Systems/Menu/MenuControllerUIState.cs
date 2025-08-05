@@ -8,7 +8,6 @@ using Terraria.Localization;
 using Terraria.ModLoader.Config;
 using Terraria.UI;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Menu.Elements;
 
 namespace ZensSky.Common.Systems.Menu;
@@ -69,7 +68,7 @@ public sealed class MenuControllerUIState : UIState
         Panel.Append(header);
 
             // Add a reset button to quickly reset the config without having to even open it.
-        ResetButton = new(Textures.Reset)
+        ResetButton = new(ButtonTextures.Reset)
         {
             HAlign = 1f
         };

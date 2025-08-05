@@ -6,7 +6,6 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
@@ -58,7 +57,7 @@ public sealed class ButtonColorController : MenuControllerElement
 
         Slider.Top.Set(-16f, 1f);
 
-        Slider.InnerTexture = Textures.HueGradient;
+        Slider.InnerTexture = MiscTextures.HueGradient;
         Slider.InnerColor = Color.White;
 
         Append(Slider);
@@ -69,7 +68,7 @@ public sealed class ButtonColorController : MenuControllerElement
 
         Append(Triangle);
 
-        ColorDisplay = new(Textures.ColorInner, Color.White, Textures.ColorOuter, Outline);
+        ColorDisplay = new(ButtonTextures.ColorInner, Color.White, ButtonTextures.ColorOuter, Outline);
 
         ColorDisplay.Width.Set(28f, 0f);
         ColorDisplay.Height.Set(28f, 0f);

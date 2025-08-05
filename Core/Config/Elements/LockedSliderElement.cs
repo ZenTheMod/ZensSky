@@ -13,7 +13,6 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
-using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
@@ -171,9 +170,9 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
 
         Texture2D colorBar = TextureAssets.ColorBar.Value;
         Texture2D colorBarHighlight = TextureAssets.ColorHighlight.Value;
-        Texture2D gradient = Textures.Gradient.Value;
+        Texture2D gradient = MiscTextures.Gradient;
         Texture2D colorSlider = TextureAssets.ColorSlider.Value;
-        Texture2D lockIcon = Textures.Lock.Value;
+        Texture2D lockIcon = UITextures.Lock;
 
         IngameOptions.valuePosition.X -= colorBar.Width;
         Rectangle rectangle = new((int)IngameOptions.valuePosition.X, (int)IngameOptions.valuePosition.Y - (int)(colorBar.Height * .5f), colorBar.Width, colorBar.Height);

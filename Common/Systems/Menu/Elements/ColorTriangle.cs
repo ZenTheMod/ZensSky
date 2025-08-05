@@ -8,7 +8,6 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.UI;
-using ZensSky.Common.Registries;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Menu.Elements;
@@ -147,13 +146,13 @@ public sealed class ColorTriangle : UIElement
         for (int i = 0; i < Points.Length; i++)
             vertices[Points.Length - 1 - i] = new(new(Points[i], 0), GetColor(i), new(.5f));
 
-        device.Textures[0] = Textures.Pixel.Value;
+        device.Textures[0] = MiscTextures.Pixel;
 
         device.DrawUserPrimitives(PrimitiveType.TriangleList, vertices, 0, Points.Length / 3);
 
         spriteBatch.Begin(in snapshot);
 
-        Texture2D picker = Textures.Dot.Value;
+        Texture2D picker = UITextures.Dot;
 
         Vector2 pickerOrigin = picker.Size() * .5f;
 

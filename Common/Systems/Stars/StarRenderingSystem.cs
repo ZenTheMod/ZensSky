@@ -1,13 +1,13 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Sloprain.Common.Registries;
 using System;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
@@ -65,19 +65,19 @@ public sealed class StarRenderingSystem : ModSystem
                 break;
 
             case StarVisual.Diamond:
-                texture = Textures.DiamondStar.Value;
+                texture = StarTextures.DiamondStar;
                 origin = texture.Size() * .5f;
                 Array.ForEach(StarSystem.Stars, s => s.DrawDiamond(spriteBatch, texture, alpha, origin, -StarRotation));
                 break;
 
             case StarVisual.FourPointed:
-                texture = Textures.Star.Value;
+                texture = StarTextures.FourPointedStar;
                 origin = texture.Size() * .5f;
                 Array.ForEach(StarSystem.Stars, s => s.DrawFlare(spriteBatch, texture, alpha, origin, -StarRotation));
                 break;
 
             case StarVisual.OuterWilds:
-                texture = Textures.OuterWildsStar.Value;
+                texture = StarTextures.CircleStar;
                 origin = texture.Size() * .5f;
                 Array.ForEach(StarSystem.Stars, s => s.DrawCircle(spriteBatch, texture, alpha, origin, -StarRotation));
                 break;
@@ -108,19 +108,19 @@ public sealed class StarRenderingSystem : ModSystem
                 break;
 
             case StarVisual.Diamond:
-                texture = Textures.DiamondStar.Value;
+                texture = StarTextures.DiamondStar;
                 origin = texture.Size() * .5f;
                 star.DrawDiamond(spriteBatch, texture, alpha, origin, rotation);
                 break;
 
             case StarVisual.FourPointed:
-                texture = Textures.Star.Value;
+                texture = StarTextures.FourPointedStar;
                 origin = texture.Size() * .5f;
                 star.DrawFlare(spriteBatch, texture, alpha, origin, rotation);
                 break;
 
             case StarVisual.OuterWilds:
-                texture = Textures.OuterWildsStar.Value;
+                texture = StarTextures.CircleStar;
                 origin = texture.Size() * .5f;
                 star.DrawCircle(spriteBatch, texture, alpha, origin, rotation);
                 break;
@@ -148,9 +148,9 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.SetAtmosphereParams(SkyEffects.Supernova.Value);
 
-        Texture2D texture = Textures.SupernovaNoise.Value;
+        Texture2D texture = SkyTextures.Supernova;
 
-        Vector2 origin = texture.Size() * 0.5f;
+        Vector2 origin = texture.Size() * .5f;
 
         foreach (Star star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
         {

@@ -14,7 +14,6 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Common.Config;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
@@ -301,7 +300,7 @@ public sealed class BetterNightSkySystem : ModSystem
         if (IsEnabled &&
             UseBigMoon &&
             edgeCase)
-            moon = Textures.BetterNightSkyMoon;
+            moon = SkyTextures.BetterNightSkyMoon;
 
         return true;
     }

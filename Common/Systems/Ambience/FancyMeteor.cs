@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent.Skies;
 using Terraria.Utilities;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Stars;
 
 namespace ZensSky.Common.Systems.Ambience;
@@ -45,7 +44,7 @@ public sealed class FancyMeteor(Player player, FastRandom random) : AmbientSky.M
 
         SkyEffects.Meteor.Apply();
 
-        Texture2D noise = Textures.LoopingNoise.Value;
+        Texture2D noise = MiscTextures.LoopingNoise;
 
         Vector2 position = GetDrawPositionByDepth() - Main.Camera.UnscaledPosition;
 

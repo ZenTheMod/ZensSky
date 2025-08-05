@@ -7,7 +7,6 @@ using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Registries;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
@@ -118,12 +117,12 @@ public sealed class ShootingStarRenderingSystem : ModSystem
             vertices[i * 2 + 1] = new(new(position + offset, 0), color, new(progress, 1f));
         }
 
-        device.Textures[0] = Textures.ShootingStar.Value;
+        device.Textures[0] = SkyTextures.ShootingStar;
 
         if (vertices.Length > 3)
             device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, vertices.Length - 2);
 
-        Texture2D starTexture = Textures.Star.Value;
+        Texture2D starTexture = StarTextures.FourPointedStar;
         Vector2 starOrigin = starTexture.Size() * .5f;
 
         Vector2 starPosition = positions[(int)(positions.Length * StarRatio)];

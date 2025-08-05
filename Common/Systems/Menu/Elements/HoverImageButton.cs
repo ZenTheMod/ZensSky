@@ -6,7 +6,6 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
-using ZensSky.Common.Registries;
 
 namespace ZensSky.Common.Systems.Menu.Elements;
 
@@ -32,7 +31,7 @@ public sealed class HoverImageButton : UIElement
         InnerTexture = innerTexture;
         InnerColor = innerColor;
 
-        OuterTexture = outerTexture ?? Textures.Invis;
+        OuterTexture = outerTexture ?? MiscTextures.Invis;
         OuterColor = outerColor ?? Color.White;
         OuterHoverColor = outerHoverColor ?? Main.OurFavoriteColor;
 

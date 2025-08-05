@@ -7,7 +7,6 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Registries;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 
@@ -122,7 +121,7 @@ public sealed class WindRenderingSystem : ModSystem
     {
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
-        device.Textures[0] = Textures.Bloom.Value;
+        device.Textures[0] = SkyTextures.SunBloom;
 
         foreach (WindParticle wind in WindSystem.Winds.Where(w => w.IsActive))
             DrawWindTrail(device, wind);

@@ -7,11 +7,11 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
+using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
 using static ZensSky.Common.DataStructures.Star;
 using Star = ZensSky.Common.DataStructures.Star;
-using ZensSky.Core.Systems;
-using ZensSky.Core.Systems.ModCall;
 
 namespace ZensSky.Common.Systems.Stars;
 
