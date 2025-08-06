@@ -26,11 +26,8 @@ public sealed class CalamityFablesSystem : ModSystem
     private static readonly Color DarkAtmosphere = new(13, 69, 96);
 
         // private const float MoonRadius = .9f;
-        // private const float MoonAtmosphere = .1f;
 
     private const float ShatterScale = 1.35f;
-
-    private const float CystAtmosphere = .175f;
 
     private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
     private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
@@ -199,8 +196,6 @@ public sealed class CalamityFablesSystem : ModSystem
     {
         if (!CompatEffects.Cyst.IsReady)
             return;
-
-        CompatEffects.Cyst.AtmosphereRange = CystAtmosphere;
 
         float shadowAngle = Main.moonPhase * SingleMoonPhase;
         CompatEffects.Cyst.ShadowRotation = -shadowAngle * MathHelper.TwoPi;

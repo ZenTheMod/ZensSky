@@ -40,14 +40,11 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private static readonly float[] EclipseBloomScales = [.36f, .27f, .2f];
     private static readonly float[] EclipseColorMultipliers = [.2f, 1f, 1.6f];
 
-    private const float EclipseTendrilsScale = .16f;
-
     private const float SunglassesScale = .3f;
 
     private const float SingleMoonPhase = .125f;
 
     private const float MoonRadius = .9f;
-    private const float MoonAtmosphere = .1f;
 
         // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
     private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
@@ -63,10 +60,12 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     private const float Moon2ExtraShadowExponent = 15f;
     private const float Moon2ExtraShadowSize = 4.6f;
 
-    private static readonly Vector2 Moon8ExtraUpperPosition = new(-30, -26);
-    private static readonly Vector2 Moon8ExtraLowerPosition = new(34);
-    private const float Moon8ExtraUpperScale = .3f;
-    private const float Moon8ExtraLowerScale = .45f;
+    private const float Moon8Scale = .74f;
+
+    private static readonly Vector2 Moon8ExtraUpperPosition = new(-22, -19);
+    private static readonly Vector2 Moon8ExtraLowerPosition = new(25);
+    private const float Moon8ExtraUpperScale = .22f;
+    private const float Moon8ExtraLowerScale = .41f;
 
     private const int BigMoonSize = 202;
 
@@ -279,7 +278,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
                 DrawMoon8Extras(spriteBatch, moon.Value, position, rotation, scale, moonColor);
 
-                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
+                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size * Moon8Scale, SpriteEffects.None, 0f);
                 break;
             default:
                 ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
@@ -353,7 +352,6 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             return;
 
         SkyEffects.Planet.Radius = MoonRadius;
-        SkyEffects.Planet.AtmosphereRange = MoonAtmosphere;
 
         SkyEffects.Planet.ShadowRotation = -shadowAngle * MathHelper.TwoPi;
 

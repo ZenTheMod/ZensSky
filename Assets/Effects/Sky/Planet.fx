@@ -3,7 +3,6 @@
 sampler tex : register(s0);
 
 float radius;
-float atmosphereRange;
 
 float shadowRotation;
 
@@ -35,7 +34,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     
     float4 inner = planet(uv, dist, sp, shad);
     
-    float4 outer = atmo(dist, shad, radius, atmosphereRange, atmosphereColor, atmosphereShadowColor);
+    float4 outer = atmo(dist, shad, radius, atmosphereColor, atmosphereShadowColor);
     
     float4 color = (inner + outer) * sampleColor;
     

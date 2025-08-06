@@ -36,7 +36,7 @@ public class AliasedList<TKey, TElement>
     }
 
     /// <summary>
-    /// Adds the item(s) at the key given.
+    /// Adds the item(s) at the key(s) given.
     /// </summary>
     /// <returns><see cref="true"/> if the list does not already contain the key(s).</returns>
     public bool Add(TKey key, TElement item)

@@ -16,11 +16,11 @@ Checkbox shown next to currently complete features.
 
 ## Cross Compatiblity
 This mod features cross compatibility with a large amount of popular mods that may tweak or otherwise interact with the visuals of the sky.
-- 'Macrocosm [BETA]' by MechanicPluto2\*\*\*4[^3]
+- 'Macrocosm [BETA]' by MechanicPluto24\*\*\*[^3]
 - 'Realistic Sky' by Lucille Karma
 - 'Wrath of the Gods' by Lucille Karma\*[^4]
 - 'Lights And Shadows' by yiyang233
-- 'Calamity Fables' by IbanPlay[^5]
+- 'Calamity Fables' by IbanPlay\*[^5]
 - 'Calamity Mod' by Ozzatron\*[^6]
 - 'Red Sun and Realistic Sky by Waffles22
 - 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^7]

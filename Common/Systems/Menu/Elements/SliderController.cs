@@ -15,7 +15,8 @@ public abstract class SliderController : MenuControllerElement
 
     public abstract ref float Modifying {  get; }
 
-    public SliderController() : base()
+    public SliderController()
+        : base()
     {
         Height.Set(75f, 0f);
 

@@ -65,10 +65,10 @@ float shadow(float3 sp, float shadowRotation)
     return shad;
 }
 
-float4 atmo(float dist, float shad, float radius, float atmosphereRange, float4 atmosphereColor, float4 atmosphereShadowColor)
+float4 atmo(float dist, float shad, float radius, float4 atmosphereColor, float4 atmosphereShadowColor)
 {
         // Hacky solution for a faux atmosphere.
-    float atmo = inCubic(1 - abs(.5 - clampedMap(dist, radius - atmosphereRange, radius + atmosphereRange, 0, 1)));
+    float atmo = inCubic(1 - clampedMap(dist, radius, 1, 0, 1));
 		
     float4 atmoColor = lerp(atmosphereShadowColor, atmosphereColor, shad);
 		

@@ -2,8 +2,6 @@
 
 sampler tex : register(s0);
 
-float atmosphereRange;
-
 float shadowRotation;
 
 float4 shadowColor;
@@ -52,7 +50,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
         // Then calculate the colors like usual.
     float4 inner = lerp(shadowColor, tex2D(tex, pt), shad) * falloff;
     
-    float4 outer = atmo(dist, shad, 1, atmosphereRange, atmosphereColor, atmosphereShadowColor);
+    float4 outer = atmo(dist, shad, 1, atmosphereColor, atmosphereShadowColor);
     
     float4 color = (inner + outer) * sampleColor;
     

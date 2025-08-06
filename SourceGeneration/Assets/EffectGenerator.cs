@@ -46,6 +46,8 @@ using {ModName}.Core.DataStructures;
         { "texture", "Texture" },
     };
 
+        // private static readonly string[] ColorAliases = ["Vector3", "Vector4"];
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var effectFiles = context.AdditionalTextsProvider
@@ -133,7 +135,17 @@ public static class {effectName}
                         typeName += "[]";
                     }
 
-                        // TODO: Potental get method impl using EffectParameter's scattered methods; Although, when has anyone used those?
+                    /*
+                            // Edge case for handling float3/4 parameters as Microsoft.Xna.Framework.Color.
+                        if (propertyName.Contains("Color") &&
+                            ColorAliases.Any(s => typeName == s)) 
+                        {
+                            writer.AppendLine(@$"
+        public static Color {propertyName} {{ set => Value.Parameters[""{parameterName}""].SetValue(value.To{typeName}()); }}");
+                            continue;
+                        } 
+                    */
+
                     writer.AppendLine(@$"
     public static {typeName} {propertyName} {{ set => Value.Parameters[""{parameterName}""].SetValue(value); }}");
                 }
