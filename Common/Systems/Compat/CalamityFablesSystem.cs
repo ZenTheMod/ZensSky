@@ -173,12 +173,14 @@ public sealed class CalamityFablesSystem : ModSystem
 
             CompatEffects.Shatter.Apply();
 
-            Models.Shatter.DrawCrackedMoon(device);
+            Models.Shatter.DrawMoon(device);
+
+            Models.Shatter.DrawRocks(device);
 
                 // The "Black Hole" in the center.
             device.Textures[0] = MiscTextures.Pixel;
 
-            Models.Shatter.DrawPlane(device);
+            Models.Shatter.DrawShaderPlane(device);
         }
 
         spriteBatch.Begin(in snapshot);
