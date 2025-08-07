@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using ReLogic.Graphics;
@@ -13,7 +12,6 @@ using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
-using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
@@ -33,8 +31,6 @@ public sealed class MenuControllerSystem : ModSystem
     private const int HorizontalPadding = 4;
 
     private static ILHook? AddMenuControllerToggle;
-
-    private static ILHook? HideConfigFromList;
 
     private delegate void orig_Save(ModConfig config);
     private static Hook? SaveConfig;
@@ -75,12 +71,6 @@ public sealed class MenuControllerSystem : ModSystem
             Main.OnResolutionChanged += CloseMenuOnResolutionChanged;
         });
 
-        MethodInfo? populateConfigs = typeof(UIModConfigList).GetMethod(nameof(UIModConfigList.PopulateConfigs), Instance | NonPublic);
-
-        if (populateConfigs is not null)
-            HideConfigFromList = new(populateConfigs,
-                HideMenuConfig);
-
         MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
 
         if (save is not null)
@@ -102,8 +92,6 @@ public sealed class MenuControllerSystem : ModSystem
             On_Main.UpdateUIStates -= UpdateInterface;
             Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
         });
-
-        HideConfigFromList?.Dispose();
 
         SaveConfig?.Dispose();
     }
@@ -214,56 +202,6 @@ public sealed class MenuControllerSystem : ModSystem
     #endregion
 
     #region Config
-
-    private void HideMenuConfig(ILContext il)
-    {
-        try
-        {
-            ILCursor c = new(il);
-
-            ILLabel? addConfigSkipTarget = c.DefineLabel();
-
-            int configIndex = -1;
-
-                // Not exactly sure how to use a compiler generated backing class as a type argument.
-            FieldReference? displayClassLocal = null;
-            FieldReference? displayClassConfig = null;
-
-                // Get the label to the bottom of the loop, this will act as our 'continue' keyword.
-            c.GotoNext(MoveType.After,
-                i => i.MatchCallvirt<List<ModConfig>>(nameof(List<>.GetEnumerator)),
-                i => i.MatchStloc(out _),
-                i => i.MatchBr(out addConfigSkipTarget));
-
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdloc(out configIndex),
-                i => i.MatchLdfld(out displayClassLocal),
-                i => i.MatchLdfld(out displayClassConfig),
-                i => i.MatchCallvirt<ModConfig>($"get_{nameof(ModConfig.DisplayName)}"));
-
-            if (displayClassLocal is null || displayClassConfig is null)
-                throw new NullReferenceException();
-
-            c.GotoPrev(MoveType.After,
-                i => i.MatchStloc(configIndex),
-                i => i.MatchLdloc(configIndex),
-                i => i.MatchLdloc(out _),
-                i => i.MatchStfld(displayClassLocal));
-
-            c.EmitLdloc(configIndex);
-
-            c.EmitLdfld(displayClassLocal);
-            c.EmitLdfld(displayClassConfig);
-
-            c.EmitDelegate((ModConfig config) => config is MenuConfig);
-
-            c.EmitBrtrue(addConfigSkipTarget);
-        }
-        catch (Exception e)
-        {
-            throw new ILEditException(Mod, il, e);
-        }
-    }
 
     private void RefreshOnSave(orig_Save orig, ModConfig config)
     {
