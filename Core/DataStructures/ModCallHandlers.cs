@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using ZensSky.Core.Utils;
 
@@ -9,9 +8,6 @@ public sealed class ModCallHandlers : AliasedList<string, MethodInfo>
 {
     public ModCallHandlers()
         : base() { }
-
-    public ModCallHandlers(MethodInfo item, Func<MethodInfo, HashSet<string>> nameFunc)
-        : base([item], nameFunc) { }
 
     public object? Invoke(string name, object?[]? args)
     {

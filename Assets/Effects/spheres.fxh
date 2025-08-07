@@ -1,7 +1,7 @@
 #ifndef SPHERES_FX
 #define SPHERES_FX
 
-#include "common.fx"
+#include "common.fxh"
 
 float aafi(float2 p)
 {

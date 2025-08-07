@@ -72,7 +72,7 @@ public sealed class RainSystem : ModSystem
                 Main.waterStyle = Main.dayTime ? WaterStyleID.Purity : WaterStyleID.Corrupt;
 
                 float num = Main.screenWidth / MagicScreenWidth;
-                num *= 0.25f + 1f * Main.cloudAlpha;
+                num *= .25f + 1f * Main.cloudAlpha;
 
                 Vector2 position = Main.screenPosition;
 
@@ -134,8 +134,8 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchBrfalse(out jumpMenuCheck),
                 i => i.MatchLdcR4(0));
 
-            c.EmitDelegate(UsingDefaultMenu);
-            c.EmitBrtrue(jumpMenuCheck);
+            c.EmitDelegate(UsingModdedMenu);
+            c.EmitBrfalse(jumpMenuCheck);
 
                 // Wind.
             c.GotoNext(MoveType.After,
@@ -144,7 +144,7 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)));
 
             c.EmitPop();
-            c.EmitDelegate(UsingDefaultMenu);
+            c.EmitDelegate(UsingModdedMenu);
         }
         catch (Exception e)
         {
@@ -152,15 +152,15 @@ public sealed class RainSystem : ModSystem
         }
     }
 
-    private static bool UsingDefaultMenu()
+    private static bool UsingModdedMenu()
     {
         ModMenu menu = MenuLoader.currentMenu;
 
             // Because most mods completely cover up the background - and credits text <3 - with their own visuals;
             // I'm being safe and only playing ambience on the vanilla menus.
-        return menu is MenutML ||
-            menu is MenuJourneysEnd ||
-            menu is MenuOldVanilla;
+        return menu is not MenutML &&
+            menu is not MenuJourneysEnd &&
+            menu is not MenuOldVanilla;
     }
 
     private void DrawMenuRain(On_Main.orig_DrawBackgroundBlackFill orig, Main self)

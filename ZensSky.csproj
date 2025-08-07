@@ -12,13 +12,17 @@
 		
 		<!-- Use the preview version to allow for null conditional assigment -->
 		<LangVersion>preview</LangVersion>
+	
+		<!-- Hides the following warnings: 
+			Effects deprecated for D3DCompiler_47
+			Type conflict with 'IgnoresAccessChecksToAttribute' -->
+		<NoWarn>X4717, CS0436</NoWarn>
 	</PropertyGroup>
 
 	<!-- References -->
 	<ItemGroup>
-		<!-- Include various mods to make cross-modding easier, 
-			(Also the use of sortBefore in build.txt eleminates the chance of a race condition via cross-mod)
-			(Of note is that as this mod is NoSync-sided you cannot use sort properties on Both/Server-sided mods) -->
+		<!-- Include various mods to make cross-modding easier;
+			(Also the use of sortBefore in build.txt eleminates the chance of a race condition via cross-mod) -->
 		<Reference Include="RealisticSky">
 			<HintPath>..\ModAssemblies\RealisticSky.dll</HintPath>
 		</Reference>
@@ -43,8 +47,6 @@
 		<Reference Include="SubworldLibrary">
 			<HintPath>..\ModAssemblies\SubworldLibrary.dll</HintPath>
 		</Reference>
-
-		<!-- Include the fabled DAYBREAK lib -->
 		<Reference Include="Daybreak">
 			<HintPath>..\ModAssemblies\Daybreak.dll</HintPath>
 		</Reference>
@@ -54,10 +56,8 @@
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" PrivateAssets="true" Version="2.2.1" />
 
-		<!-- Publicize the tModLoader API -->
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
-		<!-- Irrelevant due to Daybreak's SpriteBatchSnapshot impl* -->
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 
 		<Publicize Include="RealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
@@ -69,7 +69,7 @@
 		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
-	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed.) -->
+	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed) -->
 	<ItemGroup Condition="'$(DesignTimeBuild)' != 'true'">
 		<EffectFiles Include="**\*.fx" />
 	</ItemGroup>
@@ -78,19 +78,19 @@
 	<PropertyGroup>
 		<FxcCompilerPath>.\Assets\Effects\Compiler\fxc.exe</FxcCompilerPath>
 	</PropertyGroup>
-
+	
 	<!-- Effect File Compilation -->
 	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
 		<!-- Echo here so it logs which file is being compiled -->
-		<Exec Command="@(EffectFiles->'echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension), Out: %(RecursiveDir)%(FileName).fxc ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+		<Exec Command="@(EffectFiles->'echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
 	</Target>
 	
 	<!-- Source Generation -->
 	<ItemGroup>
-		<!-- The source generator should not be included in the packaged mod -->
+		<!-- Prevents files from causing overlap -->
 		<Compile Remove="SourceGeneration\**" />
-		<!-- Add every model to the list of additional files so that our source generator can find it -->
-		<AdditionalFiles Include="Assets\Models\**" />
+		<!-- Add every asset as an additional file so that our source generator can find it -->
+		<AdditionalFiles Include="Assets\**" />
 		<ProjectReference Include=".\SourceGeneration\SourceGeneration.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 	</ItemGroup>
 	

@@ -1,4 +1,4 @@
-#include "../spheres.fx"
+#include "../spheres.fxh"
 
 sampler tex : register(s0);
 

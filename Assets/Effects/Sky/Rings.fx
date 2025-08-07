@@ -1,4 +1,4 @@
-#include "../common.fx"
+#include "../common.fxh"
 
 sampler uImage0 : register(s0);
 

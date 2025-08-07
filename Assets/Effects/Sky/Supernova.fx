@@ -1,4 +1,4 @@
-#include "../common.fx"
+#include "../common.fxh"
 #include "../Compat/realisticSky.fx"
 
 sampler noise : register(s0);
