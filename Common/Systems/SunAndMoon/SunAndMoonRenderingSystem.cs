@@ -44,11 +44,11 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const float SingleMoonPhase = .125f;
 
-    private const float MoonRadius = .9f;
+    private const float MoonRadius = .88f;
 
         // I've just started using Vector4s over colors for shaders, I'm far too lazy to convert it.
-    private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
-    private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
+    private static readonly Vector4 AtmosphereColor = Vector4.Zero;
+    private static readonly Vector4 AtmosphereShadowColor = new(.2f, .04f, .12f, 1f);
 
     private static readonly Vector2 SmileyLeftEyePosition = new(-24, -32);
     private static readonly Vector2 SmileyRightEyePosition = new(13, -44);
@@ -392,7 +392,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
         spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
         DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, !Main.dayTime && ShowMoon);
 

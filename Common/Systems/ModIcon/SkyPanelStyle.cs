@@ -6,7 +6,6 @@ using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
@@ -29,19 +28,18 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
 
     private const float PlanetHorizontalOffset = 15f;
     private const float PlanetScale = 150f;
-    private const float PlanetRadius = 0.95f;
-    private const float PlanetAtmosphere = 0.05f;
-    private const float PlanetTimeMultiplier = 0.85f;
+    private const float PlanetRadius = .95f;
+    private const float PlanetTimeMultiplier = .85f;
 
     private const int StarCount = 300;
-    private const float StarTimeMultiplier = 0.4f;
+    private const float StarTimeMultiplier = .4f;
     private const float MaxPhase = MathHelper.Pi * 8f;
-    private const float StarScale = 0.25f;
+    private const float StarScale = .25f;
 
     private const int CreaseCount = 10;
-    private static readonly Vector2 CreaseScale = new(0.01f, 0.6f);
-    private const float CreaseOpacity = 0.15f;
-    private const float CreaseRotation = 0.22f;
+    private static readonly Vector2 CreaseScale = new(.01f, .6f);
+    private const float CreaseOpacity = .15f;
+    private const float CreaseRotation = .22f;
 
     private static RenderTarget2D? PanelTarget;
 
@@ -170,7 +168,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
         float time = Main.GlobalTimeWrappedHourly * StarTimeMultiplier;
 
         Texture2D star = StarTextures.FourPointedStar;
-        Vector2 starOrigin = star.Size() * 0.5f;
+        Vector2 starOrigin = star.Size() * .5f;
 
         for (int i = 0; i < starCount; i++)
         {
@@ -202,7 +200,6 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
             return;
 
         SkyEffects.Planet.Radius = PlanetRadius;
-        SkyEffects.Planet.AtmosphereRange = PlanetAtmosphere;
 
         SkyEffects.Planet.ShadowRotation = Main.GlobalTimeWrappedHourly * PlanetTimeMultiplier;
 

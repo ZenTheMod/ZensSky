@@ -29,7 +29,7 @@ public sealed class CalamityFablesSystem : ModSystem
 
     private const float ShatterScale = 1.35f;
 
-    private static readonly Vector4 AtmosphereColor = new(.3f, .35f, .35f, 1f);
+    private static readonly Vector4 AtmosphereColor = Vector4.Zero;
     private static readonly Vector4 AtmosphereShadowColor = new(.1f, .02f, .06f, 1f);
 
     private static readonly Vector2 ShatterTargetSize = new(200);
@@ -136,7 +136,7 @@ public sealed class CalamityFablesSystem : ModSystem
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
-        // To maintain consitency with Fables I have implemented a .obj filetype reader to import 3D models into terraria.
+        // To maintain consistency with Fables I have implemented a .obj filetype reader to import 3D models into terraria.
     private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
         if (!CompatEffects.Shatter.IsReady)

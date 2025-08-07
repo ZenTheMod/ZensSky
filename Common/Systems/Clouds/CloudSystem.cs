@@ -280,8 +280,11 @@ public sealed class CloudSystem : ModSystem
         color *= 1 - (position.Y / Utilities.ScreenSize.Y);
 
             // Decrease the intensity at noon to make the clouds not just be pure white.
+            // And alter the intensity depending on the moon phase, where a new moon casts no light.
         if (day)
             color *= MathHelper.Lerp(NoonAlpha, 1f, MathF.Pow(distanceFromCenter, 2));
+        else
+            color *= MathF.Abs(4 - Main.moonPhase) * .25f;
 
         return color;
     }

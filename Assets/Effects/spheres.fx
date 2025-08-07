@@ -56,22 +56,20 @@ float3 sphere(float2 uv, float dist, float radius)
     return sphererot;
 }
 
-float shadow(float3 sp, float shadowRotation)
+float shadow(float3 sp, float shadowRotation, float expo = 12)
 {
-    float shad = outCubic(dot(sp, mul(float3(0, 1, 0), rotateZ(TAU - PIOVER2 + shadowRotation))));
-    
-    shad = saturate(shad);
+    float shad = 1 - pow(1 - saturate(dot(sp, mul(float3(0, 1, 0), rotateZ(TAU - PIOVER2 + shadowRotation)))), expo);
     
     return shad;
 }
 
-float4 atmo(float dist, float shad, float radius, float4 atmosphereColor, float4 atmosphereShadowColor)
+float4 atmo(float dist, float shad, float radius, float4 atmosphereColor, float4 atmosphereShadowColor, float range = 0)
 {
         // Hacky solution for a faux atmosphere.
-    float atmo = inCubic(1 - clampedMap(dist, radius, 1, 0, 1));
-		
+    float atmo = clampedMap(dist, radius, 1 + range, 1, 0) * step(radius, dist);
+	
     float4 atmoColor = lerp(atmosphereShadowColor, atmosphereColor, shad);
-		
+	
     return atmoColor * atmo;
 }
 

@@ -18,10 +18,10 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     if (rotatedCoords.y > 0)
         return rings;
     
-    float shadowInterpolator = clamp(abs(rotatedCoords.x * ShadowSize), 0, 1);
+    float shadowInterpolator = saturate(abs(rotatedCoords.x * ShadowSize));
     shadowInterpolator = 1 - pow(2., ShadowExponent * (shadowInterpolator - 1));
 
-    return lerp(rings, ShadowColor * rings.a, shadowInterpolator);
+    return lerp(rings, ShadowColor * rings, shadowInterpolator);
 }
 
 technique Technique1

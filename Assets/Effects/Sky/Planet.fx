@@ -12,14 +12,13 @@ float4 atmosphereShadowColor;
 
 float4 planet(float2 uv, float dist, float3 sp, float shad)
 {
-    if (dist > radius)
-        return float4(0, 0, 0, 0);
-    
     float2 pt = lonlat(sp);
     
-    float falloff = clampedMap(dist, radius - .03, radius, 1, 0);
+    float falloff = step(dist, radius);
     
-    return lerp(shadowColor, tex2D(tex, pt), shad) * falloff;
+    float4 text = tex2D(tex, pt);
+	
+    return lerp(shadowColor * text, text, shad) * falloff;
 }
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
@@ -28,17 +27,28 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
     
     float dist = length(uv);
     
-    float3 sp = sphere(uv, dist, radius);
-    
-    float shad = shadow(sp, shadowRotation);
-    
-    float4 inner = planet(uv, dist, sp, shad);
-    
-    float4 outer = atmo(dist, shad, radius, atmosphereColor, atmosphereShadowColor);
-    
-    float4 color = (inner + outer) * sampleColor;
-    
-    return color * color.a;
+    if (dist > radius)
+    {
+        float3 sp = sphere(uv, dist, 1);
+        float shad = shadow(sp, shadowRotation, 4);
+		
+        float4 color = atmo(dist, shad, radius, atmosphereColor == 0 ? tex2D(tex, .5) : atmosphereColor, atmosphereShadowColor, 0);
+        
+        color *= color.a;
+        
+        color.a = 0;
+        
+        return color * sampleColor;
+    }
+    else
+    {
+        float3 sp = sphere(uv, dist, radius);
+        float shad = shadow(sp, shadowRotation);
+		
+        float4 color = planet(uv, dist, sp, shad);
+		
+        return color * color.a * sampleColor;
+    }
 }
 
 technique Technique1
