@@ -156,7 +156,7 @@ public sealed class RealisticSkySystem : ModSystem
             throw new ILEditException(Mod, il, null);
 
         c.EmitPop();
-        c.EmitDelegate(() => RasterizerState.CullNone);
+        c.EmitDelegate(static () => RasterizerState.CullNone);
     }
 
     private void CommonShaderInvertedGravity(ILContext il)
@@ -181,7 +181,7 @@ public sealed class RealisticSkySystem : ModSystem
             i => i.MatchCall<SunPositionSaver>($"get_{nameof(SunPositionSaver.SunPosition)}")))
             throw new ILEditException(Mod, il, null);
 
-        c.EmitDelegate((Vector2 sunPosition) =>
+        c.EmitDelegate(static (Vector2 sunPosition) =>
         {
             if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
                 sunPosition.Y = Utilities.ScreenSize.Y - sunPosition.Y;
@@ -203,7 +203,7 @@ public sealed class RealisticSkySystem : ModSystem
             throw new ILEditException(Mod, il, null);
 
         c.EmitPop();
-        c.EmitDelegate(() => StarSystem.StarRotation);
+        c.EmitDelegate(static () => StarSystem.StarRotation);
 
         if (!c.TryGotoNext(MoveType.After,
             i => i.MatchLdloc(out _),
@@ -213,7 +213,7 @@ public sealed class RealisticSkySystem : ModSystem
             i => i.MatchCall<Matrix>("op_Multiply")))
             throw new ILEditException(Mod, il, null);
 
-        c.EmitDelegate((Matrix mat) =>
+        c.EmitDelegate(static (Matrix mat) =>
         {
             bool flip = Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically);
 
@@ -270,9 +270,9 @@ public sealed class RealisticSkySystem : ModSystem
 
                     // This is a hack but its the only way I've found to correctly draw the atmosphere target.
                 if (i == 0)
-                    c.EmitDelegate(() => Matrix.Identity);
+                    c.EmitDelegate(static () => Matrix.Identity);
                 else
-                    c.EmitDelegate(() => Main.BackgroundViewMatrix.EffectMatrix);
+                    c.EmitDelegate(static () => Main.BackgroundViewMatrix.EffectMatrix);
             }
 
                 // Bring us back to the top.
@@ -295,7 +295,7 @@ public sealed class RealisticSkySystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.Rasterizer)));
 
             c.EmitPop();
-            c.EmitDelegate(() => RasterizerState.CullNone);
+            c.EmitDelegate(static () => RasterizerState.CullNone);
 
                 // Branch over the stars drawing.
             c.GotoNext(MoveType.Before, 
@@ -327,7 +327,7 @@ public sealed class RealisticSkySystem : ModSystem
                 i => i.MatchCall<Matrix>($"get_{nameof(Matrix.Identity)}"));
 
             c.EmitPop();
-            c.EmitDelegate(() => Main.BackgroundViewMatrix.EffectMatrix);
+            c.EmitDelegate(static () => Main.BackgroundViewMatrix.EffectMatrix);
         }
         catch (Exception e)
         {

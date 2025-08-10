@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content.Sources;
 using System;
 using System.Linq;
@@ -20,6 +21,19 @@ public sealed class ZensSky : Mod
     public static bool Unloading { get; private set; }
 
     #endregion
+
+    public override void Load()
+    {
+        if (Main.dedServ)
+            return;
+
+        MainThreadSystem.Enqueue(() =>
+        {
+                // Set the default render target usage to preserve to prevent issues when swaping targets.
+            Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+            Main.graphics.ApplyChanges();
+        });
+    }
 
     public override void Close()
     {

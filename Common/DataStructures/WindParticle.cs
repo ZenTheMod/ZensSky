@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using Terraria;
+using ZensSky.Common.Systems.Compat;
 
 namespace ZensSky.Common.DataStructures;
 
@@ -56,11 +57,13 @@ public record struct WindParticle
         }
 
         Velocity = newVelocity.SafeNormalize(Vector2.UnitY) * Magnitude * MathF.Abs(wind);
+
         Position += Velocity;
 
             // Update the old positions.
         for (int i = OldPositions.Length - 2; i >= 0; i--)
             OldPositions[i + 1] = OldPositions[i];
+
         OldPositions[0] = Position;
     }
 

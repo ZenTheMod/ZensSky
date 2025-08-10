@@ -5,12 +5,11 @@ using ZensSky.Core.Utils;
 namespace ZensSky.Core.DataStructures;
 
 /// <summary>
-/// Allows for eay swapping and use of a <see cref="RenderTarget2D"/> using the <see cref="using"/> keyword, 
-/// and will reinitiallize the <see cref="RenderTarget2D"/> when using <see cref="RenderTargetSwap(ref RenderTarget2D?, int, int)"/>.
+/// Allows for esay swapping and use of a <see cref="RenderTarget2D"/>, with the <see cref="using"/> keyword.
 /// </summary>
 public readonly ref struct RenderTargetSwap
 {
-    #region Public Properties
+    #region Private Properties
 
     private RenderTargetBinding[] OldTargets { get; init; }
     private Rectangle OldScissor { get; init; }
@@ -26,9 +25,12 @@ public readonly ref struct RenderTargetSwap
         OldTargets = device.GetRenderTargets();
         OldScissor = device.ScissorRectangle;
 
+            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
         foreach (RenderTargetBinding oldTarget in OldTargets)
             if (oldTarget.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
         device.SetRenderTarget(target);
         device.ScissorRectangle = new(0, 0,
@@ -50,9 +52,12 @@ public readonly ref struct RenderTargetSwap
         OldTargets = device.GetRenderTargets();
         OldScissor = device.ScissorRectangle;
 
+            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
         foreach (RenderTargetBinding oldTarget in OldTargets)
             if (oldTarget.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
         Utilities.ReintializeTarget(ref target,
             device,

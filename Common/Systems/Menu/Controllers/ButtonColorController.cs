@@ -191,7 +191,7 @@ public sealed class ButtonColorController : MenuControllerElement
             c.EmitLdloc(hoveredIndex);
             c.EmitLdloc(outerIteratorIndex);
 
-            c.EmitDelegate((ref Color color, int i, int r, int g, int b, int a, int interpolator, int hovered, int j) =>
+            c.EmitDelegate(static (ref Color color, int i, int r, int g, int b, int a, int interpolator, int hovered, int j) =>
             {
                 if (i != 4)
                     return false;

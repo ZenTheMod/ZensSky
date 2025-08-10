@@ -63,7 +63,7 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchCall<Main>(nameof(Main.UpdateMenu)),
                 i => i.MatchLdsfld<Main>(nameof(Main.netMode)));
 
-            c.EmitDelegate(() =>
+            c.EmitDelegate(static () =>
             {
                 if (Main.cloudAlpha <= 0)
                     return;

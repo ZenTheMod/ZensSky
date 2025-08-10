@@ -260,7 +260,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         Vector2 size = new Vector2(MoonSize * scale) / moon.Value.Size();
 
             // Handle various vanilla moons with additional visuals.
-        switch (canDrawEdgeCases ? Main.moonType : 0)
+        switch (canDrawEdgeCases ? Main.moonType : -1)
         {
             case 2:
                 Texture2D rings = SkyTextures.Rings.Value;

@@ -202,7 +202,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchCgtUn());
 
             c.EmitLdarg0();
-            c.EmitDelegate((bool reloadRequired, ConfigElement element) =>
+            c.EmitDelegate(static (bool reloadRequired, ConfigElement element) =>
             {
                 if (element.MemberInfo.IsField &&
                     element.MemberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&
@@ -235,7 +235,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchStloc(out memberInfoIndex));
 
             c.EmitLdloc(memberInfoIndex);
-            c.EmitDelegate((PropertyFieldWrapper memberInfo) =>
+            c.EmitDelegate(static (PropertyFieldWrapper memberInfo) =>
             {
                 if (memberInfo.IsField &&
                     memberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&

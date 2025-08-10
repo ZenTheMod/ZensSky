@@ -84,7 +84,7 @@ public sealed class RedSunSystem : ModSystem
 
             ILLabel? jumpSunOrMoonGrabbing = c.DefineLabel();
 
-            c.EmitDelegate(() =>
+            c.EmitDelegate(static () =>
             {
                 if (!ZensSky.CanDrawSky ||
                 !SkipDrawing ||
@@ -115,7 +115,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out sunAlpha));
 
             c.EmitLdloca(sunAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
+            c.EmitDelegate(static (ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
 
             int sunPosition = -1;
             int sunColor = -1;
@@ -177,7 +177,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out moonAlpha));
 
             c.EmitLdloca(moonAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
+            c.EmitDelegate(static (ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
             int moonColor = -1;
@@ -252,7 +252,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
                 i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
 
-            c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
+            c.EmitDelegate(static () => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
 
             c.EmitBrtrue(jumpSunOrMoonGrabbing);
 

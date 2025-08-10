@@ -52,13 +52,13 @@ public sealed class CalamityFablesSystem : ModSystem
     {
         PriorMoonStyles = TextureAssets.Moon.Length;
 
-        if (!ModLoader.HasMod("CalamityFables"))
+        if (!ModLoader.TryGetMod("CalamityFables", out Mod fables))
             return;
 
         IsEnabled = true;
 
             // I don't feel like adding a project reference for a massive mod just for moon styles of all things.
-        Assembly fablessAsm = ModLoader.GetMod("CalamityFables").Code;
+        Assembly fablessAsm = fables.Code;
 
         Type? moddedMoons = fablessAsm.GetType("CalamityFables.Core.ModdedMoons");
 

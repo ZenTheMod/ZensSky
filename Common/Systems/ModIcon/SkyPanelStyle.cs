@@ -112,12 +112,15 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
         using (new RenderTargetSwap(ref PanelTarget, (int)size.X, (int)size.Y))
         {
             device.Clear(Color.Transparent);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
                 // I don't trust clear to work on all devices.
             spriteBatch.Draw(MiscTextures.Pixel, new Rectangle(0, 0, (int)size.X, (int)size.Y), ClearColor);
 
             DrawStars(spriteBatch, source);
+
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
 
             DrawPlanet(spriteBatch, source);
 

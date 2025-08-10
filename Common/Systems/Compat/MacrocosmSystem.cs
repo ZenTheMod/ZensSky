@@ -113,7 +113,7 @@ public sealed class MacrocosmSystem : ModSystem
 
             c.EmitLdarg(spriteBatchIndex);
 
-            c.EmitDelegate((SpriteBatch spriteBatch) =>
+            c.EmitDelegate(static (SpriteBatch spriteBatch) =>
             {
                 float alpha = MoonSky.ComputeBrightness(7200.0, 46800.0, .3f, 1f);
 
@@ -130,7 +130,7 @@ public sealed class MacrocosmSystem : ModSystem
                 // Skip over sun drawing.
             if (SkyConfig.Instance.SunAndMoonRework || RealisticSkySystem.IsEnabled)
             {
-                c.EmitDelegate(() => ShowSun);
+                c.EmitDelegate(static () => ShowSun);
                 c.EmitBrtrue(jumpSunDrawingTarget);
 
                 c.GotoNext(MoveType.After,
@@ -142,7 +142,7 @@ public sealed class MacrocosmSystem : ModSystem
                 c.EmitLdarg(selfIndex);
                 c.EmitLdarg(spriteBatchIndex);
 
-                c.EmitDelegate((MoonSky self, SpriteBatch spriteBatch) =>
+                c.EmitDelegate(static (MoonSky self, SpriteBatch spriteBatch) =>
                 {
                     GraphicsDevice device = Main.instance.GraphicsDevice;
 

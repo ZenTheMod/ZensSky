@@ -15,35 +15,16 @@ Configs: {
 			Tooltip: If the visual overhaul of the sun and moon is enabled or not.
 		}
 
-		EclipseMode: {
-			Label: "[i:2767] Eclipse Visual"
-			Tooltip:
-				'''
-				Controls which visual is used for eclipses.
-				Right click to swap to the Eclipse menu style to preview.
-				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
-				'''
-			NameTrue: Veins
-			NameFalse: Moon
-		}
-
 		TransparentMoonShadow: {
 			Label: "[i:485] Transparent Moon Shadow"
-			Tooltip:
-				'''
-				If the moons shadow is transparent to replicate the look of the current terraria moon sprites. 
-				(Sorry if you've just learnt about this now.) 
-				[c/FF0000:Requires 'Sun And Moon Overhaul' to be enabled!]
-				'''
+			Tooltip: If the moon's shadow is transparent to replicate the look of the current Terraria moon sprites.
+			LockReason: Requires 'Sun And Moon Overhaul' to be enabled!
 		}
 
 		RealisticSun: {
 			Label: "[i:824] Realistic Sun"
-			Tooltip:
-				'''
-				If the sun from 'Realistic Sky' is drawn instead of the one from this mod.
-				[c/FF0000:Requires 'Realistic Sky' by Lucille Karma to be enabled!]
-				'''
+			Tooltip: If the sun from 'Realistic Sky' is used instead of the sun from this mod.
+			LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
 		}
 
 		StarStyle: {
@@ -57,11 +38,8 @@ Configs: {
 
 		DrawRealisticStars: {
 			Label: "[i:184] Realistic Stars"
-			Tooltip:
-				'''
-				If stars from 'Realistic Sky' are drawn alongside the stars in this mod.
-				[c/FF0000:Requires 'Realistic Sky' by Lucille Karma to be enabled!]
-				'''
+			Tooltip: If stars from 'Realistic Sky' are used alongside the stars in this mod.
+			LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
 		}
 
 		PixelatedSky: {
@@ -75,11 +53,8 @@ Configs: {
 
 		ColorSteps: {
 			Label: "[i:1067] Color Steps"
-			Tooltip:
-				'''
-				How many colors are used for the pixelation effect.
-				[c/FF0000:Requires 'Pixelated Sky' to be enabled!]
-				'''
+			Tooltip: How many colors are used for the pixelation effect.
+			LockReason: Requires 'Pixelated Sky' to be enabled!
 		}
 
 		CloudsEnabled: {
@@ -93,8 +68,8 @@ Configs: {
 				'''
 				If cloud lighting includes rim lighting on the edges of clouds.
 				(Can be less performant, due to extra reasources being used!)
-				[c/FF0000:Requires 'Fancy Cloud Lighting' to be enabled!]
 				'''
+			LockReason: Requires 'Fancy Cloud Lighting' to be enabled!
 		}
 
 		WindParticles: {
@@ -104,16 +79,14 @@ Configs: {
 
 		WindOpacity: {
 			Label: "[i:751] Wind Opacity"
-			Tooltip:
-				'''
-				The alpha of the wisps of wind (1 = Opaque, 0 = Invisible)
-				[c/FF0000:Requires 'Wind Particles' to be enabled!]
-				'''
+			Tooltip: The alpha of the wisps of wind (1 = Opaque, 0 = Invisible)
+			LockReason: Requires 'Wind Particles' to be enabled!
 		}
 
 		PitchBlackBackground: {
 			Label: "[i:237] Pitch Black Background"
 			Tooltip: Makes the background pitch black during night.
+			LockReason: The mod 'Dark Surface' is enabled!
 		}
 	}
 

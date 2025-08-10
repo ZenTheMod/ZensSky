@@ -8,6 +8,8 @@ using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
+    // There are a few issues I would like to fix; (e.g. the effect not showing on the titlescreen)
+        // But all of them could be solved by using a Filter type instead of a detour of FilterManager.EndCapture.
 [JITWhenModsEnabled("Lights")]
 [ExtendsFromMod("Lights")]
 [Autoload(Side = ModSide.Client)]

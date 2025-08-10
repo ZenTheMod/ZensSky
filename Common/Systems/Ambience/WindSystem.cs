@@ -4,8 +4,9 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
-using ZensSky.Core.Utils;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Ambience;
 
@@ -48,10 +49,11 @@ public sealed class WindSystem : ModSystem
     {
         orig(self, ref gameTime);
 
-        if (Main.dedServ || Main.gamePaused)
-            return;
-
-        if (!SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        if (Main.dedServ ||
+            (Main.gamePaused && !Main.gameMenu) ||
+            HighFPSSupportSystem.IsPartialTick ||
+            !SkyConfig.Instance.WindParticles ||
+            SkyConfig.Instance.WindOpacity <= 0)
             return;
 
         for (int i = 0; i < WindCount; i++)
@@ -66,7 +68,9 @@ public sealed class WindSystem : ModSystem
 
     private static void SpawnWind()
     {
-        if (!Main.rand.NextBool((int)(WindSpawnChance / MathF.Abs(Main.WindForVisuals))))
+        float spawnChance = WindSpawnChance / MathF.Abs(Main.WindForVisuals);
+
+        if (!Main.rand.NextBool((int)spawnChance))
             return;
 
         int index = Array.FindIndex(Winds, w => !w.IsActive);
@@ -76,7 +80,7 @@ public sealed class WindSystem : ModSystem
 
         Vector2 screensize = Utilities.ScreenSize;
 
-        Rectangle spawn = new((int)(Main.screenPosition.X - screensize.X * Main.WindForVisuals * 0.5f), (int)Main.screenPosition.Y,
+        Rectangle spawn = new((int)(Main.screenPosition.X - screensize.X * Main.WindForVisuals * .5f), (int)Main.screenPosition.Y,
             (int)screensize.X, (int)screensize.Y);
 
         spawn.Inflate(Margin, Margin);

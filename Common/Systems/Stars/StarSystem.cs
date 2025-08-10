@@ -7,6 +7,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
@@ -91,6 +92,7 @@ public sealed class StarSystem : ModSystem
         }
 
         float dayRateDivisor = Main.gameMenu ? MainMenuDayRateDivisor : GameDayRateDivisor;
+
         StarRotation += (float)(Main.dayRate / dayRateDivisor);
 
         UpdateSupernovae();

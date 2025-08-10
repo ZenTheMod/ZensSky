@@ -84,7 +84,7 @@ public sealed class PixelateSkySystem : ModSystem
             c.EmitPop();
 
                 // Lazy.
-            c.EmitDelegate(() => SamplerState.PointClamp);
+            c.EmitDelegate(static () => SamplerState.PointClamp);
 
                 // Now handle a backup case just to make sure that when drawing goes wrong nothing explodes.
             c.GotoNext(MoveType.After,
@@ -149,7 +149,7 @@ public sealed class PixelateSkySystem : ModSystem
                 i => i.MatchMul(),
                 i => i.MatchStloc(out _));
 
-            c.EmitDelegate(() =>
+            c.EmitDelegate(static () =>
             {
                 SkyManager.Instance.ResetDepthTracker();
 

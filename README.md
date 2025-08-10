@@ -10,6 +10,8 @@ Checkbox shown next to currently complete features.
 - [x] Minor ambience changes e.g. wind particles.
 - [x] Configuration to pixelate the sky.
 - [x] Dynamic cloud lighting in the style of the Terraria 1.4.5 update.
+- [x] Darker night sky.
+- [ ] Overhauled shimmer biome visuals.
 - [ ] Overhauled background meteor visuals.
 - [ ] Lightning visual rework.
 - [ ] Aurora borealis while in cold biomes.
@@ -19,11 +21,13 @@ This mod features cross compatibility with a large amount of popular mods that m
 - 'Macrocosm [BETA]' by MechanicPluto24\*\*\*[^3]
 - 'Realistic Sky' by Lucille Karma
 - 'Wrath of the Gods' by Lucille Karma\*[^4]
-- 'Lights And Shadows' by yiyang233
-- 'Calamity Fables' by IbanPlay\*[^5]
-- 'Calamity Mod' by Ozzatron\*[^6]
+- 'Lights And Shadows' by yiyang233\*[^5]
+- 'Calamity Fables' by IbanPlay\*[^6]
+- 'Calamity Mod' by Ozzatron\*[^7]
 - 'Red Sun and Realistic Sky by Waffles22
-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^7]
+- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^8]
+- 'High FPS Support' by Stellar
+- 'Dark Surface' by 2bluntz@once
 
 This mod also allows for other mod creators to very easily include their own compat;
 There are two methods to do so.
@@ -51,16 +55,20 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
 [^2]: Unique high definition visuals for every vanilla [Moon Style](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
 [^3]: Currently no high resolution earth assets; although I will be working on including these (As well as other high resolution assets and models,) in the offical Macrocosm mod.
 [^4]: Currently no changes made to any stargazing scenes.
-[^5]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
+[^5]: There are a few issues I would like to fix; (e.g. the effect not showing on the titlescreen.)
+    However these issues are of Lights and Shadow's devolopers(s), and I don't intend to rewrite their mod to account for it.
+
+    More specifically Lights and Shadows should move to a proper Filter based system to prevent common issues with detouring FilterManager.EndCapture.
+[^6]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
     - Throne
     - Iris
     - Crater
     - Sea
-    - Shatter* (Although all* assets have been created the current implementation could use work.)
+    - Shatter* (Although all assets have been created the current implementation could use work.)
     - Artifact
     - Striped
     - Greenhouse
     - Square
     - Aletheia
-[^6]: Untested, but I'm going to say that it works.
-[^7]: Lacks support for some visuals.
+[^7]: Untested, but I'm going to say that it works.
+[^8]: Lacks support for some visuals.

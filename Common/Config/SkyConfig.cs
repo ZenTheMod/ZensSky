@@ -71,7 +71,7 @@ public sealed class SkyConfig : ModConfig
     [DefaultValue(true)]
     public bool WindParticles;
 
-    [DefaultValue(0.85f)]
+    [DefaultValue(.85f)]
     [LockedElement(typeof(SkyConfig), nameof(WindParticles), false)]
     [CustomModConfigItem(typeof(LockedFloatSlider))]
     [SliderColor(148, 203, 227)]
@@ -79,5 +79,7 @@ public sealed class SkyConfig : ModConfig
     public float WindOpacity;
 
     [DefaultValue(false)]
+    [LockedElement(typeof(DarkSurfaceSystem), nameof(DarkSurfaceSystem.IsEnabled), true)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool PitchBlackBackground;
 }

@@ -18,7 +18,13 @@ namespace ZensSky.Core.Config.Elements;
 
 public sealed class LockedBoolElement : ConfigElement<bool>
 {
+    #region Private Fields
+
+    private const string LockTooltipKey = "LockReason";
+
     private const float LockedBackgroundMultiplier = 0.4f;
+
+    #endregion
 
     #region Properties
 
@@ -71,6 +77,15 @@ public sealed class LockedBoolElement : ConfigElement<bool>
             TargetInstance = null;
 
         Mode = mode ?? false;
+
+        string tooltip = ConfigManager.GetLocalizedTooltip(MemberInfo);
+        string? lockReason = ConfigManager.GetLocalizedText<LockedKeyAttribute, LockedArgsAttribute>(MemberInfo, LockTooltipKey);
+
+        TooltipFunction = () =>
+            tooltip +
+            (IsLocked && lockReason is not null ?
+            (string.IsNullOrEmpty(tooltip) ? string.Empty : "\n") + $"[c/{Color.Red.Hex3()}:" + lockReason + "]" :
+            string.Empty);
     }
 
     #endregion

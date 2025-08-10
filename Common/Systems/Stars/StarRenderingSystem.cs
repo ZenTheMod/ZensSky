@@ -211,13 +211,13 @@ public sealed class StarRenderingSystem : ModSystem
         if (RealisticSkySystem.IsEnabled)
             RealisticSkySystem.DrawStars();
 
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix * RotationMatrix());
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), RotationMatrix() * snapshot.TransformMatrix);
 
         if (alpha > 0)
             DrawStars(spriteBatch, alpha);
 
         spriteBatch.End();
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix * RotationMatrix());
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, RotationMatrix() * snapshot.TransformMatrix);
 
         if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
             DrawSupernovae(spriteBatch, alpha);

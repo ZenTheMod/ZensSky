@@ -44,7 +44,7 @@ public sealed class ParallaxController : SliderController
 
             c.EmitPop();
 
-            c.EmitDelegate(() => MenuConfig.Instance.Parallax);
+            c.EmitDelegate(static () => MenuConfig.Instance.Parallax);
         }
         catch (Exception e)
         {

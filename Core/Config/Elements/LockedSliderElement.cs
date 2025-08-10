@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
+using rail;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -13,8 +14,8 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
-using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
@@ -23,6 +24,8 @@ namespace ZensSky.Core.Config.Elements;
 public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadable where T : IComparable<T>
 {
     #region Private Fields
+
+    private const string LockTooltipKey = "LockReason";
 
     private const float TheMagicNumber = 167f;
 
@@ -76,7 +79,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             c.GotoNext(MoveType.After,
                 i => i.MatchCall<ConfigElement>("DrawSelf"));
 
-            c.EmitDelegate(() => Drawing);
+            c.EmitDelegate(static () => Drawing);
             c.EmitBrfalse(jumpret);
 
             c.EmitRet();
@@ -123,6 +126,15 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             TargetInstance = null;
 
         Mode = mode ?? false;
+
+        string tooltip = ConfigManager.GetLocalizedTooltip(MemberInfo);
+        string? lockReason = ConfigManager.GetLocalizedText<LockedKeyAttribute, LockedArgsAttribute>(MemberInfo, LockTooltipKey);
+
+        TooltipFunction = () =>
+            tooltip +
+            (IsLocked && lockReason is not null ?
+            (string.IsNullOrEmpty(tooltip) ? string.Empty : "\n") + $"[c/{Color.Red.Hex3()}:" + lockReason + "]" :
+            string.Empty);
     }
 
     #endregion

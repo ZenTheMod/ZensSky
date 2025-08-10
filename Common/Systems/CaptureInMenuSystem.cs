@@ -63,7 +63,7 @@ public sealed class CaptureInMenuSystem : ModSystem
             c.MoveAfterLabels();
 
             c.EmitLdloc(shouldCaptureIndex);
-            c.EmitDelegate((bool capture) =>
+            c.EmitDelegate(static (bool capture) =>
             {
                 if (!capture)
                     return;

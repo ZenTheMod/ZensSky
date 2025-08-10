@@ -82,7 +82,7 @@ public sealed class CloudSystem : ModSystem
 
             #region Shader Parameters
 
-            c.EmitDelegate(() =>
+            c.EmitDelegate(static () =>
             {
                 if (!SkyConfig.Instance.CloudsEnabled ||
                     !SkyEffects.CloudLighting.IsReady)
@@ -187,7 +187,7 @@ public sealed class CloudSystem : ModSystem
 
             c.MoveAfterLabels();
 
-            c.EmitDelegate(() => { LightClouds = true; });
+            c.EmitDelegate(static () => { LightClouds = true; });
         }
         catch (Exception e)
         {
@@ -195,7 +195,7 @@ public sealed class CloudSystem : ModSystem
         }
     }
 
-    private void ApplyEdgeLighting(orig_DrawCloud orig, int cloudIndex, Color color, float yOffset)
+    private static void ApplyEdgeLighting(orig_DrawCloud orig, int cloudIndex, Color color, float yOffset)
     {
         if (!ZensSky.CanDrawSky || 
             !LightClouds || 
@@ -231,7 +231,7 @@ public sealed class CloudSystem : ModSystem
         orig(cloudIndex, color, yOffset);
     }
 
-    private void ApplyShader(ref SpriteBatchSnapshot snapshot)
+    private static void ApplyShader(ref SpriteBatchSnapshot snapshot)
     {
         if (!ZensSky.CanDrawSky || 
             !LightClouds || 
@@ -255,7 +255,7 @@ public sealed class CloudSystem : ModSystem
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
 
-    private void ResetSpritebatch(SpriteBatchSnapshot snapshot)
+    private static void ResetSpritebatch(SpriteBatchSnapshot snapshot)
     {
         if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled)
             return;
