@@ -97,7 +97,11 @@ public sealed class MenuVisualChangesSystem : ModSystem
         }
     }
 
-    private void HideCredits(On_CreditsRollSky.orig_Draw orig, CreditsRollSky self, SpriteBatch spriteBatch, float minDepth, float maxDepth) { }
+    private void HideCredits(On_CreditsRollSky.orig_Draw orig, CreditsRollSky self, SpriteBatch spriteBatch, float minDepth, float maxDepth)
+    {
+        if (!Main.gameMenu)
+            orig(self, spriteBatch, minDepth, maxDepth);
+    }
 
     private static void DrawCredits(SpriteBatch spriteBatch)
     {
