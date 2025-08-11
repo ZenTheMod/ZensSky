@@ -19,7 +19,7 @@ public sealed class SloprainSystem : ModSystem
 {
     #region Private Fields
 
-    private static ILHook? CanUpdateRain;
+    private static ILHook? PatchUpdateRain;
 
     #endregion
 
@@ -38,12 +38,12 @@ public sealed class SloprainSystem : ModSystem
         MethodInfo? getCanUpdateRain = typeof(SloprainSys).GetProperty(nameof(SloprainSys.CanUpdateRain), Public | Static)?.GetGetMethod();
 
         if (getCanUpdateRain is not null)
-            CanUpdateRain = new(getCanUpdateRain,
+            PatchUpdateRain = new(getCanUpdateRain,
                 AllowRainInMainMenu);
     }
 
     public override void Unload() =>
-        CanUpdateRain?.Dispose();
+        PatchUpdateRain?.Dispose();
 
     #endregion
 

@@ -33,10 +33,10 @@ public sealed class MenuControllerSystem : ModSystem
     private static ILHook? AddMenuControllerToggle;
 
     private delegate void orig_Save(ModConfig config);
-    private static Hook? SaveConfig;
+    private static Hook? PatchSaveConfig;
 
     private static readonly UserInterface MenuControllerInterface = new();
-    private static readonly MenuControllerUIState MenuController = new();
+    private static readonly MenuControllerState MenuController = new();
 
     #endregion
 
@@ -74,7 +74,7 @@ public sealed class MenuControllerSystem : ModSystem
         MethodInfo? save = typeof(ConfigManager).GetMethod(nameof(ConfigManager.Save), Static | NonPublic);
 
         if (save is not null)
-            SaveConfig = new(save,
+            PatchSaveConfig = new(save,
                 RefreshOnSave);
 
         MenuController?.Activate();
@@ -86,14 +86,14 @@ public sealed class MenuControllerSystem : ModSystem
         {
             AddMenuControllerToggle?.Dispose();
 
-            SaveConfig?.Dispose();
+            PatchSaveConfig?.Dispose();
 
             IL_Main.DrawMenu -= ModifyInteraction;
             On_Main.UpdateUIStates -= UpdateInterface;
             Main.OnResolutionChanged -= CloseMenuOnResolutionChanged;
         });
 
-        SaveConfig?.Dispose();
+        PatchSaveConfig?.Dispose();
     }
 
     public override void PostSetupContent() =>
@@ -125,7 +125,7 @@ public sealed class MenuControllerSystem : ModSystem
             c.EmitLdloc(6); // Rectangle of the menu switcher.
 
                 // Add our own 'popup' menu button.
-            c.EmitDelegate(static (SpriteBatch spriteBatch, Rectangle switchTextRect) =>
+            c.EmitDelegate((SpriteBatch spriteBatch, Rectangle switchTextRect) =>
             {
                 Vector2 position = switchTextRect.TopRight();
                 position.X += HorizontalPadding;
@@ -178,7 +178,7 @@ public sealed class MenuControllerSystem : ModSystem
             for (int j = 0; j < names.Length * 2; j++)
             {
                 if (c.TryGotoNext(MoveType.Before, i => i.MatchStfld<Main>(names[j % names.Length])))
-                    c.EmitDelegate(static (int hovering) => Hovering ? -1 : hovering);
+                    c.EmitDelegate((int hovering) => Hovering ? -1 : hovering);
             }
 
                 // Have our popup draw.
@@ -187,7 +187,7 @@ public sealed class MenuControllerSystem : ModSystem
                 i => i.MatchLdloc(out _),
                 i => i.MatchCall<Main>(nameof(Main.DrawtModLoaderSocialMediaButtons)));
 
-            c.EmitDelegate(static () =>
+            c.EmitDelegate(() =>
             {
                 if (InUI)
                     MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());

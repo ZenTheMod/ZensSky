@@ -12,7 +12,7 @@ using ZensSky.Common.Systems.Menu.Elements;
 
 namespace ZensSky.Common.Systems.Menu;
 
-public sealed class MenuControllerUIState : UIState
+public sealed class MenuControllerState : UIState
 {
     #region Private Fields
 

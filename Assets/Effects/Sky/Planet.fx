@@ -1,6 +1,7 @@
 #include "../spheres.fxh"
 
-sampler tex : register(s0);
+sampler lightTexture : register(s0);
+sampler shadowTexture : register(s1);
 
 float radius;
 
@@ -16,9 +17,10 @@ float4 planet(float2 uv, float dist, float3 sp, float shad)
     
     float falloff = step(dist, radius);
     
-    float4 text = tex2D(tex, pt);
-	
-    return lerp(shadowColor * text, text, shad) * falloff;
+    return lerp(
+        shadowColor * tex2D(shadowTexture, pt),
+        tex2D(lightTexture, pt),
+        shad) * falloff;
 }
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
@@ -32,7 +34,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD
         float3 sp = sphere(uv, dist, 1);
         float shad = shadow(sp, shadowRotation, 4);
 		
-        float4 color = atmo(dist, shad, radius, atmosphereColor == 0 ? tex2D(tex, .5) : atmosphereColor, atmosphereShadowColor, 0);
+        float4 color = atmo(dist, shad, radius, atmosphereColor == 0 ? tex2D(lightTexture, .5) : atmosphereColor, atmosphereShadowColor, 0);
         
         color *= color.a;
         

@@ -27,7 +27,7 @@ using {ModName}.Core.DataStructures;
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var objFiles = context.AdditionalTextsProvider
-            .Where(static p =>
+            .Where(p =>
                 p.Path.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) &&
                 p.Path.Contains("Models"))
             .Collect();

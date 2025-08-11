@@ -78,7 +78,7 @@ public sealed class SkyConfig : ModConfig
     [Range(0f, 1f)]
     public float WindOpacity;
 
-    [DefaultValue(false)]
+    [DefaultValue(true)]
     [LockedElement(typeof(DarkSurfaceSystem), nameof(DarkSurfaceSystem.IsEnabled), true)]
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool PitchBlackBackground;

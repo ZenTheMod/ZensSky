@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.Ambience;
 using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
@@ -34,7 +35,7 @@ public sealed class RedSunSystem : ModSystem
     private const float MinSunBrightness = 0.82f;
     private const float MinMoonBrightness = 0.35f;
 
-    private static ILHook? SunAndMoonDrawing;
+    private static ILHook? PatchSunAndMoonDrawing;
 
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
 
@@ -54,7 +55,7 @@ public sealed class RedSunSystem : ModSystem
 
     #region Loading
 
-    // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
+        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
@@ -62,12 +63,15 @@ public sealed class RedSunSystem : ModSystem
         MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod("ChangePositionAndDrawDayMoon", NonPublic | Instance);
 
         if (changePositionAndDrawDayMoon is not null)
-            SunAndMoonDrawing = new(changePositionAndDrawDayMoon,
+            PatchSunAndMoonDrawing = new(changePositionAndDrawDayMoon,
                 ModifyDrawing);
     }
 
     public override void Unload() => 
-        SunAndMoonDrawing?.Dispose();
+        PatchSunAndMoonDrawing?.Dispose();
+
+    public override void PostSetupContent() =>
+        SkyColorSystem.ModifyInMenu += ModContent.GetInstance<GeneralLighting>().ModifySunLightColor;
 
     #endregion
 
@@ -84,7 +88,7 @@ public sealed class RedSunSystem : ModSystem
 
             ILLabel? jumpSunOrMoonGrabbing = c.DefineLabel();
 
-            c.EmitDelegate(static () =>
+            c.EmitDelegate(() =>
             {
                 if (!ZensSky.CanDrawSky ||
                 !SkipDrawing ||
@@ -115,7 +119,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out sunAlpha));
 
             c.EmitLdloca(sunAlpha);
-            c.EmitDelegate(static (ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
+            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
 
             int sunPosition = -1;
             int sunColor = -1;
@@ -177,7 +181,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out moonAlpha));
 
             c.EmitLdloca(moonAlpha);
-            c.EmitDelegate(static (ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
+            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
             int moonColor = -1;
@@ -252,7 +256,7 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
                 i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
 
-            c.EmitDelegate(static () => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
+            c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
 
             c.EmitBrtrue(jumpSunOrMoonGrabbing);
 

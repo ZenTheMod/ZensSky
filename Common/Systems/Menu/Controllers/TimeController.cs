@@ -60,7 +60,7 @@ public sealed class TimeController : SliderController
                 i => i.MatchBrfalse(out _),
                 i => i.MatchRet());
 
-            c.EmitDelegate(static () =>
+            c.EmitDelegate(() =>
             {
                 if (Main.time >= 0)
                     return;
@@ -80,12 +80,12 @@ public sealed class TimeController : SliderController
             c.GotoNext(MoveType.After,
                 i => i.MatchLdcR8(33.88235294117647)); // I shit you not this is the hardcoded value.
 
-            c.EmitDelegate(static (double time) => time * MenuConfig.Instance.TimeMultiplier);
+            c.EmitDelegate((double time) => time * MenuConfig.Instance.TimeMultiplier);
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdcR8(30.857142857142858));
 
-            c.EmitDelegate(static (double time) => time * MenuConfig.Instance.TimeMultiplier);
+            c.EmitDelegate((double time) => time * MenuConfig.Instance.TimeMultiplier);
 
                 // Refresh the moon type when the time is set to night.
             c.GotoNext(MoveType.Before,
@@ -95,7 +95,7 @@ public sealed class TimeController : SliderController
                 // No MoveType.BeforeLabels :pensive:.
             c.MoveAfterLabels();
 
-            c.EmitDelegate(static () => 
+            c.EmitDelegate(() => 
             {
                     // Prevent changing moon type while loading into a world.
                 if (!Main.lockMenuBGChange)

@@ -246,6 +246,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         Asset<Texture2D> moon = MoonTexture;
 
+        device.Textures[1] = MiscTextures.Pixel;
+
         bool canDrawEdgeCases = CanDrawEdgeCases;
 
         if (AdditionalMoonDrawing.FindIndex(m => !m(spriteBatch, ref moon, position, color, rotation, scale, moonColor, shadowColor, device, CanDrawEdgeCases)) != -1)

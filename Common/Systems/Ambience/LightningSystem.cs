@@ -42,7 +42,7 @@ public sealed class LightningSystem : ModSystem
                 i => i.MatchLdcI4(0),
                 i => i.MatchStsfld<Main>(nameof(Main.thunderDelay)));
 
-            c.EmitDelegate(static () => MenuConfig.Instance.Rain > 0);
+            c.EmitDelegate(() => MenuConfig.Instance.Rain > 0);
 
             c.EmitBrtrue(skipLightningResets);
 
@@ -53,7 +53,7 @@ public sealed class LightningSystem : ModSystem
             c.MarkLabel(skipLightningResets);
 
                 // TODO: Simplify this logic if possible.
-            c.EmitDelegate(static () =>
+            c.EmitDelegate(() =>
             {
                 if (MenuConfig.Instance.Rain <= 0)
                     return;

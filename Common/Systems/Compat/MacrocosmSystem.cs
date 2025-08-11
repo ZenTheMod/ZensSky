@@ -26,10 +26,10 @@ public sealed class MacrocosmSystem : ModSystem
 {
     #region Private Fields
 
-    private static ILHook? InjectStarDrawing;
+    private static ILHook? PatchStarDrawing;
 
     private delegate void orig_Rotate(CelestialBody self);
-    private static Hook? ModifyRotation;
+    private static Hook? PatchRotation;
 
     #endregion
 
@@ -55,7 +55,7 @@ public sealed class MacrocosmSystem : ModSystem
         MethodInfo? draw = typeof(MoonSky).GetMethod(nameof(MoonSky.Draw), Public | Instance);
 
         if (draw is not null)
-            InjectStarDrawing = new(draw,
+            PatchStarDrawing = new(draw,
                 DrawStars);
 
             // Account for RedSun's reversal of the sun's orbit.
@@ -65,15 +65,15 @@ public sealed class MacrocosmSystem : ModSystem
         MethodInfo? rotate = typeof(CelestialBody).GetMethod(nameof(CelestialBody.Rotate), Public | Instance);
 
         if (rotate is not null)
-            ModifyRotation = new(rotate,
+            PatchRotation = new(rotate,
                 ReverseRotation);
     }
 
     public override void Unload()
     {
-        InjectStarDrawing?.Dispose();
+        PatchStarDrawing?.Dispose();
 
-        ModifyRotation?.Dispose();
+        PatchRotation?.Dispose();
     }
 
     #endregion
@@ -113,7 +113,7 @@ public sealed class MacrocosmSystem : ModSystem
 
             c.EmitLdarg(spriteBatchIndex);
 
-            c.EmitDelegate(static (SpriteBatch spriteBatch) =>
+            c.EmitDelegate((SpriteBatch spriteBatch) =>
             {
                 float alpha = MoonSky.ComputeBrightness(7200.0, 46800.0, .3f, 1f);
 
@@ -130,7 +130,7 @@ public sealed class MacrocosmSystem : ModSystem
                 // Skip over sun drawing.
             if (SkyConfig.Instance.SunAndMoonRework || RealisticSkySystem.IsEnabled)
             {
-                c.EmitDelegate(static () => ShowSun);
+                c.EmitDelegate(() => ShowSun);
                 c.EmitBrtrue(jumpSunDrawingTarget);
 
                 c.GotoNext(MoveType.After,
@@ -142,7 +142,7 @@ public sealed class MacrocosmSystem : ModSystem
                 c.EmitLdarg(selfIndex);
                 c.EmitLdarg(spriteBatchIndex);
 
-                c.EmitDelegate(static (MoonSky self, SpriteBatch spriteBatch) =>
+                c.EmitDelegate((MoonSky self, SpriteBatch spriteBatch) =>
                 {
                     GraphicsDevice device = Main.instance.GraphicsDevice;
 

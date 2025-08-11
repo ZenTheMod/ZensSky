@@ -10,15 +10,24 @@ using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
+using hook_ModifySunLightColor = Terraria.ModLoader.SystemLoader.DelegateModifySunLightColor;
 
 namespace ZensSky.Common.Systems.Ambience;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class DarkenBackgroundSystem : ModSystem
+public sealed class SkyColorSystem : ModSystem
 {
     #region Private Fields
 
-    private static ILHook? ModifySunLightOnMenu;
+    private delegate void orig_ModifySunLightColor(ref Color tileColor, ref Color backgroundColor);
+
+    private static Hook? PatchSunLightColor;
+
+    #endregion
+
+    #region Public Events
+
+    public static event hook_ModifySunLightColor? ModifyInMenu;
 
     #endregion
 
@@ -31,9 +40,11 @@ public sealed class DarkenBackgroundSystem : ModSystem
             MethodInfo? modifySunLightColor = typeof(SystemLoader).GetMethod(nameof(SystemLoader.ModifySunLightColor));
 
             if (modifySunLightColor is not null)
-                ModifySunLightOnMenu = new(modifySunLightColor,
-                    AllowSunLightColor);
+                PatchSunLightColor = new(modifySunLightColor,
+                    LightingInMenu);
         });
+
+        ModifyInMenu += ModifySunLightColor;
 
         IL_Main.DrawBlack += PreventDrawBlackOverAir;
     }
@@ -41,30 +52,21 @@ public sealed class DarkenBackgroundSystem : ModSystem
     public override void Unload()
     {
         MainThreadSystem.Enqueue(() => 
-            ModifySunLightOnMenu?.Dispose());
+            PatchSunLightColor?.Dispose());
+
+        ModifyInMenu = null;
 
         IL_Main.DrawBlack -= PreventDrawBlackOverAir;
     }
 
     #endregion
 
-    private void AllowSunLightColor(ILContext il)
+    private void LightingInMenu(orig_ModifySunLightColor orig, ref Color tileColor, ref Color backgroundColor)
     {
-        try
-        {
-            ILCursor c = new(il);
+        orig(ref tileColor, ref backgroundColor);
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)));
-
-            c.EmitPop();
-
-            c.EmitLdcI4(0);
-        }
-        catch (Exception e)
-        {
-            throw new ILEditException(Mod, il, e);
-        }
+        if (Main.gameMenu)
+            ModifyInMenu?.Invoke(ref tileColor, ref backgroundColor);
     }
 
     private void PreventDrawBlackOverAir(ILContext il)
@@ -93,7 +95,7 @@ public sealed class DarkenBackgroundSystem : ModSystem
             c.EmitLdloc(tileIndex);
 
                 // If there is no tile then break.
-            c.EmitDelegate(static (Tile tile) =>
+            c.EmitDelegate((Tile tile) =>
                 !tile.HasTile && tile.WallType == WallID.None);
 
             c.EmitBrtrue(breakTarget);

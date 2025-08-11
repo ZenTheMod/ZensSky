@@ -29,7 +29,7 @@ using {ModName}.Core.DataStructures;
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var textureFiles = context.AdditionalTextsProvider
-            .Where(static p =>
+            .Where(p =>
                 p.Path.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) &&
                 p.Path.Contains("Textures"))
             .Collect();

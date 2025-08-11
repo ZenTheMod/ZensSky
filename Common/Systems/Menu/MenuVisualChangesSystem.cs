@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.GameContent.Animations;
 using Terraria.GameContent.Skies;
 using Terraria.Graphics.Effects;
@@ -19,9 +20,17 @@ using static System.Reflection.BindingFlags;
 namespace ZensSky.Common.Systems.Menu;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class CreditsSystem : ModSystem
+public sealed class MenuVisualChangesSystem : ModSystem
 {
-    private static ILHook? DrawCreditsAfterPreDrawLogo;
+    #region Private Fields
+
+    private static ILHook? RelocateCreditsDrawing;
+
+    private static ILHook? PatchMoonTextures;
+
+    #endregion
+
+    #region Loading
 
     public override void Load()
     {
@@ -30,8 +39,14 @@ public sealed class CreditsSystem : ModSystem
             MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod(nameof(MenuLoader.UpdateAndDrawModMenuInner), NonPublic | Static);
 
             if (updateAndDrawModMenuInner is not null)
-                DrawCreditsAfterPreDrawLogo = new(updateAndDrawModMenuInner,
+                RelocateCreditsDrawing = new(updateAndDrawModMenuInner,
                     DrawAfterLogo);
+
+            MethodInfo? getMoonTexture = typeof(ModMenu).GetProperty(nameof(ModMenu.MoonTexture), Public | Instance)?.GetGetMethod();
+
+            if (getMoonTexture is not null)
+                PatchMoonTextures = new(getMoonTexture,
+                    UncapMoonTextures);
         });
 
         On_CreditsRollSky.Draw += HideCredits;
@@ -39,10 +54,19 @@ public sealed class CreditsSystem : ModSystem
 
     public override void Unload()
     {
-        MainThreadSystem.Enqueue(() => DrawCreditsAfterPreDrawLogo?.Dispose());
+        MainThreadSystem.Enqueue(() =>
+        {
+            RelocateCreditsDrawing?.Dispose();
+
+            PatchMoonTextures?.Dispose();
+        });
 
         On_CreditsRollSky.Draw -= HideCredits;
     }
+
+    #endregion
+
+    #region Credits
 
     private void DrawAfterLogo(ILContext il)
     {
@@ -106,4 +130,30 @@ public sealed class CreditsSystem : ModSystem
 
         spriteBatch.Restart(in snapshot);
     }
+
+    #endregion
+
+    #region Moon Textures
+
+    private void UncapMoonTextures(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdcI4(out _),
+                i => i.MatchLdcI4(out _));
+
+            c.EmitPop();
+
+            c.EmitDelegate(() => TextureAssets.Moon.Length - 1);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    #endregion
 }

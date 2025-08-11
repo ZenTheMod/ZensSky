@@ -35,7 +35,7 @@ public sealed class CloudSystem : ModSystem
     private static readonly Color MoonMultiplier = new(40, 40, 50);
 
     private delegate void orig_DrawCloud(int cloudIndex, Color color, float yOffset);
-    private static Hook? EdgeLighting;
+    private static Hook? PatchDrawCloud;
 
     #endregion
 
@@ -56,7 +56,7 @@ public sealed class CloudSystem : ModSystem
             MethodInfo? drawCloud = typeof(Main).GetMethod($"<{nameof(Main.DrawSurfaceBG)}>g__DrawCloud|1826_0", Static | NonPublic);
 
             if (drawCloud is not null)
-                EdgeLighting = new(drawCloud,
+                PatchDrawCloud = new(drawCloud,
                     ApplyEdgeLighting);
         }); 
     }
@@ -66,7 +66,7 @@ public sealed class CloudSystem : ModSystem
         MainThreadSystem.Enqueue(() =>
         {
             IL_Main.DrawSurfaceBG -= ApplyCloudLighting;
-            EdgeLighting?.Dispose();
+            PatchDrawCloud?.Dispose();
         });
     }
 
@@ -82,7 +82,7 @@ public sealed class CloudSystem : ModSystem
 
             #region Shader Parameters
 
-            c.EmitDelegate(static () =>
+            c.EmitDelegate(() =>
             {
                 if (!SkyConfig.Instance.CloudsEnabled ||
                     !SkyEffects.CloudLighting.IsReady)
@@ -187,7 +187,7 @@ public sealed class CloudSystem : ModSystem
 
             c.MoveAfterLabels();
 
-            c.EmitDelegate(static () => { LightClouds = true; });
+            c.EmitDelegate(() => { LightClouds = true; });
         }
         catch (Exception e)
         {

@@ -136,7 +136,7 @@ public sealed class CalamityFablesSystem : ModSystem
         spriteBatch.Draw(moon, position, null, Color.White, rotation, moon.Size() * .5f, size, SpriteEffects.None, 0f);
     }
 
-        // To maintain consistency with Fables I have implemented a .obj filetype reader to import 3D models into terraria.
+        // To maintain consistency with Fables I have implemented a .obj filetype reader to import 3D models into Terraria.
     private static void DrawShatter(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
         if (!CompatEffects.Shatter.IsReady)
@@ -144,7 +144,6 @@ public sealed class CalamityFablesSystem : ModSystem
 
         spriteBatch.End(out var snapshot);
 
-            // Use a RenderTarget here to give the effect of anti aliasing. (Make sure to correctly handle depth.)
         using (new RenderTargetSwap(ref ShatterTarget, (int)ShatterTargetSize.X, (int)ShatterTargetSize.Y, preferredDepthFormat: DepthFormat.Depth16))
         {
             device.Clear(Color.Transparent);

@@ -51,7 +51,7 @@ using {ModName}.Core.DataStructures;
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var effectFiles = context.AdditionalTextsProvider
-            .Where(static p =>
+            .Where(p =>
                 Extensions.Any(ext => p.Path.EndsWith(ext, StringComparison.OrdinalIgnoreCase)) &&
                 p.Path.Contains("Effects"))
             .Collect();

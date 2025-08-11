@@ -33,7 +33,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
 
     private static readonly Color LockedGradient = new(40, 40, 40);
 
-    private static ILHook? SkipDrawing;
+    private static ILHook? PatchDrawSelf;
 
     private static bool Drawing = false;
 
@@ -60,13 +60,13 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             MethodInfo? drawSelf = typeof(RangeElement).GetMethod("DrawSelf", NonPublic | Instance);
 
             if (drawSelf is not null)
-                SkipDrawing = new(drawSelf,
+                PatchDrawSelf = new(drawSelf,
                     SkipRangeElementDrawing);
         });
     }
 
     public void Unload() => 
-        Main.QueueMainThreadAction(() => SkipDrawing?.Dispose());
+        Main.QueueMainThreadAction(() => PatchDrawSelf?.Dispose());
 
     private void SkipRangeElementDrawing(ILContext il)
     {
@@ -79,7 +79,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
             c.GotoNext(MoveType.After,
                 i => i.MatchCall<ConfigElement>("DrawSelf"));
 
-            c.EmitDelegate(static () => Drawing);
+            c.EmitDelegate(() => Drawing);
             c.EmitBrfalse(jumpret);
 
             c.EmitRet();

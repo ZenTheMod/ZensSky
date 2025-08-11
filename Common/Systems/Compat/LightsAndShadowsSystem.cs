@@ -18,7 +18,7 @@ public sealed class LightsAndShadowsSystem : ModSystem
     #region Private Fields
 
     private delegate Vector2 orig_GetSunPos(RenderTarget2D render);
-    private static Hook? ModifySunPosition;
+    private static Hook? PatchSunPosition;
 
     #endregion
 
@@ -38,12 +38,12 @@ public sealed class LightsAndShadowsSystem : ModSystem
         MethodInfo? getSunPos = typeof(Lights.Lights).GetMethod("GetSunPos", Public | Static);
 
         if (getSunPos is not null)
-            ModifySunPosition = new(getSunPos,
+            PatchSunPosition = new(getSunPos,
                 SetPosition);
     }
 
     public override void Unload() => 
-        ModifySunPosition?.Dispose();
+        PatchSunPosition?.Dispose();
 
     #endregion
 

@@ -40,7 +40,7 @@ public sealed class MeteorReplacementSystem : ModSystem
             c.EmitLdarg(playerIndex);
             c.EmitLdloc(randomIndex);
 
-            c.EmitDelegate(static (Player player, FastRandom random) => new FancyMeteor(player, random));
+            c.EmitDelegate((Player player, FastRandom random) => new FancyMeteor(player, random));
         }
         catch (Exception e)
         {

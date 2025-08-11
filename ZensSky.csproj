@@ -22,32 +22,37 @@
 	<!-- References -->
 	<ItemGroup>
 		<!-- Include various mods to make cross-modding easier;
-			(Also the use of sortBefore in build.txt eleminates the chance of a race condition via cross-mod) -->
-		<Reference Include="RealisticSky">
-			<HintPath>..\ModAssemblies\RealisticSky.dll</HintPath>
-		</Reference>
-		<Reference Include="RedSunAndRealisticSky">
-			<HintPath>..\ModAssemblies\RedSunAndRealisticSky.dll</HintPath>
-		</Reference>
-		<Reference Include="Lights">
-			<HintPath>..\ModAssemblies\Lights.dll</HintPath>
-		</Reference>
-		<Reference Include="BetterNightSky">
+			Additionally listed is the mods full name and author -->
+		<Reference Include="BetterNightSky"> <!-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy -->
 			<HintPath>..\ModAssemblies\BetterNightSky.dll</HintPath>
 		</Reference>
-		<Reference Include="YouBoss">
-			<HintPath>..\ModAssemblies\YouBoss.dll</HintPath>
+		<Reference Include="DarkSurface"> <!-- 'Dark Surface' by 2bluntz@once -->
+			<HintPath>..\ModAssemblies\DarkSurface.dll</HintPath>
 		</Reference>
-		<Reference Include="Sloprain">
-			<HintPath>..\ModAssemblies\Sloprain.dll</HintPath>
+		<Reference Include="Lights"> <!-- 'Lights And Shadows' by yiyang233 -->
+			<HintPath>..\ModAssemblies\Lights.dll</HintPath>
 		</Reference>
-		<Reference Include="Macrocosm">
+		<Reference Include="Macrocosm"> <!-- 'Macrocosm [BETA]' by MechanicPluto24 -->
 			<HintPath>..\ModAssemblies\Macrocosm.dll</HintPath>
 		</Reference>
-		<Reference Include="SubworldLibrary">
+		<Reference Include="RealisticSky"> <!-- 'Realistic Sky' by Lucille Karma -->
+			<HintPath>..\ModAssemblies\RealisticSky.dll</HintPath>
+		</Reference>
+		<Reference Include="RedSunAndRealisticSky"> <!-- 'Red Sun and Realistic Sky' by Waffles22 -->
+			<HintPath>..\ModAssemblies\RedSunAndRealisticSky.dll</HintPath>
+		</Reference>
+		<Reference Include="Sloprain"> <!-- 'Rain++' by shrek -->
+			<HintPath>..\ModAssemblies\Sloprain.dll</HintPath>
+		</Reference>
+		<Reference Include="SubworldLibrary"> <!-- 'Subworld Library' by John Snail -->
 			<HintPath>..\ModAssemblies\SubworldLibrary.dll</HintPath>
 		</Reference>
-		<Reference Include="Daybreak">
+		<Reference Include="YouBoss"> <!-- 'You Boss' by Lucille Karma -->
+			<HintPath>..\ModAssemblies\YouBoss.dll</HintPath>
+		</Reference>
+		
+		<!-- Include necessary libraries -->
+		<Reference Include="Daybreak"> <!-- 'DAYBREAK' by 2024 ***** Winter Sale's Workshop -->
 			<HintPath>..\ModAssemblies\Daybreak.dll</HintPath>
 		</Reference>
 	</ItemGroup>
@@ -56,17 +61,22 @@
 	<ItemGroup>
 		<PackageReference Include="Krafs.Publicizer" PrivateAssets="true" Version="2.2.1" />
 
+		<!-- Include Terraria/tModLoader, and FNA -->
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 
-		<Publicize Include="RealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
-
+		<!-- Include mods with difficult to access types -->
 		<Publicize Include="BetterNightSky" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
-
+		
+		<Publicize Include="DarkSurface" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		
+		<Publicize Include="RealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
+		
+		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		
 		<Publicize Include="YouBoss" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 
-		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed) -->

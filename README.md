@@ -1,13 +1,12 @@
 # Zens Sky
-
 This mod aims to overhaul Terraria's sky with a number of highly customizable visuals changes; some of which mirror the upcoming Terraria 1.4.5 update's visuals.
-Included with this mod is a dynamic menu controller panel allowing for customization of the main menu itself.
 
 ## Current Planned Features
 Checkbox shown next to currently complete features.
-- [x] Complete star overhaul[^1] including supernovae, and shooting stars.
-- [x] Sun and moon[^2] overhaul that completely replaces the vanilla visuals.
+- [x] Complete star overhaul[^StarStyles] including supernovae, and shooting stars.
+- [x] Sun and moon[^MoonStyles] overhaul that completely replaces the vanilla visuals.
 - [x] Minor ambience changes e.g. wind particles.
+- [x] Panel for configuring the titlescreen.
 - [x] Configuration to pixelate the sky.
 - [x] Dynamic cloud lighting in the style of the Terraria 1.4.5 update.
 - [x] Darker night sky.
@@ -18,16 +17,20 @@ Checkbox shown next to currently complete features.
 
 ## Cross Compatiblity
 This mod features cross compatibility with a large amount of popular mods that may tweak or otherwise interact with the visuals of the sky.
-- 'Macrocosm [BETA]' by MechanicPluto24\*\*\*[^3]
-- 'Realistic Sky' by Lucille Karma
-- 'Wrath of the Gods' by Lucille Karma\*[^4]
-- 'Lights And Shadows' by yiyang233\*[^5]
-- 'Calamity Fables' by IbanPlay\*[^6]
-- 'Calamity Mod' by Ozzatron\*[^7]
-- 'Red Sun and Realistic Sky by Waffles22
-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^8]
-- 'High FPS Support' by Stellar
+- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^BetterNightSky]
+- 'Calamity Fables' by IbanPlay\*[^CalamityFables]
+- 'Calamity Mod' by Ozzatron\*[^CalamityMod]
 - 'Dark Surface' by 2bluntz@once
+- 'High FPS Support' by Stellar
+- 'Lights And Shadows' by yiyang233\*[^LightsAndShadows]
+- 'Macrocosm [BETA]' by MechanicPluto24\*\*\*[^Macrocosm]
+- 'Realistic Sky' by Lucille Karma
+- 'Red Sun and Realistic Sky' by Waffles22
+- 'Rain++' by shrek\*[^Rain++]
+- 'Wrath of the Gods' by Lucille Karma\*[^WrathOfTheGods]
+- 'You Boss' by Lucille Karma
+
+If any issues arise with any mods, even ones listed above; please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 
 This mod also allows for other mod creators to very easily include their own compat;
 There are two methods to do so.
@@ -51,15 +54,10 @@ There are two methods to do so.
 If you feel any feature lacks certain cross compatibility that you'd like, please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 
 ### Footnotes
-[^1]: Includes five different star visual styles to choose from.
-[^2]: Unique high definition visuals for every vanilla [Moon Style](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
-[^3]: Currently no high resolution earth assets; although I will be working on including these (As well as other high resolution assets and models,) in the offical Macrocosm mod.
-[^4]: Currently no changes made to any stargazing scenes.
-[^5]: There are a few issues I would like to fix; (e.g. the effect not showing on the titlescreen.)
-    However these issues are of Lights and Shadow's devolopers(s), and I don't intend to rewrite their mod to account for it.
-
-    More specifically Lights and Shadows should move to a proper Filter based system to prevent common issues with detouring FilterManager.EndCapture.
-[^6]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
+[^StarStyles]: Includes five different star visual styles to choose from.
+[^MoonStyles]: Unique high definition visuals for every vanilla [Moon Style](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
+[^BetterNightSky]: Lacks support for some visuals.
+[^CalamityFables]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
     - Throne
     - Iris
     - Crater
@@ -70,5 +68,11 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
     - Greenhouse
     - Square
     - Aletheia
-[^7]: Untested, but I'm going to say that it works.
-[^8]: Lacks support for some visuals.
+[^CalamityMod]: Untested, but I'm going to say that it works.
+[^LightsAndShadows]: There are a few issues I would like to fix; (e.g. the effect not showing on the titlescreen.)
+    However these issues are of Lights and Shadow's devolopers(s), and I don't intend to rewrite their mod to account for it.
+
+    More specifically Lights and Shadows should move to a proper Filter based system to prevent common issues with detouring FilterManager.EndCapture.
+[^Macrocosm]: Currently no high resolution earth assets; although I will be working on including these (As well as other high resolution assets and models,) in the offical Macrocosm mod.
+[^Rain++]: Highly volatile.
+[^WrathOfTheGods]: Currently no changes made to any stargazing scenes.

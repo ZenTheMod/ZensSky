@@ -30,14 +30,14 @@ public sealed class BetterNightSkySystem : ModSystem
     #region Private Fields
 
     private delegate void orig_On_Main_DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial);
-    private static Hook? DisableDoubleOrig;
+    private static Hook? RemoveSecondaryOrig;
 
-    private static ILHook? LoadSkip;
-    private static ILHook? UnloadSkip;
+    private static ILHook? PatchLoad;
+    private static ILHook? PatchUnload;
 
-    private static ILHook? NoReloadsRequired;
+    private static ILHook? PatchConfigReloading;
 
-    private static ILHook? ActuallyIgnoreReload;
+    private static ILHook? PatchNeedsReload;
 
     #endregion
 
@@ -65,7 +65,7 @@ public sealed class BetterNightSkySystem : ModSystem
         MethodInfo? on_Main_DrawStarsInBackground = typeof(BetterNightSky.BetterNightSky).GetMethod(nameof(On_Main_DrawStarsInBackground), NonPublic | Static);
 
         if (on_Main_DrawStarsInBackground is not null)
-            DisableDoubleOrig = new(on_Main_DrawStarsInBackground,
+            RemoveSecondaryOrig = new(on_Main_DrawStarsInBackground,
                 DoubleDetour);
 
                 // This is placed before the following check purely for a strange bugfix.
@@ -75,7 +75,7 @@ public sealed class BetterNightSkySystem : ModSystem
         MethodInfo? doUnloads = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.DoUnloads), Public | Instance);
 
         if (doUnloads is not null)
-            UnloadSkip = new(doUnloads,
+            PatchUnload = new(doUnloads,
                 JumpReset);
 
         if (!SkyConfig.Instance.SunAndMoonRework)
@@ -84,32 +84,32 @@ public sealed class BetterNightSkySystem : ModSystem
         MethodInfo? onModLoad = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.OnModLoad), Public | Instance);
 
         if (onModLoad is not null)
-            LoadSkip = new(onModLoad,
+            PatchLoad = new(onModLoad,
                 JumpReplacement);
 
             // When using our moon rework the asset replacement is irrelevant and the reload is not required to activate the visual that is used.
         MethodInfo? onBind = typeof(ConfigElement).GetMethod(nameof(ConfigElement.OnBind), Public | Instance);
 
         if (onBind is not null)
-            NoReloadsRequired = new(onBind,
+            PatchConfigReloading = new(onBind,
                 NoReloading);
 
         MethodInfo? needsReload = typeof(ModConfig).GetMethod(nameof(ModConfig.NeedsReload), Public | Instance);
 
         if (needsReload is not null)
-            ActuallyIgnoreReload = new(needsReload,
+            PatchNeedsReload = new(needsReload,
                 IgnoreReload);
     }
 
     public override void Unload() 
     { 
-        DisableDoubleOrig?.Dispose();
+        RemoveSecondaryOrig?.Dispose();
 
-        LoadSkip?.Dispose();
-        UnloadSkip?.Dispose();
+        PatchLoad?.Dispose();
+        PatchUnload?.Dispose();
 
-        NoReloadsRequired?.Dispose();
-        ActuallyIgnoreReload?.Dispose();
+        PatchConfigReloading?.Dispose();
+        PatchNeedsReload?.Dispose();
     }
 
     #endregion
@@ -202,7 +202,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchCgtUn());
 
             c.EmitLdarg0();
-            c.EmitDelegate(static (bool reloadRequired, ConfigElement element) =>
+            c.EmitDelegate((bool reloadRequired, ConfigElement element) =>
             {
                 if (element.MemberInfo.IsField &&
                     element.MemberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&
@@ -235,7 +235,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchStloc(out memberInfoIndex));
 
             c.EmitLdloc(memberInfoIndex);
-            c.EmitDelegate(static (PropertyFieldWrapper memberInfo) =>
+            c.EmitDelegate((PropertyFieldWrapper memberInfo) =>
             {
                 if (memberInfo.IsField &&
                     memberInfo.fieldInfo.Name == nameof(NightConfig.UseHighResMoon) &&
