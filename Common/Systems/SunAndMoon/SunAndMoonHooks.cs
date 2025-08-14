@@ -244,6 +244,8 @@ public static class SunAndMoonHooks
 
         PreDrawMoon = null;
         PostDrawMoon = null;
+
+        OnUpdateSunAndMoonInfo = null;
     }
 
     #endregion
