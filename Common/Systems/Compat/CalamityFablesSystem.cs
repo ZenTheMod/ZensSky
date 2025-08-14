@@ -12,7 +12,7 @@ using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -66,11 +66,10 @@ public sealed class CalamityFablesSystem : ModSystem
 
         PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
 
-            // Annoyingly does negate the use of LazyAsset in the first place.
         for (int i = 0; i < FablesTextures.Moon.Length; i++)
-            AdditionalMoonStyles.Add(PriorMoonStyles + i, FablesTextures.Moon[i]);
+            AddMoonStyle(PriorMoonStyles + i, FablesTextures.Moon[i]);
 
-        AdditionalMoonDrawing.Add(DrawEdgeCases);
+        PreDrawMoon += MoonsFablesPreDraw;
     }
 
     public override void Unload() =>
@@ -96,19 +95,19 @@ public sealed class CalamityFablesSystem : ModSystem
     #region Drawing
 
         // Handle a bunch of edge cases for moons with non standard visuals.
-    private static bool DrawEdgeCases(
+    private static bool MoonsFablesPreDraw(
         SpriteBatch spriteBatch,
         ref Asset<Texture2D> moon,
-        Vector2 position,
-        Color color,
-        float rotation,
-        float scale,
-        Color moonColor,
-        Color shadowColor,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        ref Color moonColor,
+        ref Color shadowColor,
         GraphicsDevice device,
-        bool edgeCase)
+        bool nonEventMoon)
     {
-        if (!edgeCase || !IsEdgeCase())
+        if (!nonEventMoon || !IsEdgeCase())
             return true;
 
         switch (Main.moonType - PriorMoonStyles)

@@ -14,10 +14,10 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 
 namespace ZensSky.Common.Systems.Compat;
@@ -60,7 +60,7 @@ public sealed class BetterNightSkySystem : ModSystem
     {
         IsEnabled = true;
 
-        SunAndMoonSystem.AdditionalMoonDrawing.Add(ModifyMoonTexture);
+        ModifyMoonTexture += UseBigMoonTexture;
 
         MethodInfo? on_Main_DrawStarsInBackground = typeof(BetterNightSky.BetterNightSky).GetMethod(nameof(On_Main_DrawStarsInBackground), NonPublic | Static);
 
@@ -285,24 +285,14 @@ public sealed class BetterNightSkySystem : ModSystem
         }
     }
 
-    private static bool ModifyMoonTexture(
-        SpriteBatch spriteBatch,
-        ref Asset<Texture2D> moon,
-        Vector2 position,
-        Color color,
-        float rotation,
-        float scale,
-        Color moonColor,
-        Color shadowColor,
-        GraphicsDevice device,
-        bool edgeCase)
+    private static void UseBigMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon)
     {
         if (IsEnabled &&
             UseBigMoon &&
-            edgeCase)
+            nonEventMoon)
             moon = SkyTextures.BetterNightSkyMoon;
 
-        return true;
+        return;
     }
 
     #endregion

@@ -69,6 +69,8 @@ public sealed class SkyColorSystem : ModSystem
             ModifyInMenu?.Invoke(ref tileColor, ref backgroundColor);
     }
 
+    #region DrawBlack Fixes
+
     private void PreventDrawBlackOverAir(ILContext il)
     {
         try
@@ -105,6 +107,8 @@ public sealed class SkyColorSystem : ModSystem
             throw new ILEditException(Mod, il, e);
         }
     }
+
+    #endregion
 
     public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
     {

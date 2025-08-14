@@ -8,6 +8,8 @@ namespace ZensSky.Core.Systems.ModCall;
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class ModCallAttribute : Attribute
 {
+    public bool UsesDefaultName = true;
+
     public string[] NameAliases;
 
     public ModCallAttribute() =>
@@ -15,4 +17,10 @@ public sealed class ModCallAttribute : Attribute
 
     public ModCallAttribute(params string[] nameAliases) =>
         NameAliases = nameAliases;
+
+    public ModCallAttribute(bool includeDefaultName, params string[] nameAliases)
+    {
+        UsesDefaultName = includeDefaultName;
+        NameAliases = nameAliases;
+    }
 }

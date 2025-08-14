@@ -251,7 +251,7 @@ public sealed class CloudSystem : ModSystem
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
             // Samples the moon texture to grab a more accurate color. (May not work correctly when not using the moon overhaul.)
-        device.Textures[1] = SunAndMoonRenderingSystem.MoonTexture.Value;
+        device.Textures[1] = MoonTexture.Value;
         device.SamplerStates[1] = SamplerState.PointWrap;
     }
 

@@ -2,8 +2,8 @@
 using MonoMod.Cil;
 using ReLogic.Content;
 using System;
-using System.Collections.Generic;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
@@ -12,6 +12,7 @@ using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
@@ -22,32 +23,10 @@ public sealed class SunAndMoonSystem : ModSystem
 
     private const int SunMoonY = -80;
 
-    private const float MinSunBrightness = 0.82f;
-    private const float MinMoonBrightness = 0.35f;
+    private const float MinSunBrightness = .82f;
+    private const float MinMoonBrightness = .65f;
 
     private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
-
-    #endregion
-
-    #region Delegates
-
-    /// <summary>
-    /// Used for moon styles that may require custom drawing to create an high-res counterpart.
-    /// </summary>
-    /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
-    /// <param name="edgeCase">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
-    /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
-    public delegate bool PreDrawMoon(
-        SpriteBatch spriteBatch,
-        ref Asset<Texture2D> moon,
-        Vector2 position,
-        Color color,
-        float rotation,
-        float scale,
-        Color moonColor,
-        Color shadowColor,
-        GraphicsDevice device,
-        bool edgeCase);
 
     #endregion
 
@@ -74,12 +53,34 @@ public sealed class SunAndMoonSystem : ModSystem
     public static SunAndMoonInfo Info { get; private set; }
 
     /// <summary>
-    /// Additional moon styles based on an index.
+    /// The high-resolution asset to use for moon drawing.
     /// </summary>
-    public static Dictionary<int, Asset<Texture2D>> AdditionalMoonStyles { get; private set; } = [];
+    public static Asset<Texture2D> MoonTexture
+    {
+        get
+        {
+            Asset<Texture2D> ret = SkyTextures.Moon[Math.Min(Main.moonType, SkyTextures.Moon.Length - 1)];
 
-    /// <inheritdoc cref="PreDrawMoon"/>
-    public static List<PreDrawMoon> AdditionalMoonDrawing { get; private set; } = [];
+            if (ExtraMoonStyles.TryGetValue(Main.moonType,
+                out Asset<Texture2D>? style))
+                ret = style;
+
+            if (Main.pumpkinMoon)
+                ret = SkyTextures.MoonPumpkin;
+            else if (Main.snowMoon)
+                ret = SkyTextures.MoonSnow;
+
+            InvokeModifyMoonTexture(ref ret, NonEventMoon);
+
+            return ret;
+        }
+    }
+
+    /// <summary>
+    /// If no moon texture changing events are active.
+    /// </summary>
+    public static bool NonEventMoon =>
+        !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
 
     #endregion
 
@@ -88,8 +89,13 @@ public sealed class SunAndMoonSystem : ModSystem
     public override void Load() =>
         MainThreadSystem.Enqueue(() => IL_Main.DrawSunAndMoon += ModifyDrawing);
 
-    public override void Unload() =>
-        MainThreadSystem.Enqueue(() => IL_Main.DrawSunAndMoon -= ModifyDrawing);
+    public override void Unload()
+    {
+        MainThreadSystem.Enqueue(() =>
+            IL_Main.DrawSunAndMoon -= ModifyDrawing);
+
+        SunAndMoonHooks.Clear();
+    }
 
     private void ModifyDrawing(ILContext il)
     {
@@ -276,7 +282,7 @@ public sealed class SunAndMoonSystem : ModSystem
     /// Updates sun and moon positions as well as updating other mod's values.
     /// </summary>
     /// <param name="forced">If the info provided should be prioritized over the vanilla data.</param>
-    [ModCall("SetSunAndMoonInfo", "SetSunInfo")]
+    [ModCall(false, "SetSunAndMoonInfo")]
     public static void SetInfo(Vector2 sunPosition, Color sunColor, float sunRotation, float sunScale,
         Vector2 moonPosition, Color moonColor, float moonRotation, float moonScale, bool forced = false)
     {
@@ -294,14 +300,10 @@ public sealed class SunAndMoonSystem : ModSystem
     }
 
     /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>
-    [ModCall("SetSunAndMoonInfo", "SetSunInfo")]
+    [ModCall(false, "SetSunAndMoonInfo")]
     public static void SetInfo(Vector2 position, Color color, float rotation, float scale, bool forced = false) =>
         SetInfo(position, color, rotation, scale, 
             position, color, rotation, scale, forced);
-
-    [ModCall("CreateMoonStyle", "AddMoonTexture")]
-    public static void AddMoonStyle(int index, Asset<Texture2D> texture) => 
-        AdditionalMoonStyles.Add(index, texture);
 
     #endregion
 }

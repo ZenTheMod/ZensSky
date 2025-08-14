@@ -29,8 +29,10 @@ public sealed class ModCallSystem : ModSystem
 
             if (attribute.NameAliases.Length <= 0)
                 names = [m.Name];
-            else
+            else if (attribute.UsesDefaultName)
                 names = [m.Name, .. attribute.NameAliases];
+            else
+                names = attribute.NameAliases;
 
             Handlers.Add([.. names], m);
         }
