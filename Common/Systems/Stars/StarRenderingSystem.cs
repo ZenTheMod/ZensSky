@@ -1,7 +1,6 @@
 ﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Sloprain.Common.Registries;
 using System;
 using System.Linq;
 using Terraria;
@@ -12,6 +11,7 @@ using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
+using static ZensSky.Common.Systems.Stars.StarHooks;
 using static ZensSky.Common.Systems.Stars.StarSystem;
 using Star = ZensSky.Common.DataStructures.Star;
 
@@ -206,29 +206,28 @@ public sealed class StarRenderingSystem : ModSystem
 
         UpdateStarAlpha();
 
-        spriteBatch.End(out var snapshot);
+        SpriteBatchSnapshot snapshot = new(spriteBatch);
 
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.DrawStars();
+        Matrix transform = RotationMatrix() * snapshot.TransformMatrix;
 
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), RotationMatrix() * snapshot.TransformMatrix);
+        if (InvokePreDrawStars(spriteBatch, ref alpha, ref transform))
+        {
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), transform);
 
-        if (alpha > 0)
-            DrawStars(spriteBatch, alpha);
+            if (alpha > 0)
+                DrawStars(spriteBatch, alpha);
 
-        spriteBatch.End();
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, RotationMatrix() * snapshot.TransformMatrix);
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, transform);
 
-        if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
-            DrawSupernovae(spriteBatch, alpha);
+            if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
+                DrawSupernovae(spriteBatch, alpha);
 
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.DrawGalaxy();
+            spriteBatch.Restart(in snapshot);
+        }
 
-        if (BetterNightSkySystem.IsEnabled)
-            BetterNightSkySystem.DrawSpecialStars(alpha);
-
-        spriteBatch.Restart(in snapshot);
+        InvokePostDrawStars(spriteBatch, alpha, transform);
     }
 
 
@@ -238,7 +237,7 @@ public sealed class StarRenderingSystem : ModSystem
         Matrix rotation = Matrix.CreateRotationZ(StarRotation);
         Matrix offset = Matrix.CreateTranslation(new(Utilities.HalfScreenSize, 0f));
 
-        return rotation * offset; // * Main.BackgroundViewMatrix.EffectMatrix;
+        return rotation * offset;
     }
 
     #endregion

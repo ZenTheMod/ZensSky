@@ -20,7 +20,10 @@ using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Common.DataStructures;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.Stars.StarHooks;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -44,16 +47,20 @@ public sealed class RealisticSkySystem : ModSystem
     private static ILHook? PatchStarShader;
 
     private static ILHook? PatchDrawing;
-    private static FieldInfo? AtmosphereTargetInfo;
-
-    private static MethodInfo? SetSunPosition;
-    private static MethodInfo? SetMoonPosition;
-
-    private static AtmosphereTargetContent? AtmosphereTarget => (AtmosphereTargetContent?)AtmosphereTargetInfo?.GetValue(null);
 
     #endregion
 
     #region Public Properties
+
+    public static bool CanDraw
+    {
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        get => 
+            RealisticSkyManager.CanRender &&
+            !RealisticSkyManager.TemporarilyDisabled &&
+            !(!RealisticSkyConfig.Instance.ShowInMainMenu &&
+            Main.gameMenu);
+    }
 
     public static bool IsEnabled { get; private set; }
 
@@ -61,15 +68,17 @@ public sealed class RealisticSkySystem : ModSystem
 
     #region Loading
 
-        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
+        // MainThreadSystem.Enqueue can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
 
-        AtmosphereTargetInfo = typeof(AtmosphereRenderer).GetField("AtmosphereTarget", NonPublic | Static);
+        PreDrawStars += StarsRealisticPreDraw;
+        PostDrawStars += StarsGalaxyPostDraw;
 
-        SetSunPosition = typeof(SunPositionSaver).GetProperty(nameof(SunPositionSaver.SunPosition), Public | Static)?.GetSetMethod(true);
-        SetMoonPosition = typeof(SunPositionSaver).GetProperty(nameof(SunPositionSaver.MoonPosition), Public | Static)?.GetSetMethod(true);
+        PreDrawSun += SunRealisticPreDraw;
+
+        OnUpdateSunAndMoonInfo += UpdateSunPositionSaver;
 
         MethodInfo? verticallyBiasSunAndMoon = typeof(SunPositionSaver).GetMethod(nameof(SunPositionSaver.VerticallyBiasSunAndMoon));
 
@@ -95,13 +104,6 @@ public sealed class RealisticSkySystem : ModSystem
         if (handleAtmosphereTargetReqest is not null)
             PatchAtmosphereTarget = new(handleAtmosphereTargetReqest,
                 CommonRequestsInvertedGravity);
-
-            // Removed due to no longer using a RenderTarget based system.
-
-            // MethodInfo? drawToAtmosphereTarget = typeof(AtmosphereRenderer).GetMethod("RenderToTarget", Public | Static);
-            // if (drawToAtmosphereTarget is not null)
-            //     PatchAtmosphereShader = new(drawToAtmosphereTarget,
-            //         CommonShaderInvertedGravity);
 
         MethodInfo? handleCloudsTargetReqest = typeof(CloudsTargetContent).GetMethod(nameof(CloudsTargetContent.HandleUseReqest), NonPublic | Instance);
         if (handleCloudsTargetReqest is not null)
@@ -134,7 +136,6 @@ public sealed class RealisticSkySystem : ModSystem
         PatchGalaxyRotation?.Dispose();
 
         PatchAtmosphereTarget?.Dispose();
-            // PatchAtmosphereShader?.Dispose();
         PatchCloudsTarget?.Dispose();
         PatchCloudsShader?.Dispose();
         PatchStarShader?.Dispose();
@@ -338,6 +339,8 @@ public sealed class RealisticSkySystem : ModSystem
 
     #region Public Methods
 
+    #region Shaders
+
     /// <summary>
     /// Apply a star masking shader if <see cref="RealisticSky"/> is enabled and is active.
     /// </summary>
@@ -346,8 +349,7 @@ public sealed class RealisticSkySystem : ModSystem
         if (!IsEnabled)
             return null;
 
-            // Runtime does not like it if these ifs are combined.
-        if (!CanDraw())
+        if (!CanDraw)
             return null;
 
         Effect star = CompatEffects.StarAtmosphere.Value;
@@ -378,48 +380,74 @@ public sealed class RealisticSkySystem : ModSystem
 
         if (AtmosphereRenderer.AtmosphereTarget?.IsReady ?? false)
             Main.instance.GraphicsDevice.Textures[1] = AtmosphereRenderer.AtmosphereTarget.GetTarget();
+        else
+            Main.instance.GraphicsDevice.Textures[1] = MiscTextures.Invis;
+
     }
 
-    public static void DrawStars() 
-    {
-        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
-            return;
+    #endregion
 
-        StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity); 
+    #region Stars
+
+    public static bool StarsRealisticPreDraw(SpriteBatch spriteBatch, ref float alpha, ref Matrix transform)
+    {
+        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw)
+            return true;
+
+        spriteBatch.End(out var snapshot);
+
+        StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity);
+
+        spriteBatch.Begin(in snapshot);
+
+        return true;
     }
 
-    public static void DrawGalaxy() 
+    public static void StarsGalaxyPostDraw(SpriteBatch spriteBatch, float alpha, Matrix transform)
     {
-        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw())
+        if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw)
             return;
 
         Main.spriteBatch.End(out var snapshot);
-        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), snapshot.TransformMatrix);
+        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), transform);
 
         GalaxyRenderer.Render();
     }
-    public static void DrawSun()
+
+    #endregion
+
+    #region Sun
+
+    public static bool SunRealisticPreDraw(
+        SpriteBatch spriteBatch,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        GraphicsDevice device) =>
+        DrawSun();
+
+    public static bool DrawSun()
     {
-        if (!CanDraw())
-            return;
+        if (!CanDraw || !SkyConfig.Instance.RealisticSun)
+            return true;
 
         SunRenderer.Render(1f - RealisticSkyManager.SunlightIntensityByTime);
+
+        return false;
     }
+
+    public static void UpdateSunPositionSaver(SunAndMoonInfo info)
+    {
+        SunPositionSaver.SunPosition = info.SunPosition;
+        SunPositionSaver.MoonPosition = info.MoonPosition;
+    }
+
+    #endregion
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static Color GetRainColor(Color color, Rain rain) => 
         RainReplacementManager.CalculateRainColor(color, rain);
-
-    public static void UpdateSunAndMoonPosition(Vector2 sunPosition, Vector2 moonPosition)
-    {
-        SetSunPosition?.Invoke(null, [sunPosition]);
-        SetMoonPosition?.Invoke(null, [moonPosition]);
-    }
-
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    public static bool CanDraw() =>
-        RealisticSkyManager.CanRender && !RealisticSkyManager.TemporarilyDisabled && 
-        !(!RealisticSkyConfig.Instance.ShowInMainMenu && Main.gameMenu);
 
     #endregion
 }

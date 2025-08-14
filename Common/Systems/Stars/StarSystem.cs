@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
@@ -73,11 +72,17 @@ public sealed class StarSystem : ModSystem
     {
         StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
-        MainThreadSystem.Enqueue(() => On_Star.UpdateStars += UpdateStars);
+        MainThreadSystem.Enqueue(() =>
+            On_Star.UpdateStars += UpdateStars);
     }
 
-    public override void Unload() =>
-        MainThreadSystem.Enqueue(() => On_Star.UpdateStars -= UpdateStars);
+    public override void Unload()
+    {
+        MainThreadSystem.Enqueue(() =>
+            On_Star.UpdateStars -= UpdateStars);
+
+        StarHooks.Clear();
+    }
 
     #endregion
 

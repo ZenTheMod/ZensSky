@@ -3,7 +3,6 @@ using MonoMod.Cil;
 using ReLogic.Content;
 using System;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
@@ -94,7 +93,7 @@ public sealed class SunAndMoonSystem : ModSystem
         MainThreadSystem.Enqueue(() =>
             IL_Main.DrawSunAndMoon -= ModifyDrawing);
 
-        SunAndMoonHooks.Clear();
+        Clear();
     }
 
     private void ModifyDrawing(ILContext il)
@@ -292,11 +291,7 @@ public sealed class SunAndMoonSystem : ModSystem
             Info = new(sunPosition, sunColor, sunRotation, sunScale,
                 moonPosition, moonColor, moonRotation, moonScale);
 
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.UpdateSunAndMoonPosition(sunPosition, moonPosition);
-
-        if (WrathOfTheGodsSystem.IsEnabled)
-            WrathOfTheGodsSystem.UpdateSunAndMoonPosition(sunPosition, moonPosition);
+        InvokeOnUpdateSunAndMoonInfo(Info);
     }
 
     /// <inheritdoc cref="SetInfo(Vector2, Color, float, float, Vector2, Color, float, float, bool)"/>

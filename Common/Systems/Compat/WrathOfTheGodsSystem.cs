@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Reflection;
 using Terraria.ModLoader;
+using ZensSky.Common.DataStructures;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -30,6 +32,8 @@ public sealed class WrathOfTheGodsSystem : ModSystem
 
         IsEnabled = true;
 
+        OnUpdateSunAndMoonInfo += UpdateSunMoonPositionRecorder;
+
             // I don't feel like adding a project reference for a massive mod just for 4 lines of compat.
         Assembly noxusBossAsm = ModLoader.GetMod("NoxusBoss").Code;
 
@@ -43,10 +47,10 @@ public sealed class WrathOfTheGodsSystem : ModSystem
 
     #region Public Methods
 
-    public static void UpdateSunAndMoonPosition(Vector2 sunPosition, Vector2 moonPosition)
+    public static void UpdateSunMoonPositionRecorder(SunAndMoonInfo info)
     {
-        SetSunPosition?.Invoke(null, [sunPosition]);
-        SetMoonPosition?.Invoke(null, [moonPosition]);
+        SetSunPosition?.Invoke(null, [info.SunPosition]);
+        SetMoonPosition?.Invoke(null, [info.MoonPosition]);
     }
 
     public static void UpdateMoonPosition(Vector2 position) =>

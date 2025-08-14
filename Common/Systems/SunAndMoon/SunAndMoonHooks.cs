@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Terraria;
+using ZensSky.Common.DataStructures;
 using ZensSky.Core.Systems.ModCall;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
@@ -21,13 +22,47 @@ public static class SunAndMoonHooks
 
     #region Public Hooks
 
+    #region Sun
+
+    /// <returns><see cref="true"/> if the normal sun drawing should be used.</returns>
+    public delegate bool hook_PreDrawSun(
+        SpriteBatch spriteBatch,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        GraphicsDevice device);
+
+    /// <inheritdoc cref="hook_PreDrawSun"/>
+    [method: ModCall] // add_PreDrawSun, remove_PreDrawSun.
+    public static event hook_PreDrawSun? PreDrawSun;
+
+    /// <summary>
+    /// Used for drawing after the (high-res) sun draws. Useful for things similar to the vanilla sunglasses effect.
+    /// </summary>
+    public delegate void hook_PostDrawSun(
+        SpriteBatch spriteBatch,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        GraphicsDevice device);
+
+    /// <inheritdoc cref="hook_PostDrawSun"/>
+    [method: ModCall] // add_PostDrawSun, remove_PostDrawSun.
+    public static event hook_PostDrawSun? PostDrawSun;
+
+    #endregion
+
+    #region Moon
+
     /// <summary>
     /// Used for modifying the moon texture without being tied to <see cref="Main.moonType"/>.
     /// </summary>
     public delegate void hook_ModifyMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon);
 
     /// <inheritdoc cref="hook_ModifyMoonTexture"/>
-    [method: ModCall]
+    [method: ModCall] // add_ModifyMoonTexture, remove_ModifyMoonTexture.
     public static event hook_ModifyMoonTexture? ModifyMoonTexture;
 
     /// <summary>
@@ -49,7 +84,7 @@ public static class SunAndMoonHooks
         bool nonEventMoon);
 
     /// <inheritdoc cref="hook_PreDrawMoon"/>
-    [method: ModCall]
+    [method: ModCall] // add_PreDrawMoon, remove_PreDrawMoon.
     public static event hook_PreDrawMoon? PreDrawMoon;
 
     /// <summary>
@@ -70,14 +105,67 @@ public static class SunAndMoonHooks
         bool nonEventMoon);
 
     /// <inheritdoc cref="hook_PostDrawMoon"/>
-    [method: ModCall]
+    [method: ModCall] // add_PostDrawMoon, remove_PostDrawMoon.
     public static event hook_PostDrawMoon? PostDrawMoon;
+
+    #endregion
+
+    public delegate void hook_OnUpdateSunAndMoonInfo(SunAndMoonInfo info);
+
+    public static event hook_OnUpdateSunAndMoonInfo? OnUpdateSunAndMoonInfo;
 
     #endregion
 
     #region Public Methods
 
         // Methods below are mainly included for Mod.Call support.
+    #region Sun
+
+    [ModCall]
+    public static void AddPreDrawSun(hook_PreDrawSun preDraw) =>
+        PreDrawSun += preDraw;
+
+    [ModCall]
+    public static void AddPostDrawSun(hook_PostDrawSun postDraw) =>
+        PostDrawSun += postDraw;
+
+    [ModCall("PreDrawSun")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool InvokePreDrawSun(
+        SpriteBatch spriteBatch,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        GraphicsDevice device)
+    {
+        bool ret = true;
+
+        if (PreDrawSun is null)
+            return true;
+
+        foreach (hook_PreDrawSun handler in
+            PreDrawSun.GetInvocationList().Select(h => (hook_PreDrawSun)h))
+            ret &= handler(spriteBatch, ref position, ref color, ref rotation, ref scale, device);
+
+        return ret;
+    }
+
+    [ModCall("PostDrawSun")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void InvokePostDrawSun(
+        SpriteBatch spriteBatch,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        GraphicsDevice device) =>
+        PostDrawSun?.Invoke(spriteBatch, position, color, rotation, scale, device);
+
+    #endregion
+
+    #region Moon
+
     [ModCall("CreateMoonStyle", "AddMoonTexture")]
     public static void AddMoonStyle(int index, Asset<Texture2D> texture) =>
         ExtraMoonStyles.Add(index, texture);
@@ -140,8 +228,16 @@ public static class SunAndMoonHooks
         bool nonEventMoon) =>
         PostDrawMoon?.Invoke(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device, nonEventMoon);
 
+    #endregion
+
+    public static void InvokeOnUpdateSunAndMoonInfo(SunAndMoonInfo info) =>
+        OnUpdateSunAndMoonInfo?.Invoke(info);
+
     public static void Clear()
     {
+        PreDrawSun = null;
+        PostDrawSun = null;
+
         ExtraMoonStyles.Clear();
 
         ModifyMoonTexture = null;

@@ -10,6 +10,7 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -78,6 +79,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
     {
         get
         {
+                // TODO: Move to BetterNightSkySystem.UseBigMoonTexture
             if (NonEventMoon &&
                 BetterNightSkySystem.IsEnabled &&
                 BetterNightSkySystem.UseBigMoon)
@@ -96,6 +98,9 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         MainThreadSystem.Enqueue(() =>
             On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
 
+        PreDrawSun += SunEclipsePreDraw;
+        PostDrawSun += SunSunglassesPostDraw;
+
         PreDrawMoon += Moon2PreDraw;
         PostDrawMoon += Moon2PostDraw;
 
@@ -111,6 +116,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Drawing
 
+    [ModCall]
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void DrawSunAndMoon(SpriteBatch spriteBatch, GraphicsDevice device, bool showSun, bool showMoon)
     {
@@ -124,6 +130,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Sun Drawing
 
+    [ModCall]
     public static void DrawSun(SpriteBatch spriteBatch, GraphicsDevice device)
     {
         Viewport viewport = device.Viewport;
@@ -136,72 +143,59 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         DrawSun(spriteBatch, Info.SunPosition, Info.SunColor, Info.SunRotation, Info.SunScale, distanceFromCenter, distanceFromTop, device);
     }
 
+    [ModCall]
     public static void DrawSun(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, float distanceFromCenter, float distanceFromTop, GraphicsDevice device)
     {
-        if (RealisticSkySystem.IsEnabled && SkyConfig.Instance.RealisticSun)
-        {
-            RealisticSkySystem.DrawSun();
-            return;
-        }
-
-        if (Main.eclipse)
-        {
-            DrawEclipse(spriteBatch, position, color, rotation, scale, device);
-            return;
-        }
-
         color.A = 0;
 
-        float offscreenMultiplier = Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
-
-        #region Bloom
-
-        Texture2D bloom = SkyTextures.SunBloom.Value;
-        Vector2 bloomOrigin = bloom.Size() * 0.5f;
-
-        Color outerGlowColor = color * SunOuterGlowOpacity;
-        spriteBatch.Draw(bloom, position, null, outerGlowColor, 0, bloomOrigin, SunOuterGlowScale * scale, SpriteEffects.None, 0f);
-
-        Color innerGlowColor = color * (1 + (distanceFromCenter * SunInnerGlowColorMultiplier));
-        spriteBatch.Draw(bloom, position, null, innerGlowColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
-
-        float hugeGlowMultiplier = Main.atmo * distanceFromCenter;
-        Color hugeGlowColor = color * SunHugeGlowOpacity * offscreenMultiplier * hugeGlowMultiplier;
-        spriteBatch.Draw(bloom, position, null, hugeGlowColor, 0, bloomOrigin, SunHugeGlowScale * hugeGlowMultiplier * scale, SpriteEffects.None, 0f);
-
-        #endregion
-
-        #region Flare
-
-            // This draws a similar effect to that seen in 1.4.5 leaks.
-        float flareWidth = distanceFromCenter * distanceFromTop * offscreenMultiplier;
-
-        for (int i = 0; i < FlareScales.Length; i++)
+        if (InvokePreDrawSun(spriteBatch, ref position, ref color, ref rotation, ref scale, device))
         {
-            Vector2 flareScale = new(FlareScales[i].X * flareWidth, FlareScales[i].Y);
-            Color flareColor = color * FlareOpacities[i];
-            spriteBatch.Draw(bloom, position, null, flareColor, 0, bloomOrigin, flareScale * scale, SpriteEffects.None, 0f);
+            float offscreenMultiplier = Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
+
+            #region Bloom
+
+            Texture2D bloom = SkyTextures.SunBloom.Value;
+            Vector2 bloomOrigin = bloom.Size() * 0.5f;
+
+            Color outerGlowColor = color * SunOuterGlowOpacity;
+            spriteBatch.Draw(bloom, position, null, outerGlowColor, 0, bloomOrigin, SunOuterGlowScale * scale, SpriteEffects.None, 0f);
+
+            Color innerGlowColor = color * (1 + (distanceFromCenter * SunInnerGlowColorMultiplier));
+            spriteBatch.Draw(bloom, position, null, innerGlowColor, 0, bloomOrigin, SunInnerGlowScale * scale, SpriteEffects.None, 0f);
+
+            float hugeGlowMultiplier = Main.atmo * distanceFromCenter;
+            Color hugeGlowColor = color * SunHugeGlowOpacity * offscreenMultiplier * hugeGlowMultiplier;
+            spriteBatch.Draw(bloom, position, null, hugeGlowColor, 0, bloomOrigin, SunHugeGlowScale * hugeGlowMultiplier * scale, SpriteEffects.None, 0f);
+
+            #endregion
+
+            #region Flare
+
+                // This draws a similar effect to that seen in 1.4.5 leaks.
+            float flareWidth = distanceFromCenter * distanceFromTop * offscreenMultiplier;
+
+            for (int i = 0; i < FlareScales.Length; i++)
+            {
+                Vector2 flareScale = new(FlareScales[i].X * flareWidth, FlareScales[i].Y);
+                Color flareColor = color * FlareOpacities[i];
+                spriteBatch.Draw(bloom, position, null, flareColor, 0, bloomOrigin, flareScale * scale, SpriteEffects.None, 0f);
+            }
+
+            #endregion
         }
 
-        #endregion
-
-        #region Sungls
-
-        if (!Main.gameMenu && Main.LocalPlayer.head == 12)
-        {
-            Texture2D sunglasses = SkyTextures.Sunglasses.Value;
-            spriteBatch.Draw(sunglasses, position, null, Color.White, rotation, sunglasses.Size() * .5f, SunglassesScale * scale, SpriteEffects.None, 0f);
-        }
-
-        #endregion
+        InvokePostDrawSun(spriteBatch, position, color, rotation, scale, device);
     }
 
     #region Eclipse
 
-    private static void DrawEclipse(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, GraphicsDevice device)
+    private static bool SunEclipsePreDraw(SpriteBatch spriteBatch, ref Vector2 position, ref Color color, ref float rotation, ref float scale, GraphicsDevice device)
     {
+        if (!Main.eclipse)
+            return true;
+
         Texture2D bloom = SkyTextures.SunBloom.Value;
-        Vector2 bloomOrigin = bloom.Size() * 0.5f;
+        Vector2 bloomOrigin = bloom.Size() * .5f;
 
         color.A = 0;
 
@@ -209,6 +203,27 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
             spriteBatch.Draw(bloom, position, null, color * EclipseColorMultipliers[i], 0, bloomOrigin, scale * EclipseBloomScales[i], SpriteEffects.None, 0f);
 
         DrawMoon(spriteBatch, position, Color.Black, rotation, scale, Color.Black, Color.Black, device);
+
+        return false;
+    }
+
+    #endregion
+
+    #region Sunglasses
+
+    public static void SunSunglassesPostDraw(
+        SpriteBatch spriteBatch,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        GraphicsDevice device)
+    {
+        if (Main.gameMenu || Main.LocalPlayer.head == 12)
+            return;
+
+        Texture2D sunglasses = SkyTextures.Sunglasses.Value;
+        spriteBatch.Draw(sunglasses, position, null, Color.White, rotation, sunglasses.Size() * .5f, SunglassesScale * scale, SpriteEffects.None, 0f);
     }
 
     #endregion
@@ -217,6 +232,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Moon Drawing
 
+    [ModCall]
     public static void DrawMoon(SpriteBatch spriteBatch, GraphicsDevice device)
     {
         Color skyColor = Main.ColorOfTheSkies.MultiplyRGB(SkyColor);
@@ -228,6 +244,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         DrawMoon(spriteBatch, Info.MoonPosition, Info.MoonColor, Info.MoonRotation, Info.MoonScale, moonColor, moonShadowColor, device);
     }
 
+    [ModCall]
     public static void DrawMoon(SpriteBatch spriteBatch, Vector2 position, Color color, float rotation, float scale, Color moonColor, Color shadowColor, GraphicsDevice device)
     {
         Asset<Texture2D> moon = MoonTexture;

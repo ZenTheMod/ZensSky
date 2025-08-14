@@ -1,5 +1,6 @@
 ﻿using BetterNightSky;
 using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
@@ -17,6 +18,7 @@ using ZensSky.Common.Config;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.Stars.StarHooks;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 
@@ -59,6 +61,8 @@ public sealed class BetterNightSkySystem : ModSystem
     public override void Load()
     {
         IsEnabled = true;
+
+        PostDrawStars += StarsSpecialPostDraw;
 
         ModifyMoonTexture += UseBigMoonTexture;
 
@@ -258,8 +262,7 @@ public sealed class BetterNightSkySystem : ModSystem
     #region Drawing
 
         // TODO: Include other non 'Special' star drawing.
-    [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void DrawSpecialStars(float alpha)
+    public static void StarsSpecialPostDraw(SpriteBatch spriteBatch, float alpha, Matrix transform)
     {
         Main.spriteBatch.End(out var snapshot);
         Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
