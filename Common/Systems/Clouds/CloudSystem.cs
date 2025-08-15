@@ -4,20 +4,16 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using System;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
-using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Systems.ModCall;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
 
@@ -34,14 +30,24 @@ public sealed class CloudSystem : ModSystem
     private static readonly Color SunMultiplier = new(255, 245, 225);
     private static readonly Color MoonMultiplier = new(40, 40, 50);
 
-    private delegate void orig_DrawCloud(int cloudIndex, Color color, float yOffset);
-    private static Hook? PatchDrawCloud;
+    private static RenderTarget2D? OccludersTarget;
+    private static RenderTarget2D? CloudsTarget;
+
+    private static RenderTargetBinding[]? PreviousTargets;
+
+    private static bool CanDrawClouds;
 
     #endregion
 
     #region Public Properties
 
-    public static bool LightClouds { get; set; }
+    public static bool ShowCloudLighting
+    {
+        [ModCall(nameof(ShowCloudLighting), "GetShowCloudLighting")]
+        get;
+        [ModCall("SetShowCloudLighting")]
+        set;
+    }
 
     #endregion
 
@@ -51,13 +57,7 @@ public sealed class CloudSystem : ModSystem
     {
         MainThreadSystem.Enqueue(() =>
         {
-            IL_Main.DrawSurfaceBG += ApplyCloudLighting;
-
-            MethodInfo? drawCloud = typeof(Main).GetMethod($"<{nameof(Main.DrawSurfaceBG)}>g__DrawCloud|1826_0", Static | NonPublic);
-
-            if (drawCloud is not null)
-                PatchDrawCloud = new(drawCloud,
-                    ApplyEdgeLighting);
+            IL_Main.DrawSurfaceBG += CloudLighting;
         }); 
     }
 
@@ -65,110 +65,107 @@ public sealed class CloudSystem : ModSystem
     {
         MainThreadSystem.Enqueue(() =>
         {
-            IL_Main.DrawSurfaceBG -= ApplyCloudLighting;
-            PatchDrawCloud?.Dispose();
+            IL_Main.DrawSurfaceBG -= CloudLighting;
+
+            OccludersTarget?.Dispose();
+            CloudsTarget?.Dispose();
         });
     }
 
     #endregion
 
-    private void ApplyCloudLighting(ILContext il)
+    #region Cloud Lighting
+
+    private void CloudLighting(ILContext il)
     {
         try
         {
             ILCursor c = new(il);
 
-            VariableDefinition snapshot = c.AddVariable<SpriteBatchSnapshot>();
+            #region Setup
 
-            #region Shader Parameters
+            int canDrawCloudsIndex = -1;
 
-            c.EmitDelegate(() =>
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdcI4(out _),
+                i => i.MatchStloc(out canDrawCloudsIndex));
+
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdsfld<Main>(nameof(Main.ColorOfSurfaceBackgroundsBase)));
+
+            c.MoveAfterLabels();
+
+                // See if we even need to capture the background.
+            c.EmitLdloc(canDrawCloudsIndex);
+
+            c.EmitDelegate((bool canDrawClouds) =>
             {
-                if (!SkyConfig.Instance.CloudsEnabled ||
-                    !SkyEffects.CloudLighting.IsReady)
-                    return;
-
-                Viewport viewport = Main.instance.GraphicsDevice.Viewport;
-
-                Vector2 viewportSize = viewport.Bounds.Size();
-                SkyEffects.CloudLighting.ScreenSize = viewportSize;
-
-                SkyEffects.CloudLighting.UseEdgeLighting = false;
-
-                Vector2 sunPosition = Info.SunPosition;
-                Vector2 moonPosition = Info.MoonPosition;
-
-                if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
-                {
-                    sunPosition.Y = viewportSize.Y - sunPosition.Y;
-                    moonPosition.Y = viewportSize.Y - moonPosition.Y;
-                }
-
-                SkyEffects.CloudLighting.SunPosition = sunPosition;
-                SkyEffects.CloudLighting.MoonPosition = moonPosition;
-
-                Color sunColor = GetColor(true);
-                SkyEffects.CloudLighting.SunColor = sunColor.ToVector4();
-
-                Color moonColor = GetColor(false);
-                SkyEffects.CloudLighting.MoonColor = moonColor.ToVector4();
-
-                SkyEffects.CloudLighting.DrawSun = Main.dayTime && ShowSun;
-                SkyEffects.CloudLighting.DrawMoon = (RedSunSystem.IsEnabled || !Main.dayTime) && ShowMoon;
+                CanDrawClouds =
+                    canDrawClouds &&
+                    Main.numClouds > 0 &&
+                    Main.screenPosition.Y < (Main.worldSurface * 16) + 16 &&
+                    SkyConfig.Instance.CloudsEnabled &&
+                    (ShowCloudLighting = true) &&
+                    SkyEffects.CloudLighting.IsReady;
             });
 
             #endregion
+
+            #region Capturing Clouds
+
+                // Begin capturing occluders.
+            c.EmitDelegate(BeginCapturingOccluders);
 
             #region Various Clouds
 
             for (int i = 0; i < 3; i++)
             {
                     // Match to before the loop.
-                c.GotoNext(MoveType.Before, 
+                c.GotoNext(MoveType.Before,
                     i => i.MatchBr(out _),
                     i => i.MatchLdsfld<Main>(nameof(Main.cloud)),
                     i => i.MatchLdloc(out _),
                     i => i.MatchLdelemRef(),
                     i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
 
-                    // Apply our shader.
-                c.EmitLdloca(snapshot);
-                c.EmitDelegate(ApplyShader);
+                    // Begin capturing clouds.
+                c.EmitDelegate(BeginCapturingClouds);
 
-                    // Match to after the loop.
-                c.GotoNext(MoveType.After, 
+                    // Match to after the loop ends.
+                c.GotoNext(MoveType.After,
                     i => i.MatchLdloc(out _),
-                    i => i.MatchLdcI4(1),
+                    i => i.MatchLdcI4(out _),
                     i => i.MatchAdd(),
                     i => i.MatchStloc(out _),
                     i => i.MatchLdloc(out _),
-                    i => i.MatchLdcI4(200),
+                    i => i.MatchLdcI4(out _),
                     i => i.MatchBlt(out _));
 
-                c.EmitLdloc(snapshot);
-                c.EmitDelegate(ResetSpritebatch);
+                    // 0/false is used to tell EndCapturingClouds to swap back to PreviousTargets.
+                    // 1/true is used to tell EndCapturingClouds to continue capturing to OccludersTarget.
+                c.EmitLdcI4(i == 2 ? 0 : 1);
+                c.EmitDelegate(EndCapturingClouds);
             }
 
             #endregion
 
             #region CloudBG
 
-                // Match to before the loop.
+                // Match to before the first loop.
             c.GotoPrev(MoveType.Before,
                 i => i.MatchBr(out _),
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchLdsfld(typeof(TextureAssets).FullName ?? "Terraria.GameContent.TextureAssets", nameof(TextureAssets.Background)),
                 i => i.MatchLdsfld<Main>(nameof(Main.cloudBG)),
-                i => i.MatchLdcI4(0),
+                i => i.MatchLdcI4(out _),
                 i => i.MatchLdelemI4());
 
-                // Apply our shader.
-            c.EmitLdloca(snapshot);
-            c.EmitDelegate(ApplyShader);
+                // Begin capturing clouds.
+            c.EmitDelegate(BeginCapturingClouds);
 
                 // Match to after the loop of the other drawn cloud background.
             c.GotoNext(MoveType.After,
-                i => i.MatchLdloc(22), // I dislike this.
+                i => i.MatchLdloc(22),
                 i => i.MatchLdcI4(1),
                 i => i.MatchAdd(),
                 i => i.MatchStloc(out _),
@@ -177,17 +174,12 @@ public sealed class CloudSystem : ModSystem
                 i => i.MatchLdfld<Main>(nameof(Main.bgLoops)),
                 i => i.MatchBlt(out _));
 
-            c.EmitLdloc(snapshot);
-            c.EmitDelegate(ResetSpritebatch);
+            c.EmitLdcI4(1);
+            c.EmitDelegate(EndCapturingClouds);
 
             #endregion
 
-            c.GotoNext(MoveType.Before,
-                i => i.MatchRet());
-
-            c.MoveAfterLabels();
-
-            c.EmitDelegate(() => { LightClouds = true; });
+            #endregion
         }
         catch (Exception e)
         {
@@ -195,75 +187,100 @@ public sealed class CloudSystem : ModSystem
         }
     }
 
-    private static void ApplyEdgeLighting(orig_DrawCloud orig, int cloudIndex, Color color, float yOffset)
+    #endregion
+
+    private static void BeginCapturingOccluders()
     {
-        if (!ZensSky.CanDrawSky || 
-            !LightClouds || 
-            !SkyConfig.Instance.CloudsEnabled || 
-            !SkyConfig.Instance.CloudsEdgeLighting || 
-            !SkyEffects.CloudLighting.IsReady)
-        {
-            orig(cloudIndex, color, yOffset);
-            return;
-        }
-
-        SkyEffects.CloudLighting.UseEdgeLighting = true;
-
-        Cloud cloud = Main.cloud[cloudIndex];
-
-            // This has the potential to break when modders use custom draw functions with a ModCloud class, but no one uses ModCloud anyway lmao.
-        Texture2D cloudTexture = TextureAssets.Cloud[cloud.type].Value;
-
-        Vector2 pixelSize = new Vector2(2) / cloudTexture.Size();
-        pixelSize /= cloud.scale;
-
-        SkyEffects.CloudLighting.Pixel = pixelSize;
-
-            // Account for the sprite direction.
-        SpriteEffects dir = cloud.spriteDir;
-
-        Vector2 flip = new(
-            dir.HasFlag(SpriteEffects.FlipHorizontally) ? -1 : 1,
-            dir.HasFlag(SpriteEffects.FlipVertically) ? -1 : 1);
-
-        SkyEffects.CloudLighting.Flipped = flip;
-
-        orig(cloudIndex, color, yOffset);
-    }
-
-    private static void ApplyShader(ref SpriteBatchSnapshot snapshot)
-    {
-        if (!ZensSky.CanDrawSky || 
-            !LightClouds || 
-            !SkyConfig.Instance.CloudsEnabled || 
-            !SkyEffects.CloudLighting.IsReady)
+        if (!CanDrawClouds)
             return;
 
-        SkyEffects.CloudLighting.UseEdgeLighting = false;
+        SpriteBatch spriteBatch = Main.spriteBatch;
 
-        SkyEffects.CloudLighting.Apply();
-
-        bool edgeLighting = SkyConfig.Instance.CloudsEdgeLighting;
-
-        Main.spriteBatch.End(out snapshot);
-        Main.spriteBatch.Begin(edgeLighting ? SpriteSortMode.Immediate : snapshot.SortMode, snapshot.BlendState, SamplerState.PointClamp, snapshot.DepthStencilState, snapshot.RasterizerState, SkyEffects.CloudLighting.Value, snapshot.TransformMatrix);
+        spriteBatch.End(out var snapshot);
 
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-            // Samples the moon texture to grab a more accurate color. (May not work correctly when not using the moon overhaul.)
-        device.Textures[1] = MoonTexture.Value;
-        device.SamplerStates[1] = SamplerState.PointWrap;
+        PreviousTargets = device.GetRenderTargets();
+
+            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
+        foreach (RenderTargetBinding oldTarg in PreviousTargets)
+            if (oldTarg.RenderTarget is RenderTarget2D rt)
+                rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        Viewport viewport = device.Viewport;
+
+        Utilities.ReintializeTarget(ref OccludersTarget, device, viewport.Width, viewport.Height);
+
+        device.SetRenderTarget(OccludersTarget);
+        device.Clear(Color.Transparent);
+
+        spriteBatch.Begin(in snapshot);
     }
 
-    private static void ResetSpritebatch(SpriteBatchSnapshot snapshot)
+    private static void BeginCapturingClouds()
     {
-        if (!ZensSky.CanDrawSky || !LightClouds || !SkyConfig.Instance.CloudsEnabled)
+        if (!CanDrawClouds)
             return;
 
-        Main.spriteBatch.Restart(in snapshot);
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        spriteBatch.End(out var snapshot);
+
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        Viewport viewport = device.Viewport;
+
+        Utilities.ReintializeTarget(ref CloudsTarget, device, viewport.Width, viewport.Height);
+
+        device.SetRenderTarget(CloudsTarget);
+        device.Clear(Color.Transparent);
+
+        spriteBatch.Begin(in snapshot);
     }
 
-    private static Color GetColor(bool day)
+    private static void EndCapturingClouds(bool beginCapturing)
+    {
+        if (!CanDrawClouds)
+            return;
+
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        spriteBatch.End(out var snapshot);
+
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        Viewport viewport = device.Viewport;
+
+        Utilities.ReintializeTarget(ref OccludersTarget, device, viewport.Width, viewport.Height);
+
+            // Swap back to the screen target and draw the clouds with the lighting shader attached.
+        device.SetRenderTargets(PreviousTargets);
+
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+
+            // Hi ebonf.ly !
+            // [Apply shader here] [Should be under the 'SkyEffects.CloudLighting' namespace and located at 'Assets/Effects/Sky/CloudLighting.fx']
+
+        spriteBatch.Draw(CloudsTarget, Utilities.ScreenDimensions, Color.White);
+
+        if (beginCapturing)
+        {
+            spriteBatch.End();
+
+                // Draw clouds as occluders, and begin capturing the background again.
+            device.SetRenderTarget(OccludersTarget);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+
+            spriteBatch.Draw(CloudsTarget, Utilities.ScreenDimensions, Color.White);
+        }
+
+        spriteBatch.Restart(in snapshot);
+    }
+
+    private static Color GetLightColor(bool day)
     {
             // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
         Vector2 position = day ? Info.SunPosition : Info.MoonPosition;

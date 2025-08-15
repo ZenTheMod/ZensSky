@@ -203,11 +203,12 @@ public sealed class PixelateSkySystem : ModSystem
 
         PreviousTargets = device.GetRenderTargets();
 
-            // Make sure that we can swap back to the previous targets without losing any information.
-                // Lolxd might purge me for meddling with this during drawing.
+            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
         foreach (RenderTargetBinding oldTarg in PreviousTargets)
             if (oldTarg.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
 
         Viewport viewport = device.Viewport;
 

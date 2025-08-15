@@ -26,7 +26,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     private const int SunTopBuffer = 50;
 
-    private static readonly Vector2[] FlareScales = [new(6f, .02f), new(3.3f, .09f), new(2f, .06f)];
+    private static readonly Vector2[] FlareScales = [new(3f, .02f), new(1.15f, .09f), new(1f, .06f)];
     private static readonly float[] FlareOpacities = [.6f, .3f, 1f];
 
     private const float FlareEdgeFallOffStart = 1f;

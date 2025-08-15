@@ -32,8 +32,8 @@ public sealed class RedSunSystem : ModSystem
 
     private const int SunMoonY = -80;
 
-    private const float MinSunBrightness = 0.82f;
-    private const float MinMoonBrightness = 0.35f;
+    private const float MinSunBrightness = .82f;
+    private const float MinMoonBrightness = .65f;
 
     private static ILHook? PatchSunAndMoonDrawing;
 

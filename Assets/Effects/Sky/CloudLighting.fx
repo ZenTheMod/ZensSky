@@ -1,14 +1,6 @@
 sampler Clouds : register(s0);
 sampler Moon : register(s1);
 
-float2 ScreenSize;
-
-float2 Pixel;
-
-float2 Flipped;
-
-bool UseEdgeLighting;
-
 bool DrawSun;
 float2 SunPosition;
 float4 SunColor;
@@ -16,26 +8,6 @@ float4 SunColor;
 bool DrawMoon;
 float2 MoonPosition;
 float4 MoonColor;
-
-float EdgeLighting(float2 screen, float2 light, float2 uv)
-{
-    float3 e = float3(Pixel, 0);
-    
-    float up = tex2D(Clouds, uv - e.zy).a * step(0, uv.y - e.y);
-    float down = tex2D(Clouds, uv + e.zy).a * (1 - step(1, uv.y + e.y));
-    float right = tex2D(Clouds, uv - e.xz).a * step(0, uv.x - e.x);
-    float left = tex2D(Clouds, uv + e.xz).a * (1 - step(1, uv.x + e.x));
-    
-    float dy = (up - down) * .5;
-    float dx = (right - left) * .5;
-    
-    float2 direction = float2(dx, dy) * Flipped;
-    
-        // Get the dot product between the alpha difference angle and the direction to the sun.
-    float dirsun = dot(direction, normalize(light - screen));
-    
-    return saturate(dirsun);
-}
 
 float4 Lighting(float2 lightPosition, float2 screenPosition, float2 uv, float4 lightColor, float4 cloud)
 {
@@ -52,24 +24,11 @@ float4 Lighting(float2 lightPosition, float2 screenPosition, float2 uv, float4 l
         // Combine the distance with the dark parts to make it look as if light is bleeding through.
     float glow = distlight * ((shadows * 2.7) + (cloud.r * .65));
     
-    float4 outer = float4(0, 0, 0, 0);
-    
-    if (UseEdgeLighting)
-    {
-        float edge = EdgeLighting(screen, light, uv);
-        
-        float distedge = saturate(1 - (dist * 2.5));
-        
-        outer = lightColor * 1.5 * distedge * edge;
-    }
-    
     float4 inner = lightColor * 2. * distlight * glow;
     
-    return saturate(inner) + saturate(outer);
+    return saturate(inner);
 }
 
-    // https://www.shadertoy.com/view/tX2Xzc
-        // This shader uses SV_POSITION to grab the coordinate on the screen of the pixel being drawn, rather than the texture coordinate.
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0, float2 screenCoords : SV_POSITION) : COLOR0
 {
     float4 cloud = tex2D(Clouds, coords);
