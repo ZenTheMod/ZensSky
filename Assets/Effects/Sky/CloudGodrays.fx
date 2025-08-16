@@ -21,7 +21,8 @@ float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos, float d
 {
     float2 dist = (lightpos - screenCoords) / min(screenSize.x, screenSize.y);
     
-    float2 dtc = dist * (1 / samples);
+        // Use 1. to avoid integer division.
+    float2 dtc = dist * (1. / samples);
     
     float2 offset = dither * dtc;
     
@@ -55,7 +56,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
     float dither = bayer[bayeruv.x][bayeruv.y];
     
     float4 color = lightColor *
-            blur(coords, screenCoords, sampleCount, lightPosition, dither);
+        blur(coords, screenCoords, sampleCount, lightPosition, dither);
     
     if (shouldSample)
         color *= tex2D(Body, .5);

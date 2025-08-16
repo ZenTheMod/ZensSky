@@ -27,7 +27,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
     
     float4 color = cloud * sampleColor;
     
-    return color + (light * color.a) * step(coords.x, .5);
+    return color + (light * color.a);
 }
 
 technique Technique1

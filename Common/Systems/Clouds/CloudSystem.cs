@@ -1,10 +1,7 @@
-﻿using Daybreak.Common.CIL;
-using Daybreak.Common.Rendering;
+﻿using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil.Cil;
 using MonoMod.Cil;
-using SteelSeries.GameSense;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -250,7 +247,7 @@ public sealed class CloudSystem : ModSystem
         {
             device.Clear(Color.Transparent);
 
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
             DrawGodrays(spriteBatch);
 
@@ -285,8 +282,6 @@ public sealed class CloudSystem : ModSystem
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
-            spriteBatch.Draw(MiscTextures.Pixel, Utilities.ScreenDimensions, Color.Black);
-            spriteBatch.Draw(LightTarget, Utilities.ScreenDimensions, Color.White);
             spriteBatch.Draw(OccludersTarget, Utilities.ScreenDimensions, Color.White);
 
             spriteBatch.End();
@@ -333,10 +328,10 @@ public sealed class CloudSystem : ModSystem
             SkyConfig.Instance.SunAndMoonRework ? MoonTexture.Value : null;
 
         if (showSun)
-            DrawLight(spriteBatch, sunPosition, sunColor, sunSize, device);
+            DrawLight(spriteBatch, sunPosition, sunColor * 99f, sunSize, device);
 
         if (showMoon)
-            DrawLight(spriteBatch, moonPosition, moonColor, moonSize, device, moonTexture);
+            DrawLight(spriteBatch, moonPosition, moonColor*99f, moonSize, device, moonTexture);
     }
 
     private static void DrawLight(SpriteBatch spriteBatch, Vector2 lightPosition, Color lightColor, float lightSize, GraphicsDevice device, Texture2D? body = null)
