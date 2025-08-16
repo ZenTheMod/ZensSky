@@ -1,0 +1,90 @@
+DisplayName: Sky Config
+
+Headers: {
+	SunMoon: Sun and Moon
+	Stars: Stars
+	Clouds: Clouds
+	Ambient: Ambient Effects
+	Pixelation: Pixelation
+}
+
+SunAndMoonRework: {
+	Label: "[i:237] Sun And Moon Overhaul"
+	Tooltip: If the visual overhaul of the sun and moon is enabled or not.
+}
+
+TransparentMoonShadow: {
+	Label: "[i:485] Transparent Moon Shadow"
+	Tooltip: If the moon's shadow is transparent to replicate the look of the current Terraria moon sprites.
+	LockReason: Requires 'Sun And Moon Overhaul' to be enabled!
+}
+
+RealisticSun: {
+	Label: "[i:824] Realistic Sun"
+	Tooltip: If the sun from 'Realistic Sky' is used instead of the sun from this mod.
+	LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
+}
+
+StarStyle: {
+	Label: "[i:184] Star Style"
+	Tooltip:
+		'''
+		Which of the five styles to draw stars with.
+		(Can look strange with 'Pixelated Sky' enabled.)
+		'''
+}
+
+DrawRealisticStars: {
+	Label: "[i:184] Realistic Stars"
+	Tooltip: If stars from 'Realistic Sky' are used alongside the stars in this mod.
+	LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
+}
+
+PixelatedSky: {
+	Label: "[i:3725] Pixelated Sky"
+	Tooltip:
+		'''
+		Pixelates the Stars, Sun, and Moon.
+		(Can be less performant, due to extra reasources being used!)
+		'''
+}
+
+ColorSteps: {
+	Label: "[i:1067] Color Steps"
+	Tooltip: How many colors are used for the pixelation effect.
+	LockReason: Requires 'Pixelated Sky' to be enabled!
+}
+
+CloudsEnabled: {
+	Label: "[i:751] Fancy Cloud Lighting"
+	Tooltip: If clouds have added lighting.
+}
+
+CloudLightingSamples: {
+	Label: "[i:752] Cloud Lighting Quality"
+	Tooltip:
+		'''
+		The quality of the lighting effect used for clouds;
+		Lower Number - Faster, Lower Quality.
+		Higher Number - Slower, Higher Quality.
+		(Can be less performant, due to extra reasources being used!)
+		'''
+	LockReason: Requires 'Fancy Cloud Lighting' to be enabled!
+}
+
+WindParticles: {
+	Label: "[i:751] Wind Particles"
+	Tooltip: Enables small wind wisp particles.
+}
+
+WindOpacity: {
+	Label: "[i:751] Wind Opacity"
+	Tooltip: The alpha of the wisps of wind (1 = Opaque, 0 = Invisible)
+	LockReason: Requires 'Wind Particles' to be enabled!
+}
+
+PitchBlackBackground: {
+	Label: "[i:237] Pitch Black Background"
+	Tooltip: Makes the background pitch black during night.
+	LockReason: The mod 'Dark Surface' is enabled!
+}

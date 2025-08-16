@@ -1,5 +1,5 @@
 #include "../common.fxh"
-#include "../Compat/realisticSky.fx"
+#include "../Compat/realisticSky.fxh"
 
 sampler noise : register(s0);
 sampler atmosphere : register(s1);

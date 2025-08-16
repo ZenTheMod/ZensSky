@@ -1,4 +1,4 @@
-#include "../Compat/realisticSky.fx"
+#include "../Compat/realisticSky.fxh"
 
 sampler star : register(s0);
 sampler atmosphere : register(s1);

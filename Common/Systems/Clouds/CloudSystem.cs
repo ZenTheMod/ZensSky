@@ -4,15 +4,18 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
+using SteelSeries.GameSense;
 using System;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Core.Utils;
+using ZensSky.Common.Systems.Compat;
+using ZensSky.Core.DataStructures;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
+using ZensSky.Core.Utils;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Clouds;
@@ -31,7 +34,7 @@ public sealed class CloudSystem : ModSystem
     private static readonly Color MoonMultiplier = new(40, 40, 50);
 
     private static RenderTarget2D? OccludersTarget;
-    private static RenderTarget2D? CloudsTarget;
+    private static RenderTarget2D? LightTarget;
 
     private static RenderTargetBinding[]? PreviousTargets;
 
@@ -68,7 +71,7 @@ public sealed class CloudSystem : ModSystem
             IL_Main.DrawSurfaceBG -= CloudLighting;
 
             OccludersTarget?.Dispose();
-            CloudsTarget?.Dispose();
+            LightTarget?.Dispose();
         });
     }
 
@@ -106,15 +109,22 @@ public sealed class CloudSystem : ModSystem
                     Main.screenPosition.Y < (Main.worldSurface * 16) + 16 &&
                     SkyConfig.Instance.CloudsEnabled &&
                     (ShowCloudLighting = true) &&
-                    SkyEffects.CloudLighting.IsReady;
+                    SkyEffects.CloudLighting.IsReady &&
+                    SkyEffects.CloudGodrays.IsReady;
             });
+
+            c.GotoNext(MoveType.Before,
+                    i => i.MatchBr(out _),
+                    i => i.MatchLdsfld<Main>(nameof(Main.cloud)),
+                    i => i.MatchLdloc(out _),
+                    i => i.MatchLdelemRef(),
+                    i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
+
+            c.EmitDelegate(BeginCapturingOccluders);
 
             #endregion
 
             #region Capturing Clouds
-
-                // Begin capturing occluders.
-            c.EmitDelegate(BeginCapturingOccluders);
 
             #region Various Clouds
 
@@ -155,7 +165,7 @@ public sealed class CloudSystem : ModSystem
             c.GotoPrev(MoveType.Before,
                 i => i.MatchBr(out _),
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
-                i => i.MatchLdsfld(typeof(TextureAssets).FullName ?? "Terraria.GameContent.TextureAssets", nameof(TextureAssets.Background)),
+                i => i.MatchLdsfld(typeof(TextureAssets).FullName!, nameof(TextureAssets.Background)),
                 i => i.MatchLdsfld<Main>(nameof(Main.cloudBG)),
                 i => i.MatchLdcI4(out _),
                 i => i.MatchLdelemI4());
@@ -180,6 +190,8 @@ public sealed class CloudSystem : ModSystem
             #endregion
 
             #endregion
+
+            ILEditException.SafeDumpIL(Mod, il);
         }
         catch (Exception e)
         {
@@ -188,6 +200,8 @@ public sealed class CloudSystem : ModSystem
     }
 
     #endregion
+
+    #region Capturing
 
     private static void BeginCapturingOccluders()
     {
@@ -232,12 +246,22 @@ public sealed class CloudSystem : ModSystem
 
         Viewport viewport = device.Viewport;
 
-        Utilities.ReintializeTarget(ref CloudsTarget, device, viewport.Width, viewport.Height);
+        using (new RenderTargetSwap(ref LightTarget, viewport.Width, viewport.Height))
+        {
+            device.Clear(Color.Transparent);
 
-        device.SetRenderTarget(CloudsTarget);
-        device.Clear(Color.Transparent);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
-        spriteBatch.Begin(in snapshot);
+            DrawGodrays(spriteBatch);
+
+            spriteBatch.End();
+        }
+
+        Effect cloudLighting = ApplyCloudLighting(device);
+
+        spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, cloudLighting, snapshot.TransformMatrix);
+
+        device.Textures[1] = LightTarget;
     }
 
     private static void EndCapturingClouds(bool beginCapturing)
@@ -255,30 +279,108 @@ public sealed class CloudSystem : ModSystem
 
         Utilities.ReintializeTarget(ref OccludersTarget, device, viewport.Width, viewport.Height);
 
-            // Swap back to the screen target and draw the clouds with the lighting shader attached.
-        device.SetRenderTargets(PreviousTargets);
-
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
-
-            // Hi ebonf.ly !
-            // [Apply shader here] [Should be under the 'SkyEffects.CloudLighting' namespace and located at 'Assets/Effects/Sky/CloudLighting.fx']
-
-        spriteBatch.Draw(CloudsTarget, Utilities.ScreenDimensions, Color.White);
-
-        if (beginCapturing)
+        if (!beginCapturing)
         {
-            spriteBatch.End();
-
-                // Draw clouds as occluders, and begin capturing the background again.
-            device.SetRenderTarget(OccludersTarget);
+            device.SetRenderTargets(PreviousTargets);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
-            spriteBatch.Draw(CloudsTarget, Utilities.ScreenDimensions, Color.White);
+            spriteBatch.Draw(MiscTextures.Pixel, Utilities.ScreenDimensions, Color.Black);
+            spriteBatch.Draw(LightTarget, Utilities.ScreenDimensions, Color.White);
+            spriteBatch.Draw(OccludersTarget, Utilities.ScreenDimensions, Color.White);
+
+            spriteBatch.End();
         }
 
-        spriteBatch.Restart(in snapshot);
+        spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
     }
+
+    #endregion
+
+    #region Shaders
+
+    private static void DrawGodrays(SpriteBatch spriteBatch)
+    {
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        Viewport viewport = device.Viewport;
+
+        Vector2 viewportSize = viewport.Bounds.Size();
+
+        Vector2 sunPosition = Info.SunPosition;
+        Vector2 moonPosition = Info.MoonPosition;
+
+        if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
+        {
+            sunPosition.Y = viewportSize.Y - sunPosition.Y;
+            moonPosition.Y = viewportSize.Y - moonPosition.Y;
+        }
+
+        Color sunColor = GetLightColor(true);
+        Color moonColor = GetLightColor(false);
+
+        float sunSize = Info.SunScale;
+        float moonSize = Info.MoonScale;
+
+        bool showSun = ShowSun &&
+            Main.dayTime;
+
+        bool showMoon = ShowMoon &&
+            (RedSunSystem.IsEnabled || !Main.dayTime) &&
+            moonColor != Color.Transparent;
+
+        Texture2D? moonTexture =
+            SkyConfig.Instance.SunAndMoonRework ? MoonTexture.Value : null;
+
+        if (showSun)
+            DrawLight(spriteBatch, sunPosition, sunColor, sunSize, device);
+
+        if (showMoon)
+            DrawLight(spriteBatch, moonPosition, moonColor, moonSize, device, moonTexture);
+    }
+
+    private static void DrawLight(SpriteBatch spriteBatch, Vector2 lightPosition, Color lightColor, float lightSize, GraphicsDevice device, Texture2D? body = null)
+    {
+        Viewport viewport = device.Viewport;
+
+        Vector2 viewportSize = viewport.Bounds.Size();
+
+        SkyEffects.CloudGodrays.ScreenSize = viewportSize;
+
+        int sampleCount = SkyConfig.Instance.CloudLightingSamples;
+
+        SkyEffects.CloudGodrays.SampleCount = sampleCount;
+
+        SkyEffects.CloudGodrays.LightPosition = lightPosition;
+        SkyEffects.CloudGodrays.LightColor = lightColor.ToVector4();
+
+        SkyEffects.CloudGodrays.LightSize = lightSize;
+
+        if (body is not null)
+        {
+            SkyEffects.CloudGodrays.ShouldSample = true;
+            device.Textures[1] = body;
+        }
+
+        SkyEffects.CloudGodrays.Apply();
+
+        spriteBatch.Draw(OccludersTarget, Utilities.ScreenDimensions, Color.White);
+    }
+
+    private static Effect ApplyCloudLighting(GraphicsDevice device)
+    {
+        Viewport viewport = Main.instance.GraphicsDevice.Viewport;
+
+        Vector2 viewportSize = viewport.Bounds.Size();
+
+        SkyEffects.CloudLighting.ScreenSize = viewportSize;
+
+        SkyEffects.CloudLighting.Apply();
+
+        return SkyEffects.CloudLighting.Value;
+    }
+
+    #endregion
 
     private static Color GetLightColor(bool day)
     {
@@ -297,7 +399,7 @@ public sealed class CloudSystem : ModSystem
         color *= 1 - (position.Y / Utilities.ScreenSize.Y);
 
             // Decrease the intensity at noon to make the clouds not just be pure white.
-            // And alter the intensity depending on the moon phase, where a new moon casts no light.
+            // And alter the intensity depending on the moon phase, where a new moon would cast no light.
         if (day)
             color *= MathHelper.Lerp(NoonAlpha, 1f, MathF.Pow(distanceFromCenter, 2));
         else

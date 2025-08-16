@@ -53,7 +53,7 @@ public sealed class SkyConfig : ModConfig
     [LockedElement(typeof(SkyConfig), nameof(PixelatedSky), false)]
     [CustomModConfigItem(typeof(LockedIntSlider))]
     [SliderColor(240, 103, 135)]
-    [Range(8, 255)]
+    [Range(8, 256)]
     public int ColorSteps;
 
     [Header("Clouds")]
@@ -61,10 +61,12 @@ public sealed class SkyConfig : ModConfig
     [DefaultValue(true)]
     public bool CloudsEnabled;
 
-    [DefaultValue(true)]
+    [DefaultValue(32)]
     [LockedElement(typeof(SkyConfig), nameof(CloudsEnabled), false)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
-    public bool CloudsEdgeLighting;
+    [CustomModConfigItem(typeof(LockedIntSlider))]
+    [SliderColor(240, 103, 135)]
+    [Range(4, 128)]
+    public int CloudLightingSamples;
 
     [Header("Ambient")]
 

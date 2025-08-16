@@ -1,0 +1,60 @@
+DisplayName: Menu Config
+
+Parallax: {
+	Label: Parallax Direction
+	Tooltip:
+		'''
+		The direction the screen scrolls on the titlescreen.
+		(Defaults to 4)
+		'''
+}
+
+UseCloudDensity: {
+	Label: Uses Cloud Density
+	Tooltip: If the below option will be used upon load.
+}
+
+CloudDensity: {
+	Label: Cloud Density
+	Tooltip: The density of clouds on the titlescreen.
+}
+
+UseWind: {
+	Label: Use Wind Direction
+	Tooltip: If the below option will be used upon load.
+}
+
+Wind: {
+	Label: Wind Direction
+	Tooltip: The direction/speed of wind on the titlescreen.
+}
+
+Rain: {
+	Label: Rain Intensity
+	Tooltip: The intensity of rain on the titlescreen.
+}
+
+TimeMultiplier: {
+	Label: Time Multiplier
+	Tooltip: The speed of days on the titlescreen.
+}
+
+UseMenuButtonColor: {
+	Label: Uses Menu Button Color
+	Tooltip: If the below option will be used upon load.
+}
+
+MenuButtonColor: {
+	Label: Menu Button Color
+	Tooltip: The color of menu buttons.
+}
+
+UseMenuButtonHoverColor: {
+	Label: Uses Menu Button Hover Color
+	Tooltip: If the below option will be used upon load.
+}
+
+MenuButtonHoverColor: {
+	Label: Menu Button Hover Color
+	Tooltip: The color of menu buttons when hovered.
+}
