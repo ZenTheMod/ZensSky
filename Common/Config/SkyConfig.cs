@@ -65,7 +65,7 @@ public sealed class SkyConfig : ModConfig
     [LockedElement(typeof(SkyConfig), nameof(CloudsEnabled), false)]
     [CustomModConfigItem(typeof(LockedIntSlider))]
     [SliderColor(240, 103, 135)]
-    [Range(4, 128)]
+    [Range(4, 64)]
     public int CloudLightingSamples;
 
     [Header("Ambient")]

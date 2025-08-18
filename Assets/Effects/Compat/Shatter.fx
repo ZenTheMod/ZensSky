@@ -69,7 +69,7 @@ float4 PixelShaderFunction(VSOutput input) : COLOR0
 
 technique Technique1
 {
-    pass AutoloadPass
+    pass Pass1
     {
         VertexShader = compile vs_3_0 VertexShaderFunction();
         PixelShader = compile ps_3_0 PixelShaderFunction();

@@ -5,28 +5,25 @@ float2 lightPosition;
 float4 lightColor;
 float lightSize;
 
-bool shouldSample;
+bool useTexture;
 
 float2 screenSize;
 
 int sampleCount;
 
-static const float4x4 bayer = float4x4(
-    0, 8, 2, 10,
-    12, 4, 14, 6,
-    3, 11, 1, 9,
-    15, 7, 13, 5.6) / 16;
-
-float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos, float dither)
+float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos)
 {
     float2 dist = (lightpos - screenCoords) / min(screenSize.x, screenSize.y);
     
         // Use 1. to avoid integer division.
     float2 dtc = dist * (1. / samples);
     
-    float2 offset = dither * dtc;
+    float size = 3.9 / max(lightSize, .001);
     
-    float light = 1 - saturate(length(dist) * 3.4 / max(lightSize, .001));
+    float light = saturate(length(dist) * size);
+    
+    light *= light;
+    light = 1 - light;
     
     if (light <= 0)
         return 0;
@@ -35,13 +32,13 @@ float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos, float d
     
     samples = max(samples, 8);
     
-    [unroll(128)]
+    [unroll(64)]
     for (int i = 0; i < samples; i++)
     {
         uv += dtc;
         
         occ += light -
-        	tex2D(Occluders, uv + offset).a;
+        	tex2D(Occluders, uv);
     }
     
     occ /= samples;
@@ -53,12 +50,11 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
 {
     float2 bayeruv = frac(screenCoords.xy * .25) * 4;
     
-    float dither = bayer[bayeruv.x][bayeruv.y];
+    float4 color = lightColor;
     
-    float4 color = lightColor *
-        blur(coords, screenCoords, sampleCount, lightPosition, dither);
+    color.a *= blur(coords, screenCoords, sampleCount, lightPosition);
     
-    if (shouldSample)
+    if (useTexture)
         color *= tex2D(Body, .5);
     
     return color;
@@ -66,7 +62,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
 
 technique Technique1
 {
-    pass AutoloadPass
+    pass Pass1
     {
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }

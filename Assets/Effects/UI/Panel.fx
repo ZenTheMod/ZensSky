@@ -25,7 +25,7 @@ float4 PixelShaderFunction(float2 coords : SV_POSITION, float2 textureCoords : T
 
 technique Technique1
 {
-    pass AutoloadPass
+    pass Pass1
     {
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }

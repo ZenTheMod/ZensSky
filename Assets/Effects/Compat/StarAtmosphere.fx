@@ -18,7 +18,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float2 screenPosition : SV
 
 technique Technique1
 {
-    pass AutoloadPass
+    pass Pass1
     {
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }

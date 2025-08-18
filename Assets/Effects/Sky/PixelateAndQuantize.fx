@@ -39,12 +39,12 @@ float4 Pixelate(float4 sampleColor : COLOR0, float2 coords : TEXCOORD0) : COLOR0
 
 technique Technique1
 {
-    pass PixelateAndQuantizePass
+    pass Pass1
     {
         PixelShader = compile ps_2_0 PixelateAndQuantize();
     }
 
-    pass PixelatePass
+    pass Pass2
     {
         PixelShader = compile ps_2_0 PixelateAndQuantize();
     }
