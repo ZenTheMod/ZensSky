@@ -411,7 +411,6 @@ public sealed class CloudSystem : ModSystem
 
     private static Color GetLightColor(bool day)
     {
-            // This will behave a little buggy with Red Sun as the sun will take priority but I'm not implementing an array based light system as of now.
         Vector2 position = day ? Info.SunPosition : Info.MoonPosition;
         float centerX = Utilities.HalfScreenSize.X;
 
