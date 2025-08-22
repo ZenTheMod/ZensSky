@@ -254,6 +254,10 @@ public sealed class StarSystem : ModSystem
 
     public override void NetReceive(BinaryReader reader)
     {
+        if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
+            return;
+
+        
         try
         {
             StarRotation = reader.ReadSingle();
