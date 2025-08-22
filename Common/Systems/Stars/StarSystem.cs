@@ -256,7 +256,6 @@ public sealed class StarSystem : ModSystem
     {
         if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
             return;
-
         
         try
         {
