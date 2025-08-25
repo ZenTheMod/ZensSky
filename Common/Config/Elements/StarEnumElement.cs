@@ -21,11 +21,12 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
     private Star DisplayStar = new() 
     { 
         Position = Vector2.Zero,
-        BaseColor = Color.White,
-        BaseSize = 2f,
-        VanillaStyle = 0,
+        Color = Color.White,
+        Scale = 2f,
+        Style = 0,
         Rotation = 0,
-        Twinkle = 1f
+        Twinkle = 1f,
+        Disabled = false
     };
 
     public string[]? EnumNames;

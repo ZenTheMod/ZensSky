@@ -8,14 +8,6 @@ using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.DataStructures;
 
-public enum SupernovaProgress : byte
-{
-    None = 0,
-    Shrinking = 1,
-    Exploding = 2,
-    Regenerating = 3
-}
-
 public enum StarVisual : byte
 {
     Vanilla = 0,
@@ -27,7 +19,7 @@ public enum StarVisual : byte
 
     // Thanks to jupiter.ryo for early help with this.
 /// <summary>
-/// A simpler version of <see cref="Terraria.Star"/> that provides extra supernova functionality with <see cref="SupernovaTimer"/> and <see cref="SupernovaProgress"/>.
+/// A simpler version of <see cref="Terraria.Star"/> that allows for multiple styles.
 /// </summary>
 public record struct Star
 {
@@ -42,7 +34,7 @@ public record struct Star
     private const float MinSize = 0.3f;
     private const float MaxSize = 1.2f;
     private const float MaxTwinkle = 2f;
-    private const int VanillaStarStyles = 4;
+    private const int StarStyles = 4;
     private const float CircularRadius = 1200f;
     private const float LowTempThreshold = .4f;
     private const float HighTempThreshold = .6f;
@@ -67,25 +59,17 @@ public record struct Star
 
     public required Vector2 Position { get; set; }
 
-    public required Color BaseColor { get; init; }
+    public required Color Color { get; set; }
 
-    public required float BaseSize { get; init; }
+    public required float Scale { get; set; }
 
     public required float Rotation { get; init; }
 
     public required float Twinkle { get; init; }
 
-    public required int VanillaStyle { get; init; }
+    public required int Style { get; init; }
 
-    public float SupernovaTimer { get; set; }
-
-    public SupernovaProgress SupernovaProgress { get; set; }
-
-    public readonly Color Color =>
-        Color.Lerp(BaseColor, Compressed, SupernovaTimer);
-
-    public readonly float Scale =>
-        BaseSize * (1 - MathF.Pow(SupernovaTimer, 3));
+    public required bool Disabled { get; set; }
 
     #endregion
 
@@ -93,10 +77,7 @@ public record struct Star
 
     public readonly void DrawVanilla(SpriteBatch spriteBatch, float alpha)
     {
-        if (SupernovaProgress == SupernovaProgress.Exploding)
-            return;
-
-        Texture2D texture = TextureAssets.Star[VanillaStyle].Value;
+        Texture2D texture = TextureAssets.Star[Style].Value;
         Vector2 origin = texture.Size() * .5f;
 
         Vector2 position = Position;
@@ -115,9 +96,6 @@ public record struct Star
 
     public readonly void DrawDiamond(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
-        if (SupernovaProgress == SupernovaProgress.Exploding)
-            return;
-
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha) * DiamondAlpha;
@@ -133,9 +111,6 @@ public record struct Star
 
     public readonly void DrawFlare(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
-        if (SupernovaProgress == SupernovaProgress.Exploding)
-            return;
-
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha);
@@ -155,9 +130,6 @@ public record struct Star
 
     public readonly void DrawCircle(SpriteBatch spriteBatch, Texture2D texture, float alpha, Vector2 origin, float rotation)
     {
-        if (SupernovaProgress == SupernovaProgress.Exploding)
-            return;
-
         Vector2 position = Position;
 
         Color color = Color * GetAlpha(alpha) * CircleAlpha;
@@ -170,27 +142,27 @@ public record struct Star
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Star CreateRandom(UnifiedRandom rand) => new()
     {
         Position = rand.NextUniformVector2Circular(CircularRadius),
-        BaseColor = GenerateColor(rand.NextFloat(1)),
-        BaseSize = rand.NextFloat(MinSize, MaxSize),
-        VanillaStyle = rand.Next(0, VanillaStarStyles),
+        Color = GenerateColor(rand.NextFloat(1)),
+        Scale = rand.NextFloat(MinSize, MaxSize),
+        Style = rand.Next(0, StarStyles),
         Rotation = rand.NextFloatDirection(),
-        Twinkle = rand.NextFloat(MaxTwinkle)
+        Twinkle = rand.NextFloat(MaxTwinkle),
+        Disabled = false
     };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static Color GenerateColor(float temperature)
-    {
-        return temperature switch
+    private static Color GenerateColor(float temperature) =>
+        temperature switch
         {
             <= LowTempThreshold => Color.Lerp(LowestTemperature, LowTemperature, Utils.Remap(temperature, 0f, LowTempThreshold, 0f, 1f)),
             <= HighTempThreshold => Color.Lerp(LowTemperature, HighTemperature, Utils.Remap(temperature, LowTempThreshold, HighTempThreshold, 0f, 1f)),
             _ => Color.Lerp(HighTemperature, HighestTemperature, Utils.Remap(temperature, HighTempThreshold, 1f, 0f, 1f))
         };
-    }
 
     public readonly float GetAlpha(float a) =>
-        Utilities.Saturate(MathF.Pow(a + MathF.Pow(SupernovaTimer, 3) + BaseSize, 2) * a);
+        Utilities.Saturate(MathF.Pow(a + Scale, 3) * a);
 }

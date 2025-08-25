@@ -8,6 +8,7 @@ using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
+using static ZensSky.Common.Systems.Stars.StarHooks;
 
 namespace ZensSky.Common.Systems.Stars;
 
@@ -50,6 +51,8 @@ public sealed class ShootingStarSystem : ModSystem
             IL_Main.UpdateMenu += ModifyMenuStarFall;
             On_Star.StarFall += ModifyFallingStarSpawn;
         });
+
+        UpdateStars += Update;
     }
 
     public override void Unload()
@@ -155,13 +158,15 @@ public sealed class ShootingStarSystem : ModSystem
 
     public static void Update()
     {
-        for (int i = 0; i < ShootingStarCount; i++)
-            if (ShootingStars[i].IsActive)
-                ShootingStars[i].Update();
-    }
+        if (!Main.starGame)
+        {
+            for (int i = 0; i < ShootingStarCount; i++)
+                if (ShootingStars[i].IsActive)
+                    ShootingStars[i].Update();
 
-    public static void StarGameUpdate()
-    {
+            return;
+        }
+
         for (int i = 0; i < ShootingStarCount; i++)
             if (ShootingStars[i].IsActive)
                 ShootingStars[i].StarGameUpdate();

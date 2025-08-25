@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -53,7 +52,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Stars
 
-    [ModCall]
+    [ModCall("DrawAllStars")]
     public static void DrawStars(SpriteBatch spriteBatch, float alpha)
     {
         Texture2D texture;
@@ -96,6 +95,7 @@ public sealed class StarRenderingSystem : ModSystem
         }
     }
 
+    [ModCall("DrawSingleStar")]
     public static void DrawStar(SpriteBatch spriteBatch, float alpha, float rotation, Star star, StarVisual style)
     {
         Texture2D texture;
@@ -129,61 +129,12 @@ public sealed class StarRenderingSystem : ModSystem
 
     #endregion
 
-    #region Supernovae
-
-    [ModCall]
-    public static void DrawSupernovae(SpriteBatch spriteBatch, float alpha)
-    {
-        if (!SkyEffects.Supernova.IsReady)
-            return;
-
-            // Set all of the generic color info.
-        SkyEffects.Supernova.Background=Background;
-
-        SkyEffects.Supernova.RingStartColor = RingStart;
-        SkyEffects.Supernova.RingEndColor = RingEnd;
-
-        SkyEffects.Supernova.GlobalTime = Main.GlobalTimeWrappedHourly;
-
-        if (RealisticSkySystem.IsEnabled)
-            RealisticSkySystem.SetAtmosphereParams(SkyEffects.Supernova.Value);
-
-        Texture2D texture = SkyTextures.Supernova;
-
-        Vector2 origin = texture.Size() * .5f;
-
-        foreach (Star star in StarSystem.Stars.Where(s => s.SupernovaProgress == SupernovaProgress.Exploding))
-        {
-            float time = star.SupernovaTimer / star.BaseSize;
-            Vector2 position = star.Position;
-
-                // Multiply the Vector4 and not the Color to give values past 1.
-            SkyEffects.Supernova.StartColor = star.BaseColor.ToVector4() * ExplosionStart;
-            SkyEffects.Supernova.EndColor = star.BaseColor.ToVector4() * ExplosionEnd;
-
-            SkyEffects.Supernova.QuickTime = MathF.Min(time * QuickTimeMultiplier, 1f);
-            SkyEffects.Supernova.ExpandTime = MathF.Min(time * ExpandTimeMultiplier, 1f);
-            SkyEffects.Supernova.RingTime = MathF.Min(time * RingTimeMultiplier, 1f);
-            SkyEffects.Supernova.LongTime = time;
-
-            SkyEffects.Supernova.Offset = position / Utilities.ScreenSize;
-
-            SkyEffects.Supernova.Apply();
-
-            float opacity = alpha + (MinimumSupernovaAlpha / star.BaseSize);
-
-            float rotation = star.Rotation;
-
-            spriteBatch.Draw(texture, position, null, Color.White * opacity, rotation, origin, SupernovaScale * star.BaseSize, SpriteEffects.None, 0f);
-        }
-    }
-
-    #endregion
-
     private void DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
             // TODO: Better method of detecting when a mod uses custom sky to hide the visuals.
-        if (!ZensSky.CanDrawSky || (MacrocosmSystem.IsEnabled && MacrocosmSystem.InAnySubworld))
+        if (!ZensSky.CanDrawSky ||
+            (MacrocosmSystem.IsEnabled && MacrocosmSystem.InAnySubworld) ||
+            artificial)
         {
             orig(self, sceneArea, artificial);
             return;
@@ -202,8 +153,6 @@ public sealed class StarRenderingSystem : ModSystem
 
     public static void DrawStarsToSky(SpriteBatch spriteBatch, float alpha)
     {
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-
         UpdateStarAlpha();
 
         SpriteBatchSnapshot snapshot = new(spriteBatch);
@@ -218,12 +167,6 @@ public sealed class StarRenderingSystem : ModSystem
             if (alpha > 0)
                 DrawStars(spriteBatch, alpha);
 
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, transform);
-
-            if (StarSystem.Stars.Any(s => s.SupernovaProgress > SupernovaProgress.Shrinking))
-                DrawSupernovae(spriteBatch, alpha);
-
             spriteBatch.Restart(in snapshot);
         }
 
@@ -231,7 +174,7 @@ public sealed class StarRenderingSystem : ModSystem
     }
 
 
-    [ModCall("GetStarRotation")]
+    [ModCall(false, "StarRotationMatrix", "GetStarRotationMatrix", "StarDrawMatrix", "StarTransform")]
     public static Matrix RotationMatrix()
     {
         Matrix rotation = Matrix.CreateRotationZ(StarRotation);

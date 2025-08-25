@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -6,7 +7,6 @@ using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.Utilities;
-using ZensSky.Common.DataStructures;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
@@ -27,15 +27,6 @@ public sealed class StarSystem : ModSystem
     private const float GraveyardAlphaMultiplier = 1.4f;
 
     private const int DefaultStarGenerationSeed = 100;
-    private static int StarGenerationSeed;
-
-    private const string SupernovaeCount = "SupernovaeCount";
-
-    private const float CompressionIncrement = 0.002f;
-
-    private const float ExplosionIncrement = 0.00001f;
-
-    private const float RegenerationIncrement = 0.0001f;
 
     #endregion
 
@@ -48,11 +39,16 @@ public sealed class StarSystem : ModSystem
 
     #region Public Properties
 
-    public static float StarRotation { get; private set; }
+    public static float StarRotation
+    {
+        [ModCall(nameof(StarRotation), $"Get{nameof(StarRotation)}")]
+        get; 
+        private set; 
+    }
 
     public static float StarAlpha
     {
-        [ModCall(nameof(StarAlpha), "GetStarAlpha")]
+        [ModCall(nameof(StarAlpha), $"Get{nameof(StarAlpha)}")]
         get; 
         private set; 
     }
@@ -60,7 +56,7 @@ public sealed class StarSystem : ModSystem
     public static float StarAlphaOverride
     {
         get;
-        [ModCall("SetStarAlpha")]
+        [ModCall($"Set{nameof(StarAlpha)}")]
         set;
     } = -1;
 
@@ -70,8 +66,8 @@ public sealed class StarSystem : ModSystem
 
     public override void Load()
     {
-        StarGenerationSeed = DefaultStarGenerationSeed;
         GenerateStars();
+
         MainThreadSystem.Enqueue(() =>
             On_Star.UpdateStars += UpdateStars);
     }
@@ -100,106 +96,43 @@ public sealed class StarSystem : ModSystem
 
         StarRotation += (float)(Main.dayRate / dayRateDivisor);
 
-        UpdateSupernovae();
+        StarRotation %= MathHelper.TwoPi;
 
-        if (Main.starGame)
-            ShootingStarSystem.StarGameUpdate();
-        else
-            ShootingStarSystem.Update();
-    }
-
-    private static void UpdateSupernovae()
-    {
-        if (!Stars.Any(s => s.SupernovaProgress > SupernovaProgress.None))
-            return;
-
-        for (int i = 0; i < StarCount; i++)
-        {
-            Star star = Stars[i];
-
-            if (star.SupernovaProgress == SupernovaProgress.None)
-                continue;
-                // TODO: Sub-Method to shrink down this switch statement slop.
-            switch (star.SupernovaProgress)
-            {
-                case SupernovaProgress.Shrinking:
-                    Stars[i].SupernovaTimer += CompressionIncrement * (float)Main.dayRate;
-
-                    if (Stars[i].SupernovaTimer < 1f)
-                        break;
-
-                    Stars[i].SupernovaTimer = 0f;
-                    Stars[i].SupernovaProgress = SupernovaProgress.Exploding;
-
-                    break;
-                case SupernovaProgress.Exploding:
-                    Stars[i].SupernovaTimer += ExplosionIncrement * (float)Main.dayRate;
-
-                    if (Stars[i].SupernovaTimer < 1f)
-                        break;
-
-                    Stars[i].SupernovaTimer = 1f;
-                    Stars[i].SupernovaProgress = SupernovaProgress.Regenerating;
-
-                    break;
-                case SupernovaProgress.Regenerating:
-                    Stars[i].SupernovaTimer -= RegenerationIncrement * (float)Main.dayRate;
-
-                    if (Stars[i].SupernovaTimer > 0f)
-                        break;
-
-                    Stars[i].SupernovaTimer = 1f;
-                    Stars[i].SupernovaProgress = SupernovaProgress.None;
-
-                    break;
-                default:
-                    break;
-            }
-        }
+        StarHooks.InvokeUpdateStars();
     }
 
     #endregion
 
     #region Saving and Syncing
 
-    public override void OnWorldLoad()
-    {
-        StarGenerationSeed = Main.worldID;
-        GenerateStars();
-    }
+    public override void OnWorldLoad() =>
+        GenerateStars(Main.worldID);
 
-    public override void OnWorldUnload()
-    {
-        StarGenerationSeed = DefaultStarGenerationSeed;
+    public override void OnWorldUnload() =>
         GenerateStars();
-    }
 
-    public override void ClearWorld()
-    {
-        StarGenerationSeed = DefaultStarGenerationSeed;
+    public override void ClearWorld() =>
         GenerateStars();
-    }
 
     public override void SaveWorldData(TagCompound tag)
     {
         tag[nameof(StarRotation)] = StarRotation;
 
-        int count = Stars.Count(s => s.SupernovaProgress > SupernovaProgress.None);
-        tag[SupernovaeCount] = count;
+        int count = Stars.Count(s => s.Disabled);
+        tag[$"{nameof(Star.Disabled)}Count"] = count;
 
         int index = 0;
 
         ReadOnlySpan<Star> starSpan = Stars.AsSpan();
+
         for (int i = 0; i < starSpan.Length; i++)
         {
             Star star = starSpan[i];
 
-            if (star.SupernovaProgress == SupernovaProgress.None)
+            if (!star.Disabled)
                 continue;
 
             tag[nameof(Stars) + index] = i;
-            tag[nameof(Star.SupernovaProgress) + index] = (byte)star.SupernovaProgress;
-            tag[nameof(Star.SupernovaTimer) + index] = star.SupernovaTimer;
 
             index++;
         }
@@ -211,14 +144,13 @@ public sealed class StarSystem : ModSystem
         {
             StarRotation = tag.Get<float>(nameof(StarRotation));
 
-            int count = tag.Get<int>(SupernovaeCount);
+            int count = tag.Get<int>($"{nameof(Star.Disabled)}Count");
 
             for (int i = 0; i < count; i++)
             {
                 int index = tag.Get<int>(nameof(Stars) + i);
 
-                Stars[index].SupernovaProgress = (SupernovaProgress)tag.Get<byte>(nameof(Star.SupernovaProgress) + i);
-                Stars[index].SupernovaTimer = tag.Get<float>(nameof(Star.SupernovaTimer) + i);
+                Stars[index].Disabled = true;
             }
         }
         catch (Exception ex)
@@ -229,32 +161,30 @@ public sealed class StarSystem : ModSystem
 
     public override void NetSend(BinaryWriter writer)
     {
-            // Because this mod uses 'side = NoSync' in the build.txt file we have to account for it.
-        if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
+        if (!Mod.IsNetSynced)
             return;
 
         writer.Write(StarRotation);
 
-        int count = Stars.Count(s => s.SupernovaProgress > SupernovaProgress.None);
+        int count = Stars.Count(s => s.Disabled);
         writer.Write7BitEncodedInt(count);
 
         ReadOnlySpan<Star> starSpan = Stars.AsSpan();
+
         for (int i = 0; i < starSpan.Length; i++)
         {
             Star star = starSpan[i];
 
-            if (star.SupernovaProgress == SupernovaProgress.None)
+            if (!star.Disabled)
                 continue;
 
             writer.Write7BitEncodedInt(i);
-            writer.Write((byte)star.SupernovaProgress);
-            writer.Write(star.SupernovaTimer);
         }
     }
 
     public override void NetReceive(BinaryReader reader)
     {
-        if (!ModContent.GetInstance<ZensSky>().IsNetSynced)
+        if (!Mod.IsNetSynced)
             return;
         
         try
@@ -267,8 +197,7 @@ public sealed class StarSystem : ModSystem
             {
                 int index = reader.Read7BitEncodedInt();
 
-                Stars[index].SupernovaProgress = (SupernovaProgress)reader.ReadByte();
-                Stars[index].SupernovaTimer = reader.ReadSingle();
+                Stars[index].Disabled = true;
             }
         }
         catch (Exception ex)
@@ -281,21 +210,6 @@ public sealed class StarSystem : ModSystem
     #endregion
 
     #region Private Methods
-
-    private static void ResetSky()
-    {
-        StarRotation = 0f;
-
-        if (Stars is null)
-            return;
-
-        for (int i = 0; i < StarCount; i++)
-        {
-            Stars[i].SupernovaProgress = SupernovaProgress.None;
-            Stars[i].SupernovaTimer = 0f;
-        }
-
-    }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     private static float CalculateStarAlpha()
@@ -331,12 +245,8 @@ public sealed class StarSystem : ModSystem
 
     #region Public Methods
 
-    [ModCall("TriggerSupernova", "DestroyStar")]
-    public static void ExplodeStar(int index) => 
-        Stars[index].SupernovaProgress |= SupernovaProgress.Shrinking;
-
-    [ModCall("RegenStars")]
-    public static void GenerateStars()
+    [ModCall("RegenStars", "RegenerateStars")]
+    public static void GenerateStars(int seed = DefaultStarGenerationSeed)
     {
         if (Main.dedServ)
         {
@@ -344,17 +254,20 @@ public sealed class StarSystem : ModSystem
             return; 
         }
 
-        UnifiedRandom rand = new(StarGenerationSeed);
+        UnifiedRandom rand = new(seed);
 
-        ResetSky();
+        StarRotation = 0f;
 
         for (int i = 0; i < StarCount; i++)
             Stars[i] = CreateRandom(rand);
+
+        StarHooks.InvokeGenerateStars(rand, seed);
     }
 
     public static void UpdateStarAlpha()
     {
-        StarAlpha = StarAlphaOverride == -1 ? CalculateStarAlpha() : StarAlphaOverride;
+        StarAlpha = StarAlphaOverride == -1 ?
+            CalculateStarAlpha() : StarAlphaOverride;
 
         StarAlphaOverride = -1;
     }
