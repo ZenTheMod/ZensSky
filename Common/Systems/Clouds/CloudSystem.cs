@@ -49,9 +49,9 @@ public sealed class CloudSystem : ModSystem
 
     public static bool ShowCloudLighting
     {
-        [ModCall(nameof(ShowCloudLighting), "GetShowCloudLighting")]
+        [ModCall(nameof(ShowCloudLighting), $"Get{nameof(ShowCloudLighting)}")]
         get;
-        [ModCall("SetShowCloudLighting")]
+        [ModCall($"Set{nameof(ShowCloudLighting)}")]
         set;
     }
 

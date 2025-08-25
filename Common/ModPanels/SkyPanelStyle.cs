@@ -13,7 +13,7 @@ using Terraria.Utilities;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 
-namespace ZensSky.Common.Systems.ModIcon;
+namespace ZensSky.Common.ModPanels;
 
 public sealed class SkyPanelStyle : ModPanelStyleExt
 {

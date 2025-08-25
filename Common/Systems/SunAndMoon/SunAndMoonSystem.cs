@@ -6,7 +6,6 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
@@ -35,17 +34,17 @@ public sealed class SunAndMoonSystem : ModSystem
 
     public static bool ShowSun
     {
-        [ModCall(nameof(ShowSun), "GetShowSun")]
+        [ModCall(nameof(ShowSun), $"Get{nameof(ShowSun)}")]
         get;
-        [ModCall("SetShowSun")]
+        [ModCall($"Set{nameof(ShowSun)}")]
         set; 
     } = true;
 
     public static bool ShowMoon
     {
-        [ModCall(nameof(ShowMoon), "GetShowMoon")]
+        [ModCall(nameof(ShowMoon), $"Get{nameof(ShowMoon)}n")]
         get;
-        [ModCall("SetShowMoon")]
+        [ModCall($"Set{nameof(ShowMoon)}")]
         set;
     } = true;
 
@@ -56,6 +55,7 @@ public sealed class SunAndMoonSystem : ModSystem
     /// </summary>
     public static Asset<Texture2D> MoonTexture
     {
+        [ModCall(nameof(MoonTexture), $"Get{nameof(MoonTexture)}")]
         get
         {
             Asset<Texture2D> ret = SkyTextures.Moon[Math.Min(Main.moonType, SkyTextures.Moon.Length - 1)];
