@@ -12,6 +12,7 @@ using Terraria.UI;
 using Terraria.Utilities;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.ModPanels;
 
@@ -184,7 +185,7 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
             {
                 float sinValue = MathF.Sin(lifeTime);
 
-                float scale = MathF.Pow(2, 10 * (sinValue - 1));
+                float scale = Easings.InExpo(sinValue);
 
                 Color color = Color.White * sinValue;
                 color.A = 0;

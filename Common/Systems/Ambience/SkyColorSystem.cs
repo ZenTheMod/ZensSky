@@ -10,6 +10,7 @@ using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
+using ZensSky.Core.Utils;
 using hook_ModifySunLightColor = Terraria.ModLoader.SystemLoader.DelegateModifySunLightColor;
 
 namespace ZensSky.Common.Systems.Ambience;
@@ -115,7 +116,7 @@ public sealed class SkyColorSystem : ModSystem
         if (!SkyConfig.Instance.PitchBlackBackground || DarkSurfaceSystem.IsEnabled)
             return;
 
-        float interpolator = MathF.Pow(StarSystem.StarAlpha, 3);
+        float interpolator = Easings.InPolynomial(StarSystem.StarAlpha, 3);
 
         backgroundColor = Color.Lerp(Main.ColorOfTheSkies, Color.Black, interpolator);
         tileColor = Color.Lerp(Main.ColorOfTheSkies, Color.Black, interpolator);

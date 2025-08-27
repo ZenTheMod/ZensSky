@@ -236,9 +236,9 @@ public sealed class StarSystem : ModSystem
         if (Main.GraveyardVisualIntensity > 0f)
             alpha *= 1f - Main.GraveyardVisualIntensity * GraveyardAlphaMultiplier;
 
-        float atmosphericBoost = MathF.Pow(1f - Main.atmo, 3f);
+        float atmosphericBoost = Easings.InPolynomial(1f - Main.atmo, 3);
 
-        return MathF.Pow(Utilities.Saturate(alpha + atmosphericBoost), 3f);
+        return Utilities.Saturate(Easings.InPolynomial(alpha + atmosphericBoost, 3));
     }
 
     #endregion
