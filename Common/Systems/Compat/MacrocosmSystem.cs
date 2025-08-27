@@ -13,7 +13,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Stars;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 using MacrocosmSky = Macrocosm.Common.Drawing.Sky;
 
@@ -117,7 +117,7 @@ public sealed class MacrocosmSystem : ModSystem
             {
                 float alpha = MoonSky.ComputeBrightness(7200.0, 46800.0, .3f, 1f);
 
-                StarRenderingSystem.DrawStarsToSky(spriteBatch, alpha);
+                StarRendering.DrawStarsToSky(spriteBatch, alpha);
             });
 
                 // Skip over sun drawing.

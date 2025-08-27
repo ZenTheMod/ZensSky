@@ -11,7 +11,7 @@ using ZensSky.Common.Config;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;

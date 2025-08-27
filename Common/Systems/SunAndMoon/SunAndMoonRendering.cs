@@ -1,4 +1,5 @@
-﻿using Daybreak.Common.Rendering;
+﻿using Daybreak.Common.Features.Hooks;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -17,8 +18,7 @@ using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.SunAndMoon;
 
-[Autoload(Side = ModSide.Client)]
-public sealed class SunAndMoonRenderingSystem : ModSystem
+public static class SunAndMoonRendering
 {
     #region Private Fields
 
@@ -93,7 +93,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load()
+    [OnLoad(Side = ModSide.Client)]
+    public static void Load()
     {
         MainThreadSystem.Enqueue(() =>
             On_Main.DrawSunAndMoon += DrawSunAndMoonToSky);
@@ -109,7 +110,8 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
         PreDrawMoon += MoonGetFixedBoiPreDraw;
     }
 
-    public override void Unload() =>
+    [OnUnload(Side = ModSide.Client)]
+    public static void Unload() =>
         MainThreadSystem.Enqueue(() => On_Main.DrawSunAndMoon -= DrawSunAndMoonToSky);
 
     #endregion
@@ -439,7 +441,7 @@ public sealed class SunAndMoonRenderingSystem : ModSystem
 
     #endregion
 
-    private void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
+    private static void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
         if (!ZensSky.CanDrawSky || 
             RedSunSystem.IsEnabled || 

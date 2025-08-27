@@ -98,11 +98,11 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
 
     private void DrawStar(SpriteBatch spriteBatch)
     {
-        int style = (int)Value;
+        StarVisual style = Value;
 
         if (Value == StarVisual.Random)
-            style = ((int)(Main.GlobalTimeWrappedHourly * TimeMultiplier) % 3) + 1;
+            style = (StarVisual)((int)(Main.GlobalTimeWrappedHourly * TimeMultiplier) % 3) + 1;
 
-        StarRenderingSystem.DrawStar(spriteBatch, 1, 0f, DisplayStar, (StarVisual)style);
+        StarRendering.DrawStar(spriteBatch, 1, 0f, DisplayStar, style);
     }
 }

@@ -15,7 +15,7 @@ using static ZensSky.Common.Systems.Stars.ShootingStarSystem;
 namespace ZensSky.Common.Systems.Stars;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class ShootingStarRenderingSystem : ModSystem
+public sealed class ShootingStarRendering : ModSystem
 {
     #region Private Fields
 

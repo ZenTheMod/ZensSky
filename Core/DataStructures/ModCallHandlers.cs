@@ -6,9 +6,6 @@ namespace ZensSky.Core.DataStructures;
 
 public sealed class ModCallHandlers : AliasedList<string, MethodInfo>
 {
-    public ModCallHandlers()
-        : base() { }
-
     public object? Invoke(string name, object?[]? args)
     {
         int matching = this[name].FindIndex(m => m.MatchesArguments(args));

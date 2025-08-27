@@ -5,7 +5,7 @@ namespace ZensSky.Core.Systems.ModCall;
 /// <summary>
 /// Adds this method to <see cref="ModCallSystem.Handlers"/> under its name and <see cref="NameAliases"/> if provided.
 /// </summary>
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class ModCallAttribute : Attribute
 {
     public bool UsesDefaultName = true;

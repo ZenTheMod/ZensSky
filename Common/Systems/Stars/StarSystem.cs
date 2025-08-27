@@ -259,7 +259,7 @@ public sealed class StarSystem : ModSystem
         StarRotation = 0f;
 
         for (int i = 0; i < StarCount; i++)
-            Stars[i] = CreateRandom(rand);
+            Stars[i] = new(rand);
 
         StarHooks.InvokeGenerateStars(rand, seed);
     }

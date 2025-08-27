@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
@@ -67,7 +68,7 @@ public sealed class MenuControllerState : UIState
 
         Panel.Append(header);
 
-            // Add a reset button to quickly reset the config without having to even open it.
+            // Add a reset button to quickly reset the hidden config.
         ResetButton = new(ButtonTextures.Reset)
         {
             HAlign = 1f
@@ -103,11 +104,19 @@ public sealed class MenuControllerState : UIState
 
         Controllers.SetScrollbar(uIScrollbar);
 
-            // Add list items.
         List<MenuControllerElement> controllers = MenuControllerSystem.Controllers;
         for (int i = 0; i < controllers.Count; i++)
         {
+                // Recreate the instance for easier debugging.
+            object? instance = Activator.CreateInstance(controllers[i].GetType());
+
+            if (instance is null)
+                continue;
+
+            controllers[i] = (MenuControllerElement)instance;
+
             controllers[i].Width.Set(0f, 1f);
+
             Controllers.Add(controllers[i]);
         }
 

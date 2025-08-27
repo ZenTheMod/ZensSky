@@ -1,4 +1,5 @@
-﻿using Daybreak.Common.Rendering;
+﻿using Daybreak.Common.Features.Hooks;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -16,8 +17,7 @@ using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Systems.Stars;
 
-[Autoload(Side = ModSide.Client)]
-public sealed class StarRenderingSystem : ModSystem
+public static class StarRendering
 {
     #region Private Fields
 
@@ -40,10 +40,12 @@ public sealed class StarRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() => 
+    [OnLoad(Side = ModSide.Client)]
+    public static void Load() => 
         MainThreadSystem.Enqueue(() => On_Main.DrawStarsInBackground += DrawStarsInBackground);
 
-    public override void Unload() => 
+    [OnUnload(Side = ModSide.Client)]
+    public static void Unload() => 
         MainThreadSystem.Enqueue(() => On_Main.DrawStarsInBackground -= DrawStarsInBackground);
 
     #endregion
@@ -129,7 +131,7 @@ public sealed class StarRenderingSystem : ModSystem
 
     #endregion
 
-    private void DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
+    private static void DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial)
     {
             // TODO: Better method of detecting when a mod uses custom sky to hide the visuals.
         if (!ZensSky.CanDrawSky ||

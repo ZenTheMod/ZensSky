@@ -1,4 +1,5 @@
-﻿using Daybreak.Common.Rendering;
+﻿using Daybreak.Common.Features.Hooks;
+using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -12,8 +13,7 @@ using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Ambience;
 
-[Autoload(Side = ModSide.Client)]
-public sealed class WindRenderingSystem : ModSystem
+public static class WindRendering
 {
     #region Private Fields
 
@@ -25,14 +25,17 @@ public sealed class WindRenderingSystem : ModSystem
 
     #region Loading
 
-    public override void Load() 
+    [OnLoad(Side = ModSide.Client)]
+    public static void Load() 
     {
-        MainThreadSystem.Enqueue(() => On_Main.DrawBackgroundBlackFill += MenuDraw);
+        MainThreadSystem.Enqueue(() =>
+            On_Main.DrawBackgroundBlackFill += MenuDraw);
 
         On_Main.DrawInfernoRings += InGameDraw;
     }
 
-    public override void Unload()
+    [OnUnload(Side = ModSide.Client)]
+    public static void Unload()
     {
         MainThreadSystem.Enqueue(() => 
         {
@@ -44,7 +47,7 @@ public sealed class WindRenderingSystem : ModSystem
         On_Main.DrawInfernoRings -= InGameDraw;
     }
 
-    private void MenuDraw(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
+    private static void MenuDraw(On_Main.orig_DrawBackgroundBlackFill orig, Main self)
     {
         orig(self);
 
@@ -57,7 +60,7 @@ public sealed class WindRenderingSystem : ModSystem
             DrawWinds();
     }
 
-    private void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
+    private static void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
     {
         orig(self);
 

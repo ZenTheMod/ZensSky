@@ -14,7 +14,7 @@ using ZensSky.Common.Systems.Ambience;
 using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRenderingSystem;
+using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Compat;

@@ -10,11 +10,11 @@ namespace ZensSky.Common.DataStructures;
 
 public enum StarVisual : byte
 {
-    Vanilla = 0,
-    Diamond = 1,
-    FourPointed = 2,
-    OuterWilds = 3,
-    Random = 4
+    Vanilla,
+    Diamond,
+    FourPointed,
+    OuterWilds,
+    Random
 }
 
     // Thanks to jupiter.ryo for early help with this.
@@ -29,10 +29,9 @@ public record struct Star
     private static readonly Color LowTemperature = new(255, 242, 238);
     private static readonly Color HighTemperature = new(236, 238, 255);
     private static readonly Color HighestTemperature = new(113, 135, 255);
-    private static readonly Color Compressed = Color.White;
 
-    private const float MinSize = 0.3f;
-    private const float MaxSize = 1.2f;
+    private const float MinScale = .3f;
+    private const float MaxScale = 1.25f;
     private const float MaxTwinkle = 2f;
     private const int StarStyles = 4;
     private const float CircularRadius = 1200f;
@@ -57,19 +56,34 @@ public record struct Star
 
     #region Public Properties
 
-    public required Vector2 Position { get; set; }
+    public Vector2 Position { get; set; }
 
-    public required Color Color { get; set; }
+    public Color Color { get; set; }
 
-    public required float Scale { get; set; }
+    public float Scale { get; set; }
 
-    public required float Rotation { get; init; }
+    public float Rotation { get; init; }
 
-    public required float Twinkle { get; init; }
+    public float Twinkle { get; init; }
 
-    public required int Style { get; init; }
+    public int Style { get; init; }
 
-    public required bool Disabled { get; set; }
+    public bool Disabled { get; set; }
+
+    #endregion
+
+    #region Public Constructors
+
+    public Star(UnifiedRandom rand)
+    {
+        Position = rand.NextUniformVector2Circular(CircularRadius);
+        Color = GenerateColor(rand.NextFloat(1));
+        Scale = rand.NextFloat(MinScale, MaxScale);
+        Style = rand.Next(0, StarStyles);
+        Rotation = rand.NextFloatDirection();
+        Twinkle = rand.NextFloat(MaxTwinkle);
+        Disabled = false;
+    }
 
     #endregion
 
@@ -141,18 +155,6 @@ public record struct Star
     }
 
     #endregion
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Star CreateRandom(UnifiedRandom rand) => new()
-    {
-        Position = rand.NextUniformVector2Circular(CircularRadius),
-        Color = GenerateColor(rand.NextFloat(1)),
-        Scale = rand.NextFloat(MinSize, MaxSize),
-        Style = rand.Next(0, StarStyles),
-        Rotation = rand.NextFloatDirection(),
-        Twinkle = rand.NextFloat(MaxTwinkle),
-        Disabled = false
-    };
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Color GenerateColor(float temperature) =>

@@ -213,6 +213,10 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
         SkyEffects.Planet.AtmosphereColor = Color.Transparent.ToVector4();
         SkyEffects.Planet.AtmosphereShadowColor = Color.Transparent.ToVector4();
 
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        device.Textures[1] = MiscTextures.Pixel;
+
         SkyEffects.Planet.Apply();
 
         Texture2D texture = MiscTextures.Pixel;

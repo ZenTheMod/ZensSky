@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Terraria.ModLoader;
 using ZensSky.Core.DataStructures;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Systems.ModCall;
 
@@ -15,12 +16,15 @@ public sealed class ModCallSystem : ModSystem
         Assembly assembly = Mod.Code;
 
         MethodInfo[]? methods = [.. assembly.GetTypes()
-            .SelectMany(t => t.GetMethods())
-            .Where(m => m.GetCustomAttributes(typeof(ModCallAttribute), false).Length > 0 && m.IsStatic)];
+            .SelectMany(t => t.GetMethods(Public | NonPublic | Static))
+            .Where(m => m.GetCustomAttribute<ModCallAttribute>() is not null)];
 
-        foreach (MethodInfo m in methods)
+        foreach (MethodInfo method in methods)
         {
-            ModCallAttribute? attribute = m.GetCustomAttribute<ModCallAttribute>();
+            if (method.IsGenericMethod)
+                continue;
+
+            ModCallAttribute? attribute = method.GetCustomAttribute<ModCallAttribute>();
 
             if (attribute is null)
                 return;
@@ -28,13 +32,13 @@ public sealed class ModCallSystem : ModSystem
             string[] names;
 
             if (attribute.NameAliases.Length <= 0)
-                names = [m.Name];
+                names = [method.Name];
             else if (attribute.UsesDefaultName)
-                names = [m.Name, .. attribute.NameAliases];
+                names = [method.Name, .. attribute.NameAliases];
             else
                 names = attribute.NameAliases;
 
-            Handlers.Add([.. names], m);
+            Handlers.Add([.. names], method);
         }
     }
 

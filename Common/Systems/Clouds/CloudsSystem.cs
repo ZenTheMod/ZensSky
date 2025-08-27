@@ -18,7 +18,7 @@ using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
 namespace ZensSky.Common.Systems.Clouds;
 
 [Autoload(Side = ModSide.Client)]
-public sealed class CloudSystem : ModSystem
+public sealed class CloudsSystem : ModSystem
 {
     #region Private Fields
 
