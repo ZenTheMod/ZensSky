@@ -7,7 +7,8 @@ using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.UI;
-using ZensSky.Common.DataStructures;
+using ZensSky.Core.Systems.ModCall;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Utils;
 
@@ -27,6 +28,8 @@ public static partial class Utilities
 
     #endregion
 
+    #region Async
+
     /// <summary>
     /// Blocks thread until <paramref name="condition"/> returns <see cref="true"/> or timeout occurs.
     /// </summary>
@@ -44,10 +47,14 @@ public static partial class Utilities
             throw new TimeoutException();
     }
 
+    #endregion
+
+    #region Reflection
+
     /// <summary>
     /// Checks if <paramref name="methodInfo"/>'s arguments matches the types of <paramref name="arguments"/>.
     /// </summary>
-    public static bool MatchesArguments(this MethodInfo methodInfo, object?[]? arguments)
+    public static bool MatchesParameters(this MethodInfo methodInfo, object?[]? arguments)
     {
         ParameterInfo[] parameters = methodInfo.GetParameters();
 
@@ -63,6 +70,18 @@ public static partial class Utilities
 
         return true;
     }
+
+    /// <typeparam name="T"></typeparam>
+    /// <returns>All methods in <paramref name="assembly"/> with the attribute <typeparamref name="T"/>.</returns>
+    public static MethodInfo[] GetAllDecoratedMethods<T>(this Assembly assembly, BindingFlags flags = Public | NonPublic | Static) where T : Attribute =>
+        [.. 
+            assembly.GetTypes()
+            .SelectMany(t => t.GetMethods(flags))
+            .Where(m => m.GetCustomAttribute<T>() is not null &&
+                !m.IsGenericMethod)
+        ];
+
+    #endregion
 
     #region Arrays
 

@@ -1,75 +1,104 @@
 #include "../common.fxh"
 #include "../Compat/realisticSky.fxh"
 
-sampler noise : register(s0);
+sampler noise1 : register(s0);
+sampler noise2 : register(s2);
+
+    // 1 is reserved for Realistic Sky's atmosphere for compat.
 sampler atmosphere : register(s1);
 
-float4 background;
+float expand;
+float decay;
 
-float4 startColor;
-float4 endColor;
-float4 ringStartColor;
-float4 ringEndColor;
-
-float quickTime;
-float expandTime;
-float ringTime;
-float longTime;
+float4 explosionColor;
+float hue;
 
 float globalTime;
 
 float2 offset;
 
-float2 screenSize;
-float2 sunPosition;
-float distanceFadeoff;
+static const float4 explosionStart = 2;
 
-bool usesAtmosphere;
-
-float4 supernova(float2 coords)
+float cloudMap(float2 uv, float dist)
 {
-    float n = tex2D(noise, coords * 3 + expandTime + offset);
+    float2 off = tex2D(noise2, uv + (globalTime * .01)).rg;
+	
+    uv *= .5;
+    
+    float n = tex2D(noise1, offset + (uv / expand) + (float2(.09, .05) * off)).r * 1.55;
+	
+    dist *= 1.5;
+	
+    float falloff = 1 - pow(saturate(dist - (off.x * off.y)), 6);
+	
+    return n * falloff;
+}
 
-    float dist = length(.5 - coords) * 2;
-    
-        // Create this wobbly kind of expanding circle.
-    float radius = outCubic(expandTime) + n * (1 - dist) * quickTime;
+float4 nebula(float2 uv, float2 highlightDir, float dist)
+{
+    dist /= expand;
 	
-    float interpolator = saturate(radius - dist - longTime);
-    
-    float4 explosionColor = oklabLerp(startColor, endColor, quickTime);
+    float invDecay = 1 - decay;
+
+    float n = cloudMap(uv, dist).r;
+
+    float cloud = n * n * 2.1 * invDecay;
+    float cloudOffset = n * cloudMap(uv + highlightDir, dist).r * 2.1 * invDecay;
+
+    float cli = saturate(lerp(-.6, 1, .5 + 8 * ((cloud * 1.03) - (cloudOffset))) * (1 - (dist * 1.5)));
+  
+    float tc = saturate(cloud);
+    float satc = lerp(.9, .5, tc);
+  
+    float3 colc = HSLtoRGB(float3(hue - pow(dist * n, 3.2) - (invDecay * .2), satc, .52)) + cli;
+  
+    tc *= tc;
+
+    float3 col = colc * .66;
+    col *= tc;
 	
-    float4 explosion = explosionColor * (5 - inOutCubic(quickTime) * 4.75);
+    col = pow(saturate(col), .4545);
 	
-    float4 color = oklabLerp(background, explosion, interpolator);
+    return float4(col, (col.r + col.g + col.b) * .333);
+}
+
+float4 explosion(float2 uv, float dist, float4 exploColor)
+{
+    float n = cloudMap(uv * expand, dist).r;
+	
+    float radius = outCubic(saturate(expand * .5)) + (n * n * expand) * (1 - dist) * expand;
+	
+    radius += (1 - dist) * expand * 4.8;
+    radius *= 1 - pow(expand, 2);
     
-        // Add an sort of expanding ring.
-    float expandingRing = clampedMap(abs(.4 - interpolator), 0, .03, 1, 0);
-    color += frac(expandingRing) * .6 * explosionColor * (1 - expandTime);
+    float4 explo = exploColor * (5 - inOutCubic(expand) * .7);
     
-    color *= 1.2;
+    return oklabLerp(0, explo, saturate(radius - dist - expand));
+}
+
+float4 supernova(float2 uv)
+{
+    float dist = length(uv) * 2;
     
-    float shellinterpolator = 1 - abs(.5 - map(interpolator, .65, .9, 1, 0));
+    float4 exploColor = oklabLerp(explosionStart, explosionColor, expand);
     
-        // Add a small vein-like effect. (Really I'm just mashing shit together.)
-    shellinterpolator *= 1.5 - coronaries(coords * 4 + offset, globalTime * 0.00001);
+    float4 expl = explosion(uv, dist, exploColor);
     
-    float4 outer = lerp(ringStartColor, ringEndColor, inCubic(longTime));
+    float4 neb = nebula(uv, -normalize(uv) * .015, dist);
     
-        // Interpolate using the oklap colorspace for a better transition.
-    color = oklabLerp(color, outer, saturate(shellinterpolator - longTime) * outCubic(ringTime) * interpolator);
+    neb *= inCubic(saturate(expand * 3));
     
-        // Add a small glowing "star" at its center
-    color = oklabLerp(color, startColor, (1 - longTime) * quickTime * saturate(inCubic(1 - dist * 7)));
-        
-        // Add a vauge dust cloud.
-    color += endColor * min(outCubic(.2 * interpolator * n) * expandTime, .1);
+    neb = oklabLerp(neb.a * exploColor, neb, expand);
     
-    return color * outCubic(1 - longTime) * color.a;
+    float4 col = neb + (expl * (1 - expand + neb.a));
+    
+    return col;
 }
 
 float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 screenPosition : SV_POSITION, float2 coords : TEXCOORD0) : COLOR0
 {
+    coords -= .5;
+    
     float4 color = supernova(coords);
     
     float2 screenCoords = screenPosition / screenSize;
@@ -79,7 +108,13 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 screenPosition : 
     if (usesAtmosphere)
         opactity = StarOpacity(screenPosition, coords, sunPosition, tex2D(atmosphere, screenCoords).rgb, distanceFadeoff);
     
-    return color * sampleColor * opactity;
+    color *= sampleColor * opactity;
+    
+    color.a = 0;
+    
+    color = saturate(color);
+    
+    return color;
 }
 
 technique Technique1

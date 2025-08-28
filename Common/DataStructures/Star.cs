@@ -68,7 +68,7 @@ public record struct Star
 
     public int Style { get; init; }
 
-    public bool Disabled { get; set; }
+    public bool IsActive { get; set; } = true;
 
     #endregion
 
@@ -82,7 +82,6 @@ public record struct Star
         Style = rand.Next(0, StarStyles);
         Rotation = rand.NextFloatDirection();
         Twinkle = rand.NextFloat(MaxTwinkle);
-        Disabled = false;
     }
 
     #endregion
@@ -156,6 +155,8 @@ public record struct Star
 
     #endregion
 
+    #region Private Methods
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Color GenerateColor(float temperature) =>
         temperature switch
@@ -165,6 +166,12 @@ public record struct Star
             _ => Color.Lerp(HighTemperature, HighestTemperature, Utils.Remap(temperature, HighTempThreshold, 1f, 0f, 1f))
         };
 
+    #endregion
+
+    #region Public Methods
+
     public readonly float GetAlpha(float a) =>
         Utilities.Saturate(MathF.Pow(a + Scale, 3) * a);
+
+    #endregion
 }

@@ -17,8 +17,6 @@ public static class WindRendering
 {
     #region Private Fields
 
-    private const float WidthAmplitude = 2f;
-
     private static RenderTarget2D? WindTarget;
 
     #endregion
@@ -57,7 +55,7 @@ public static class WindRendering
         if (SkyConfig.Instance.PixelatedSky)
             DrawPixelated();
         else
-            DrawWinds();
+            DrawWind();
     }
 
     private static void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
@@ -70,7 +68,7 @@ public static class WindRendering
         if (SkyConfig.Instance.PixelatedSky)
             DrawPixelated();
         else
-            DrawWinds();
+            DrawWind();
     }
 
     #endregion
@@ -97,7 +95,7 @@ public static class WindRendering
             device.Clear(Color.Transparent);
             spriteBatch.Begin(in snapshot);
 
-            DrawWinds();
+            DrawWind();
 
             spriteBatch.End();
         }
@@ -120,48 +118,16 @@ public static class WindRendering
         spriteBatch.Restart(in snapshot);
     }
 
-    private static void DrawWinds()
+    private static void DrawWind()
     {
         GraphicsDevice device = Main.graphics.GraphicsDevice;
 
         device.Textures[0] = SkyTextures.SunBloom;
 
-        foreach (WindParticle wind in WindSystem.Winds.Where(w => w.IsActive))
-            DrawWindTrail(device, wind);
-    }
+        ReadOnlySpan<WindParticle> activeWind = [.. WindSystem.Winds.Where(w => w.IsActive)];
 
-    private static void DrawWindTrail(GraphicsDevice device, WindParticle wind)
-    {
-        Vector2[] positions = [.. wind.OldPositions.Where(pos => pos != default)];
-
-        if (positions.Length <= 2)
-            return;
-
-        VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[(positions.Length - 1) * 2];
-
-        float brightness = MathF.Sin(wind.LifeTime * MathHelper.Pi) * Main.atmo * MathF.Abs(Main.WindForVisuals);
-
-        float alpha = SkyConfig.Instance.WindOpacity;
-
-        for (int i = 0; i < positions.Length - 1; i++)
-        {
-            float progress = (float)i / positions.Length;
-            float width = MathF.Sin(progress * MathHelper.Pi) * brightness * WidthAmplitude;
-
-            Vector2 position = positions[i] - Main.screenPosition;
-
-            float direction = (positions[i] - positions[i + 1]).ToRotation();
-            Vector2 offset = new Vector2(width, 0).RotatedBy(direction + MathHelper.PiOver2);
-
-            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()).MultiplyRGB(Main.ColorOfTheSkies) * brightness * alpha;
-            color.A = 0;
-
-            vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));
-            vertices[i * 2 + 1] = new(new(position + offset, 0), color, new(progress, 1f));
-        }
-
-        if (vertices.Length > 3)
-            device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, vertices.Length - 2);
+        for (int i = 0; i < activeWind.Length; i++)
+            activeWind[i].Draw(device);
     }
 
     #endregion

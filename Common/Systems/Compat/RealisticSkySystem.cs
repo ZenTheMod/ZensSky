@@ -16,14 +16,14 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Stars;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Common.DataStructures;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Stars.StarHooks;
+using static ZensSky.Common.Systems.Space.StarHooks;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
+using ZensSky.Common.Systems.Space;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -364,6 +364,7 @@ public sealed class RealisticSkySystem : ModSystem
         return star;
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void SetAtmosphereParams(Effect shader)
     {
         shader.Parameters["usesAtmosphere"]?.SetValue(true);
@@ -389,29 +390,26 @@ public sealed class RealisticSkySystem : ModSystem
 
     #region Stars
 
-    public static bool StarsRealisticPreDraw(SpriteBatch spriteBatch, ref float alpha, ref Matrix transform)
+    public static bool StarsRealisticPreDraw(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, ref float alpha, ref Matrix transform)
     {
         if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw)
             return true;
 
-        spriteBatch.End(out var snapshot);
-
         StarsRenderer.Render(StarSystem.StarAlpha, Matrix.Identity);
-
-        spriteBatch.Begin(in snapshot);
 
         return true;
     }
 
-    public static void StarsGalaxyPostDraw(SpriteBatch spriteBatch, float alpha, Matrix transform)
+    public static void StarsGalaxyPostDraw(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, float alpha, Matrix transform)
     {
         if (!SkyConfig.Instance.DrawRealisticStars || !CanDraw)
             return;
 
-        Main.spriteBatch.End(out var snapshot);
-        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), transform);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, ApplyStarShader(), transform);
 
         GalaxyRenderer.Render();
+
+        spriteBatch.End();
     }
 
     #endregion

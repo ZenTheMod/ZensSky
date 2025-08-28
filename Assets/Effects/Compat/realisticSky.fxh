@@ -1,6 +1,13 @@
 #ifndef COMPAT_FX
 #define COMPAT_FX
 
+    // Realistic Sky parameters.
+bool usesAtmosphere;
+
+float2 screenSize;
+float distanceFadeoff;
+float2 sunPosition;
+
 float StarOpacity(float2 screenPosition, float2 coords, float2 sunPosition, float3 atmosphere, float distanceFadeoff)
 {
     float distanceSqrFromSun = dot(screenPosition - sunPosition, screenPosition - sunPosition);

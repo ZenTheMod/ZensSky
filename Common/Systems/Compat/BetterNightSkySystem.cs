@@ -18,7 +18,7 @@ using ZensSky.Common.Config;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Stars.StarHooks;
+using static ZensSky.Common.Systems.Space.StarHooks;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 
@@ -262,10 +262,9 @@ public sealed class BetterNightSkySystem : ModSystem
     #region Drawing
 
         // TODO: Include other non 'Special' star drawing.
-    public static void StarsSpecialPostDraw(SpriteBatch spriteBatch, float alpha, Matrix transform)
+    public static void StarsSpecialPostDraw(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, float alpha, Matrix transform)
     {
-        Main.spriteBatch.End(out var snapshot);
-        Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), snapshot.TransformMatrix);
 
             // This isn't ideal but it doesn't matter.
         int i = 0;
@@ -286,6 +285,8 @@ public sealed class BetterNightSkySystem : ModSystem
             i++;
             Main.instance.DrawStar(ref sceneArea, alpha, Main.ColorOfTheSkies, i, star, false, false);
         }
+
+        spriteBatch.End();
     }
 
     private static void UseBigMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon)

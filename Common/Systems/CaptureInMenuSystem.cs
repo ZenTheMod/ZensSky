@@ -1,10 +1,12 @@
 ﻿using MonoMod.Cil;
 using System;
+using System.Reflection;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems;
 
@@ -43,7 +45,7 @@ public sealed class CaptureInMenuSystem : ModSystem
 
             c.MoveAfterLabels();
 
-            c.EmitLdcI4(0);
+            c.EmitDelegate(() => ZensSky.Unloading);
             c.EmitStloc(menuCaptureFlagIndex);
 
                 // Grab flag2's index.

@@ -90,7 +90,7 @@ public sealed class WindSystem : ModSystem
         if (!Main.gameMenu && (position.Y > Main.worldSurface * 16f || Collision.SolidCollision(position, 1, 1)))
             return;
 
-        Winds[index] = WindParticle.CreateActive(position, Main.rand.NextBool(WindLoopChance));
+        Winds[index] = new(position, Main.rand.NextBool(WindLoopChance));
     }
 
     #endregion

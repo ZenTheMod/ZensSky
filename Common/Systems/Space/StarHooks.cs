@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Daybreak.Common.Rendering;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Runtime.CompilerServices;
 using Terraria.Utilities;
 using ZensSky.Core.Systems.ModCall;
 
-namespace ZensSky.Common.Systems.Stars;
+namespace ZensSky.Common.Systems.Space;
 
 public static class StarHooks
 {
@@ -20,12 +21,12 @@ public static class StarHooks
     [method: ModCall] // add_GenerateStars, remove_GenerateStars.
     public static event hook_GenerateStars? GenerateStars;
 
-    public delegate bool hook_PreDrawStars(SpriteBatch spriteBatch, ref float alpha, ref Matrix transform);
+    public delegate bool hook_PreDrawStars(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, ref float alpha, ref Matrix transform);
 
     [method: ModCall] // add_PreDrawStars, remove_PreDrawStars.
     public static event hook_PreDrawStars? PreDrawStars;
 
-    public delegate void hook_PostDrawStars(SpriteBatch spriteBatch, float alpha, Matrix transform);
+    public delegate void hook_PostDrawStars(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, float alpha, Matrix transform);
 
     [method: ModCall] // add_PostDrawStars, remove_PostDrawStars.
     public static event hook_PostDrawStars? PostDrawStars;
@@ -63,7 +64,7 @@ public static class StarHooks
 
     [ModCall("PreDrawStars")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool InvokePreDrawStars(SpriteBatch spriteBatch, ref float alpha, ref Matrix transform)
+    public static bool InvokePreDrawStars(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, ref float alpha, ref Matrix transform)
     {
         bool ret = true;
 
@@ -72,15 +73,15 @@ public static class StarHooks
 
         foreach (hook_PreDrawStars handler in
             PreDrawStars.GetInvocationList().Select(h => (hook_PreDrawStars)h))
-            ret &= handler(spriteBatch, ref alpha, ref transform);
+            ret &= handler(spriteBatch, in snapshot, ref alpha, ref transform);
 
         return ret;
     }
 
     [ModCall("PostDrawStars")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void InvokePostDrawStars(SpriteBatch spriteBatch, float alpha, Matrix transform) =>
-        PostDrawStars?.Invoke(spriteBatch, alpha, transform);
+    public static void InvokePostDrawStars(SpriteBatch spriteBatch, in SpriteBatchSnapshot snapshot, float alpha, Matrix transform) =>
+        PostDrawStars?.Invoke(spriteBatch, in snapshot, alpha, transform);
 
     public static void Clear()
     {

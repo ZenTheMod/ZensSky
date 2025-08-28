@@ -30,9 +30,13 @@ public readonly record struct LazyAsset<T> where T : class
 
     #endregion
 
+    #region Public Constructors
+
     /// <inheritdoc cref="ModContent.Request{T}"/>
     public LazyAsset(string name) =>
         _asset = new(() => ModContent.Request<T>(name));
+
+    #endregion
 
     #region Public Operators
 

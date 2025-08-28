@@ -221,7 +221,7 @@ public static class SunAndMoonRendering
         float scale,
         GraphicsDevice device)
     {
-        if (Main.gameMenu || Main.LocalPlayer.head == 12)
+        if (Main.gameMenu || Main.LocalPlayer.head != 12)
             return;
 
         Texture2D sunglasses = SkyTextures.Sunglasses.Value;

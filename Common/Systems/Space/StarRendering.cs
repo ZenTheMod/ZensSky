@@ -3,6 +3,7 @@ using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -11,11 +12,11 @@ using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Systems.Stars.StarHooks;
-using static ZensSky.Common.Systems.Stars.StarSystem;
+using static ZensSky.Common.Systems.Space.StarHooks;
+using static ZensSky.Common.Systems.Space.StarSystem;
 using Star = ZensSky.Common.DataStructures.Star;
 
-namespace ZensSky.Common.Systems.Stars;
+namespace ZensSky.Common.Systems.Space;
 
 public static class StarRendering
 {
@@ -58,48 +59,56 @@ public static class StarRendering
     public static void DrawStars(SpriteBatch spriteBatch, float alpha)
     {
         Texture2D texture;
+
         Vector2 origin;
+
+        float rotation = -StarRotation;
+
+        ReadOnlySpan<Star> activeStars = [.. Stars.Where(s => s.IsActive)];
+
         switch (SkyConfig.Instance.StarStyle)
         {
             case StarVisual.Vanilla:
-                Array.ForEach(StarSystem.Stars, s => s.DrawVanilla(spriteBatch, alpha));
-                break;
+                for (int i = 0; i < activeStars.Length; i++)
+                    activeStars[i].DrawVanilla(spriteBatch, alpha);
+                return;
 
             case StarVisual.Diamond:
                 texture = StarTextures.DiamondStar;
                 origin = texture.Size() * .5f;
-                Array.ForEach(StarSystem.Stars, s => s.DrawDiamond(spriteBatch, texture, alpha, origin, -StarRotation));
-                break;
+
+                for (int i = 0; i < activeStars.Length; i++)
+                    activeStars[i].DrawDiamond(spriteBatch, texture, alpha, origin, rotation);
+                return;
 
             case StarVisual.FourPointed:
                 texture = StarTextures.FourPointedStar;
                 origin = texture.Size() * .5f;
-                Array.ForEach(StarSystem.Stars, s => s.DrawFlare(spriteBatch, texture, alpha, origin, -StarRotation));
-                break;
+
+                for (int i = 0; i < activeStars.Length; i++)
+                    activeStars[i].DrawFlare(spriteBatch, texture, alpha, origin, rotation);
+                return;
 
             case StarVisual.OuterWilds:
                 texture = StarTextures.CircleStar;
                 origin = texture.Size() * .5f;
-                Array.ForEach(StarSystem.Stars, s => s.DrawCircle(spriteBatch, texture, alpha, origin, -StarRotation));
-                break;
 
-                // TODO: Clean up this logic.
+                for (int i = 0; i < activeStars.Length; i++)
+                    activeStars[i].DrawCircle(spriteBatch, texture, alpha, origin, rotation);
+                return;
+
             case StarVisual.Random:
-                for (int i = 0; i < StarCount; i++)
-                {
-                    Star star = StarSystem.Stars[i];
-
-                    int style = (i % 3) + 1;
-
-                    DrawStar(spriteBatch, alpha, -StarRotation, star, (StarVisual)style);
-                }
-                break;
+                for (int i = 0; i < activeStars.Length; i++)
+                    DrawStar(spriteBatch, alpha, rotation, activeStars[i], (StarVisual)(i % 3 + 1));
+                return;
         }
     }
 
-    [ModCall("DrawSingleStar")]
     public static void DrawStar(SpriteBatch spriteBatch, float alpha, float rotation, Star star, StarVisual style)
     {
+        if (!star.IsActive)
+            return;
+
         Texture2D texture;
         Vector2 origin;
 
@@ -107,25 +116,28 @@ public static class StarRendering
         {
             case StarVisual.Vanilla:
                 star.DrawVanilla(spriteBatch, alpha);
-                break;
+                return;
 
             case StarVisual.Diamond:
                 texture = StarTextures.DiamondStar;
                 origin = texture.Size() * .5f;
+
                 star.DrawDiamond(spriteBatch, texture, alpha, origin, rotation);
-                break;
+                return;
 
             case StarVisual.FourPointed:
                 texture = StarTextures.FourPointedStar;
                 origin = texture.Size() * .5f;
+
                 star.DrawFlare(spriteBatch, texture, alpha, origin, rotation);
-                break;
+                return;
 
             case StarVisual.OuterWilds:
                 texture = StarTextures.CircleStar;
                 origin = texture.Size() * .5f;
+
                 star.DrawCircle(spriteBatch, texture, alpha, origin, rotation);
-                break;
+                return;
         }
     }
 
@@ -135,7 +147,7 @@ public static class StarRendering
     {
             // TODO: Better method of detecting when a mod uses custom sky to hide the visuals.
         if (!ZensSky.CanDrawSky ||
-            (MacrocosmSystem.IsEnabled && MacrocosmSystem.InAnySubworld) ||
+            MacrocosmSystem.IsEnabled && MacrocosmSystem.InAnySubworld ||
             artificial)
         {
             orig(self, sceneArea, artificial);
@@ -161,18 +173,21 @@ public static class StarRendering
 
         Matrix transform = RotationMatrix() * snapshot.TransformMatrix;
 
-        if (InvokePreDrawStars(spriteBatch, ref alpha, ref transform))
+        spriteBatch.End();
+
+        if (InvokePreDrawStars(spriteBatch, in snapshot, ref alpha, ref transform))
         {
-            spriteBatch.End();
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), transform);
 
             if (alpha > 0)
                 DrawStars(spriteBatch, alpha);
 
-            spriteBatch.Restart(in snapshot);
+            spriteBatch.End();
         }
 
-        InvokePostDrawStars(spriteBatch, alpha, transform);
+        InvokePostDrawStars(spriteBatch, in snapshot, alpha, transform);
+
+        spriteBatch.Begin(in snapshot);
     }
 
 

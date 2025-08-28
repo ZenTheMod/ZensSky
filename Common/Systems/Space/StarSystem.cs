@@ -9,13 +9,14 @@ using Terraria.ModLoader.IO;
 using Terraria.Utilities;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
+using ZensSky.Core.Systems.Net;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.DataStructures.Star;
+using static ZensSky.Core.Systems.Net.NetMessageHooks;
 using Star = ZensSky.Common.DataStructures.Star;
 
-namespace ZensSky.Common.Systems.Stars;
+namespace ZensSky.Common.Systems.Space;
 
-public sealed class StarSystem : ModSystem
+public sealed class StarSystem : ModSystem, IPacketHandler
 {
     #region Private Fields
 
@@ -27,6 +28,8 @@ public sealed class StarSystem : ModSystem
     private const float GraveyardAlphaMultiplier = 1.4f;
 
     private const int DefaultStarGenerationSeed = 100;
+
+    private const string InactiveCountKey = "InactiveCount";
 
     #endregion
 
@@ -70,6 +73,8 @@ public sealed class StarSystem : ModSystem
 
         MainThreadSystem.Enqueue(() =>
             On_Star.UpdateStars += UpdateStars);
+
+        OnSyncWorldData += WorldDataSupernovae;
     }
 
     public override void Unload()
@@ -114,22 +119,24 @@ public sealed class StarSystem : ModSystem
     public override void ClearWorld() =>
         GenerateStars();
 
+    #region World Data
+
     public override void SaveWorldData(TagCompound tag)
     {
         tag[nameof(StarRotation)] = StarRotation;
 
-        int count = Stars.Count(s => s.Disabled);
-        tag[$"{nameof(Star.Disabled)}Count"] = count;
+        int count = Stars.Count(s => !s.IsActive);
+        tag[InactiveCountKey] = count;
 
         int index = 0;
 
-        ReadOnlySpan<Star> starSpan = Stars.AsSpan();
+        ReadOnlySpan<Star> starSpan = Stars;
 
         for (int i = 0; i < starSpan.Length; i++)
         {
             Star star = starSpan[i];
 
-            if (!star.Disabled)
+            if (star.IsActive)
                 continue;
 
             tag[nameof(Stars) + index] = i;
@@ -144,13 +151,13 @@ public sealed class StarSystem : ModSystem
         {
             StarRotation = tag.Get<float>(nameof(StarRotation));
 
-            int count = tag.Get<int>($"{nameof(Star.Disabled)}Count");
+            int count = tag.Get<int>(InactiveCountKey);
 
             for (int i = 0; i < count; i++)
             {
                 int index = tag.Get<int>(nameof(Stars) + i);
 
-                Stars[index].Disabled = true;
+                Stars[index].IsActive = false;
             }
         }
         catch (Exception ex)
@@ -159,30 +166,37 @@ public sealed class StarSystem : ModSystem
         }
     }
 
-    public override void NetSend(BinaryWriter writer)
+    #endregion
+
+    #region Net Syncing
+
+    private void WorldDataSupernovae(int toClient, int ignoreClient) =>
+        (this as IPacketHandler).Send(Mod, toClient, ignoreClient);
+
+    void IPacketHandler.Write(BinaryWriter writer)
     {
         if (!Mod.IsNetSynced)
             return;
 
         writer.Write(StarRotation);
 
-        int count = Stars.Count(s => s.Disabled);
+        int count = Stars.Count(s => !s.IsActive);
         writer.Write7BitEncodedInt(count);
 
-        ReadOnlySpan<Star> starSpan = Stars.AsSpan();
+        ReadOnlySpan<Star> starSpan = Stars;
 
         for (int i = 0; i < starSpan.Length; i++)
         {
             Star star = starSpan[i];
 
-            if (!star.Disabled)
+            if (star.IsActive)
                 continue;
 
             writer.Write7BitEncodedInt(i);
         }
     }
 
-    public override void NetReceive(BinaryReader reader)
+    void IPacketHandler.Receive(BinaryReader reader)
     {
         if (!Mod.IsNetSynced)
             return;
@@ -197,7 +211,7 @@ public sealed class StarSystem : ModSystem
             {
                 int index = reader.Read7BitEncodedInt();
 
-                Stars[index].Disabled = true;
+                Stars[index].IsActive = false;
             }
         }
         catch (Exception ex)
@@ -206,6 +220,8 @@ public sealed class StarSystem : ModSystem
             Mod.Logger.Error($"Failed to sync stars: {ex.Message}");
         }
     }
+
+    #endregion
 
     #endregion
 
@@ -219,7 +235,7 @@ public sealed class StarSystem : ModSystem
         if (Main.dayTime)
         {
             if (Main.time < DawnTime)
-                alpha = (float)(1f - (Main.time / DawnTime));
+                alpha = (float)(1f - Main.time / DawnTime);
             else if (Main.time > DuskStartTime)
                 alpha = (float)((Main.time - DuskStartTime) / (DayLength - DuskStartTime));
             else
@@ -250,7 +266,7 @@ public sealed class StarSystem : ModSystem
     {
         if (Main.dedServ)
         {
-            Array.Clear(Stars, 0, Stars.Length);
+            Array.Clear(Stars);
             return; 
         }
 

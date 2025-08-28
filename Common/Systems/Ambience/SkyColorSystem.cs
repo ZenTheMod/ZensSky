@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
-using ZensSky.Common.Systems.Stars;
+using ZensSky.Common.Systems.Space;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Utils;

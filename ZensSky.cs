@@ -1,12 +1,15 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content.Sources;
 using System;
+using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Core.AssetReaders;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
+using ZensSky.Core.Systems.Net;
+
 
 #pragma warning disable CS8603 // Possible null reference return.
 
@@ -22,6 +25,8 @@ public sealed class ZensSky : Mod
 
     #endregion
 
+    #region Loading
+
     public override void Load()
     {
         if (Main.dedServ)
@@ -33,36 +38,6 @@ public sealed class ZensSky : Mod
             Main.graphics.GraphicsDevice.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
             Main.graphics.ApplyChanges();
         });
-    }
-
-    public override void Close()
-    {
-        Unloading = true;
-        MainThreadSystem.ClearQueue();
-
-        base.Close();
-    }
-
-    public override void PostSetupContent() => 
-        CanDrawSky = true;
-
-    public override IContentSource CreateDefaultContentSource()
-    {
-        if (!Main.dedServ)
-            AddContent(new OBJReader());
-
-        return base.CreateDefaultContentSource();
-    }
-
-    public override object Call(params object[] args)
-    {
-        if (args.Length <= 0)
-            throw new ArgumentException("Zero arguments provided!");
-
-        if (args[0] is not string name)
-            throw new ArgumentException("Argument zero was not a string!");
-
-        return ModCallSystem.HandleCall(name, [.. args.Skip(1)]);
     }
 
     /*
@@ -102,4 +77,47 @@ public sealed class ZensSky : Mod
                 Cache[i]?.Unload();
         }
     */
+
+    public override void Close()
+    {
+        Unloading = true;
+        MainThreadSystem.ClearQueue();
+
+        base.Close();
+    }
+
+    public override void PostSetupContent() => 
+        CanDrawSky = true;
+
+    #endregion
+
+    public override IContentSource CreateDefaultContentSource()
+    {
+        if (!Main.dedServ)
+            AddContent(new OBJReader());
+
+        return base.CreateDefaultContentSource();
+    }
+
+    #region Packets
+
+    public override void HandlePacket(BinaryReader reader, int whoAmI) =>
+        PacketSystem.Handle(this, reader, whoAmI);
+
+    #endregion
+
+    #region ModCall
+
+    public override object Call(params object[] args)
+    {
+        if (args.Length <= 0)
+            throw new ArgumentException("Zero arguments provided!");
+
+        if (args[0] is not string name)
+            throw new ArgumentException("First argument was not of type string!");
+
+        return ModCallSystem.HandleCall(name, [.. args.Skip(1)]);
+    }
+
+    #endregion
 }

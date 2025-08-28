@@ -9,7 +9,7 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Systems.Stars;
+using ZensSky.Common.Systems.Space;
 using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Config.Elements;
@@ -26,7 +26,7 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
         Style = 0,
         Rotation = 0,
         Twinkle = 1f,
-        Disabled = false
+        IsActive = true
     };
 
     public string[]? EnumNames;

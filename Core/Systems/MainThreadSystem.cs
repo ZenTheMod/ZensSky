@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.Systems;
@@ -31,7 +32,8 @@ public sealed class MainThreadSystem : ModSystem
 
     public override void OnModLoad()
     {
-        Main.QueueMainThreadAction(() => On_Main.DoUpdate += DequeueActions);
+        Main.QueueMainThreadAction(() =>
+            On_Main.DoUpdate += DequeueActions);
 
             // Block loading thread until all items have been dequeued. (Bad idea.)
         Utilities.WaitUntil(() => MainThreadActions.Count <= 0, 1).GetAwaiter().GetResult();
@@ -40,6 +42,7 @@ public sealed class MainThreadSystem : ModSystem
     public override void OnModUnload() =>
         Main.QueueMainThreadAction(() => On_Main.DoUpdate -= DequeueActions);
 
+        // Detour DoUpdate over ConsumeAllMainThreadActions to prevent, get this, a race condition!
     private void DequeueActions(On_Main.orig_DoUpdate orig, Main self, ref GameTime gameTime)
     {
         orig(self, ref gameTime);

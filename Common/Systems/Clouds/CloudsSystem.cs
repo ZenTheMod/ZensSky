@@ -425,7 +425,7 @@ public sealed class CloudsSystem : ModSystem
             // Decrease the intensity at noon to make the clouds not just be pure white.
             // And alter the intensity depending on the moon phase, where a new moon would cast no light.
         if (day)
-            color *= MathHelper.Lerp(SunNoonAlpha, 1f, MathF.Pow(distanceFromCenter, 4f));
+            color *= MathHelper.Lerp(SunNoonAlpha, 1f, Easings.InPolynomial(distanceFromCenter, 4));
         else
             color *= MathF.Abs(4 - Main.moonPhase) * .25f;
 

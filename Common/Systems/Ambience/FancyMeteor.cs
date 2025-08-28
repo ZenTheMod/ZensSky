@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent.Skies;
 using Terraria.Utilities;
-using ZensSky.Common.Systems.Stars;
+using ZensSky.Common.Systems.Space;
 
 namespace ZensSky.Common.Systems.Ambience;
 

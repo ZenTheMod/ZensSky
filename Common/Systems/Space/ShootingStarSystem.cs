@@ -8,9 +8,9 @@ using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Systems.Stars.StarHooks;
+using static ZensSky.Common.Systems.Space.StarHooks;
 
-namespace ZensSky.Common.Systems.Stars;
+namespace ZensSky.Common.Systems.Space;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class ShootingStarSystem : ModSystem
@@ -132,7 +132,7 @@ public sealed class ShootingStarSystem : ModSystem
         SpawnShootingStar();
     }
 
-    [ModCall("SpawnRandomShootingStar")]
+    [ModCall("SpawnRandomShootingStar", "CreateShootingStar", "StarFall")]
     public static void SpawnShootingStar()
     {
         int index = Array.FindIndex(ShootingStars, s => !s.IsActive);
@@ -149,7 +149,7 @@ public sealed class ShootingStarSystem : ModSystem
 
         Vector2 position = Main.rand.NextVector2FromRectangle(spawn);
 
-        ShootingStars[index] = ShootingStar.CreateActive(position, Main.rand);
+        ShootingStars[index] = new(position, Main.rand);
     }
 
     #endregion
