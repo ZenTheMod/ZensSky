@@ -17,13 +17,13 @@ float globalTime;
 
 float2 offset;
 
-static const float4 explosionStart = 2;
+static const float4 explosionStart = float4(2, 2, 2, 1);
 
 float cloudMap(float2 uv, float dist)
 {
     float2 off = tex2D(noise2, uv + (globalTime * .01)).rg;
 	
-    uv *= .5;
+    uv *= .33;
     
     float n = tex2D(noise1, offset + (uv / expand) + (float2(.09, .05) * off)).r * 1.55;
 	

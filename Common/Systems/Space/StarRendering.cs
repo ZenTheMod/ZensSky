@@ -98,8 +98,9 @@ public static class StarRendering
                 return;
 
             case StarVisual.Random:
-                for (int i = 0; i < activeStars.Length; i++)
-                    DrawStar(spriteBatch, alpha, rotation, activeStars[i], (StarVisual)(i % 3 + 1));
+                for (int i = 0; i < Stars.Length; i++)
+                    if (Stars[i].IsActive)
+                        DrawStar(spriteBatch, alpha, rotation, Stars[i], (StarVisual)(i % 3 + 1));
                 return;
         }
     }

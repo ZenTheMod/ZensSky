@@ -32,7 +32,7 @@ public struct Supernova
     private const float MinAlpha = .25f;
     private const float MaxAlpha = 1f;
 
-    private const float Scale = .1f;
+    private const float Scale = .033f;
 
     private readonly Color EndingColor = Color.White;
 
@@ -93,7 +93,7 @@ public struct Supernova
 
     #region Drawing
 
-    public void Draw(SpriteBatch spriteBatch, GraphicsDevice device, float alpha, float rotation)
+    public readonly void Draw(SpriteBatch spriteBatch, GraphicsDevice device, float alpha, float rotation)
     {
         Vector2 position = Vector2.Zero;
 
@@ -124,7 +124,7 @@ public struct Supernova
 
         Vector2 origin = texture.Size() * .5f;
 
-        Color color = Color.White * Utils.Remap(alpha, 0, 1, MinAlpha, MaxAlpha);
+        Color color = SupernovaColor * Utils.Remap(alpha, 0, 1, MinAlpha, MaxAlpha);
 
         float scale = Scale * StartingScale;
 
@@ -162,11 +162,11 @@ public struct Supernova
         Contract += Increment * ContractMultiplier * Multiplier;
         Contract = Utilities.Saturate(Contract);
 
-        float colorInterpolator = Easings.OutPolynomial(Contract, 3);
+        float colorInterpolator = Easings.OutPolynomial(Contract, 5);
         Target->Color = Color.Lerp(StartingColor, EndingColor, colorInterpolator);
 
             // Have the star increase in scale slightly before shrinking.
-        float scaleMultiplier = Easings.OutBack(1 - Contract, 15);
+        float scaleMultiplier = Easings.OutBack(1 - Contract, 7);
         Target->Scale = StartingScale * scaleMultiplier;
 
         return Contract >= 1f;
