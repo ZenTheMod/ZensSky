@@ -63,6 +63,10 @@ public sealed class StarSystem : ModSystem, IPacketHandler
         set;
     } = -1;
 
+    public static SupernovaSystem Instance => ModContent.GetInstance<SupernovaSystem>();
+
+    public static IPacketHandler Packet => Instance;
+
     #endregion
 
     #region Loading
@@ -74,7 +78,7 @@ public sealed class StarSystem : ModSystem, IPacketHandler
         MainThreadSystem.Enqueue(() =>
             On_Star.UpdateStars += UpdateStars);
 
-        OnSyncWorldData += WorldDataSupernovae;
+        OnSyncWorldData += WorldDataStars;
     }
 
     public override void Unload()
@@ -170,8 +174,8 @@ public sealed class StarSystem : ModSystem, IPacketHandler
 
     #region Net Syncing
 
-    private void WorldDataSupernovae(int toClient, int ignoreClient) =>
-        (this as IPacketHandler).Send(Mod, toClient, ignoreClient);
+    private void WorldDataStars(int toClient, int ignoreClient) =>
+        PacketSystem.Send<StarSystem>(toClient, ignoreClient);
 
     void IPacketHandler.Write(BinaryWriter writer)
     {

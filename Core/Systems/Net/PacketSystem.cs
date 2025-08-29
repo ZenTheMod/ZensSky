@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -11,45 +8,42 @@ namespace ZensSky.Core.Systems.Net;
 
 public sealed class PacketSystem : ModSystem
 {
-    #region Private Fields
+    #region Public Properties
 
-    private static IPacketHandler?[] Handlers = [];
+    public static PacketSystem Instance => ModContent.GetInstance<PacketSystem>();
 
-    #endregion
-
-    #region Loading
-
-    public override void Load()
-    {
-        Assembly assembly = Mod.Code;
-
-        Handlers = [.. assembly.GetTypes()
-            .Where(t => t.IsAssignableTo(typeof(IPacketHandler)))
-            .Select(t => t as IPacketHandler)];
-    }
+    public static List<IPacketHandler> Handlers { get; } = [];
 
     #endregion
 
     #region Public Methods
 
-    public static void Send(Mod mod, IPacketHandler handler, int toClient = -1, int ignoreClient = -1)
+    /// <summary>
+    /// Writes this <see cref="IPacketHandler"/> over the network to clients or the server.<br/>
+    /// When called on a client, the data will be sent to the server and the optional parameters are ignored.<br/>
+    /// When called on a server, the data will be sent to either all clients, all clients except a specific client, or just a specific client:<br/><br/>
+    ///
+    /// <code>
+    ///     // Sends to all connected clients.
+    /// PacketSystem.Send&lt;<typeparamref name="T"/>&gt;();
+    ///     // Sends to <paramref name="toClient"/> only.
+    /// PacketSystem.Send&lt;<typeparamref name="T"/>&gt;(<paramref name="toClient"/>: somePlayer.whoAmI);
+    ///     // Sends to all other clients excluding <paramref name="ignoreClient"/>.
+    /// PacketSystem.Send&lt;<typeparamref name="T"/>&gt;(<paramref name="ignoreClient"/>: somePlayer.whoAmI);
+    /// </code>
+    ///
+    /// Typically if data is sent from a client to the server, the server will then need to relay this to all other clients to keep them in sync.<br/>
+    /// This is when the <paramref name="ignoreClient"/> option will be used.
+    /// </summary>
+    /// <exception cref="KeyNotFoundException"></exception>
+    public static void Send<T>(int toClient = -1, int ignoreClient = -1) where T : class, IPacketHandler
     {
-        if (Main.netMode == NetmodeID.SinglePlayer ||
-            !mod.IsNetSynced)
-            return;
+        int index = Handlers.FindIndex(h => h == ModContent.GetInstance<T>());
 
-        ModPacket packet = mod.GetPacket();
+        if (index == -1)
+            throw new KeyNotFoundException($"Could not find '{typeof(T).FullName}' in '{nameof(Handlers)}!'");
 
-        int id = Array.IndexOf(Handlers, handler);
-
-        if (id == -1)
-            throw new KeyNotFoundException($"Could not find {nameof(handler)}, in {nameof(Handlers)}!");
-
-        packet.Write(id);
-
-        handler.Write(packet);
-
-        packet.Send(toClient, ignoreClient);
+        Send(Instance.Mod, index, toClient, ignoreClient);
     }
 
     public static void Handle(Mod mod, BinaryReader reader, int whoAmI)
@@ -58,12 +52,33 @@ public sealed class PacketSystem : ModSystem
             !mod.IsNetSynced)
             return;
 
-        int id = reader.ReadInt32();
+        int index = reader.ReadInt32();
 
-        Handlers[id]?.Receive(reader);
+        IPacketHandler handler = Handlers[index];
+
+        handler.Receive(reader);
 
         if (Main.netMode == NetmodeID.Server)
-            Handlers[id]?.Send(mod, ignoreClient: whoAmI);
+            Send(mod, index, ignoreClient: whoAmI);
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private static void Send(Mod mod, int index, int toClient = -1, int ignoreClient = -1)
+    {
+        if (Main.netMode == NetmodeID.SinglePlayer ||
+            !mod.IsNetSynced)
+            return;
+
+        ModPacket packet = mod.GetPacket();
+
+        packet.Write(index);
+
+        Handlers[index].Write(packet);
+
+        packet.Send(toClient, ignoreClient);
     }
 
     #endregion

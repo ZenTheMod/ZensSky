@@ -30,12 +30,6 @@ public sealed class SupernovaSystem : ModSystem, IPacketHandler
 
     #endregion
 
-    #region Public Properties
-
-    public static SupernovaSystem Instance => ModContent.GetInstance<SupernovaSystem>();
-
-    #endregion
-
     #region Loading
 
     public override void Load()
@@ -67,7 +61,7 @@ public sealed class SupernovaSystem : ModSystem, IPacketHandler
         }
 
         if (shouldSync)
-            (Instance as IPacketHandler).Send(Instance.Mod, ignoreClient: Main.myPlayer);
+            PacketSystem.Send<SupernovaSystem>(ignoreClient: Main.myPlayer);
     }
 
     #endregion
@@ -165,7 +159,7 @@ public sealed class SupernovaSystem : ModSystem, IPacketHandler
     #region Net Syncing
 
     private void WorldDataSupernovae(int toClient, int ignoreClient) =>
-        (this as IPacketHandler).Send(Mod, toClient, ignoreClient);
+        PacketSystem.Send<SupernovaSystem>(toClient, ignoreClient);
 
     void IPacketHandler.Write(BinaryWriter writer)
     {
