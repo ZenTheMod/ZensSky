@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameInput;
+using Terraria.ModLoader;
 using Terraria.UI;
 using ZensSky.Core.Systems.ModCall;
 using static System.Reflection.BindingFlags;
@@ -71,7 +72,6 @@ public static partial class Utilities
         return true;
     }
 
-    /// <typeparam name="T"></typeparam>
     /// <returns>All methods in <paramref name="assembly"/> with the attribute <typeparamref name="T"/>.</returns>
     public static MethodInfo[] GetAllDecoratedMethods<T>(this Assembly assembly, BindingFlags flags = Public | NonPublic | Static) where T : Attribute =>
         [.. 
@@ -80,6 +80,14 @@ public static partial class Utilities
             .Where(m => m.GetCustomAttribute<T>() is not null &&
                 !m.IsGenericMethod)
         ];
+
+    /// <summary>
+    /// <inheritdoc cref="ModContent.GetInstance"/><br/>
+    /// However uses <paramref name="type"/> over a generic argument.
+    /// </summary>
+    /// <returns>The instance of the object with type of <paramref name="type"/>.</returns>
+    public static object GetInstance(Type type) =>
+        ContentInstance.contentByType[type].instance;
 
     #endregion
 

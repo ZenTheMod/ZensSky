@@ -80,7 +80,7 @@ float4 supernova(float2 uv)
 {
     float dist = length(uv) * 2;
     
-    float4 exploColor = oklabLerp(explosionStart, explosionColor, expand);
+    float4 exploColor = explosionColor; // oklabLerp(explosionStart, explosionColor, expand);
     
     float4 expl = explosion(uv, dist, exploColor);
     

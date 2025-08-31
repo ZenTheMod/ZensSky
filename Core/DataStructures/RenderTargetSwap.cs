@@ -12,6 +12,7 @@ public readonly ref struct RenderTargetSwap
     #region Private Properties
 
     private RenderTargetBinding[] OldTargets { get; init; }
+
     private Rectangle OldScissor { get; init; }
 
     #endregion

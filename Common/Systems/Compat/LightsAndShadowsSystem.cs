@@ -35,7 +35,7 @@ public sealed class LightsAndShadowsSystem : ModSystem
     {
         IsEnabled = true;
 
-        MethodInfo? getSunPos = typeof(Lights.Lights).GetMethod("GetSunPos", Public | Static);
+        MethodInfo? getSunPos = typeof(Lights.Lights).GetMethod(nameof(Lights.Lights.GetSunPos), Public | Static);
 
         if (getSunPos is not null)
             PatchSunPosition = new(getSunPos,

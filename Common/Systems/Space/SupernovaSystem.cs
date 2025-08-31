@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using ZensSky.Core.Systems.ModCall;
@@ -48,7 +49,8 @@ public sealed class SupernovaSystem : ModSystem, IPacketHandler
     [ModCall("TriggerSupernova", "ExplodeStar", "SpawnSupernova")]
     public static void CreateSupernova(int index = -1, Color? supernovaColor = null, float nebulaHue = -1f, bool shouldSync = true)
     {
-        if (index < 0 || index >= SupernovaeCount)
+        if (index < 0 ||
+            index >= SupernovaeCount)
             index = Main.rand.Next(SupernovaeCount);
 
         if (Supernovae[index].IsActive)
@@ -60,7 +62,8 @@ public sealed class SupernovaSystem : ModSystem, IPacketHandler
                 Supernovae[index] = new(star, supernovaColor, nebulaHue);
         }
 
-        if (shouldSync)
+        if (shouldSync &&
+            Main.netMode != NetmodeID.SinglePlayer)
             PacketSystem.Send<SupernovaSystem>(ignoreClient: Main.myPlayer);
     }
 

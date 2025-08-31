@@ -1,8 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.Systems.Net;
 
@@ -13,6 +17,23 @@ public sealed class PacketSystem : ModSystem
     public static PacketSystem Instance => ModContent.GetInstance<PacketSystem>();
 
     public static List<IPacketHandler> Handlers { get; } = [];
+
+    #endregion
+
+    #region Loading
+
+    public override void PostSetupContent()
+    {
+        Assembly assembly = Mod.Code;
+
+        Type[] types = [.. assembly.GetTypes()
+            .Where(p => p.IsAssignableTo(typeof(IPacketHandler)) &&
+            p.IsClass &&
+            p != typeof(IPacketHandler))];
+
+        foreach (Type type in types)
+            Handlers.Add((IPacketHandler)Utilities.GetInstance(type));
+    }
 
     #endregion
 
@@ -38,7 +59,7 @@ public sealed class PacketSystem : ModSystem
     /// <exception cref="KeyNotFoundException"></exception>
     public static void Send<T>(int toClient = -1, int ignoreClient = -1) where T : class, IPacketHandler
     {
-        int index = Handlers.FindIndex(h => h == ModContent.GetInstance<T>());
+        int index = Handlers.FindIndex(h => h.GetType() == typeof(T));
 
         if (index == -1)
             throw new KeyNotFoundException($"Could not find '{typeof(T).FullName}' in '{nameof(Handlers)}!'");
