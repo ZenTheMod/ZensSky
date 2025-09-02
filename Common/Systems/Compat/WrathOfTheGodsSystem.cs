@@ -7,6 +7,7 @@ using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
+[ExtendsFromMod("NoxusBoss")]
 [Autoload(Side = ModSide.Client)]
 public sealed class WrathOfTheGodsSystem : ModSystem
 {
@@ -38,9 +39,13 @@ public sealed class WrathOfTheGodsSystem : ModSystem
         Assembly noxusBossAsm = ModLoader.GetMod("NoxusBoss").Code;
 
         Type? sunMoonPositionRecorder = noxusBossAsm.GetType("NoxusBoss.Core.Graphics.SunMoonPositionRecorder");
+        ArgumentNullException.ThrowIfNull(sunMoonPositionRecorder);
 
         SetSunPosition = sunMoonPositionRecorder?.GetProperty("SunPosition", Public | Static)?.GetSetMethod(true);
+        ArgumentNullException.ThrowIfNull(SetSunPosition);
+
         SetMoonPosition = sunMoonPositionRecorder?.GetProperty("MoonPosition", Public | Static)?.GetSetMethod(true);
+        ArgumentNullException.ThrowIfNull(SetMoonPosition);
     }
 
     #endregion

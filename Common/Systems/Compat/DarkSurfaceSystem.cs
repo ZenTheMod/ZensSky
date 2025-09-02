@@ -1,10 +1,11 @@
-﻿using Terraria.ModLoader;
+﻿using System;
+using System.Reflection;
+using Terraria.ModLoader;
 using ZensSky.Common.Systems.Ambience;
-using DarkSurfaceSys = DarkSurface.DarkSurfaceSystem;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Compat;
 
-[JITWhenModsEnabled("DarkSurface")]
 [ExtendsFromMod("DarkSurface")]
 [Autoload(Side = ModSide.Client)]
 public sealed class DarkSurfaceSystem : ModSystem
@@ -17,13 +18,23 @@ public sealed class DarkSurfaceSystem : ModSystem
 
     #region Loading
 
-        // Annoyingly DarkSurface is a Both-Sided mod, meaning I cannot deliberatly load before or after it.
+        // DarkSurface is a Both-Sided mod, meaning we cannot deliberatly load before or after it with build.txt sorting.
     public override void PostSetupContent()
     {
+        if (!ModLoader.TryGetMod("DarkSurface", out Mod darkSurface))
+            return;
+
         IsEnabled = true;
 
+        Assembly darkAsm = darkSurface.Code;
+
+        Type? darkSurfaceSystem = darkAsm.GetType("DarkSurface.DarkSurfaceSystem");
+        ArgumentNullException.ThrowIfNull(darkSurfaceSystem);
+
+        ModSystem system = (ModSystem)Utilities.GetInstance(darkSurfaceSystem);
+
         SkyColorSystem.ModifyInMenu +=
-            ModContent.GetInstance<DarkSurfaceSys>().ModifySunLightColor;
+            system.ModifySunLightColor;
     }
 
     #endregion

@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Terraria.ModLoader;
-using ZensSky.Core.DataStructures;
+﻿using Terraria.ModLoader;
 
 namespace ZensSky.Common.MenuStyles;
 

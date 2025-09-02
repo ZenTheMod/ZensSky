@@ -1,25 +1,58 @@
 ﻿using Microsoft.Xna.Framework;
+using System;
+using System.Reflection;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
-using YouBoss.Content.NPCs.Bosses.TerraBlade.SpecificEffectManagers;
 using ZensSky.Common.Systems.Space;
 using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Systems;
+using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
-[JITWhenModsEnabled("YouBoss")]
 [ExtendsFromMod("YouBoss")]
 [Autoload(Side = ModSide.Client)]
 public sealed class YouBossSystem : ModSystem
 {
+    #region Private Fields
+
+    private const string SkyKey = "YouBoss:TerraBlade";
+
+    private static Type? TerraBladeSkyType;
+
+    private static FieldInfo? TerraBladeSkyOpacityInfo;
+
+    #endregion
+
+    #region Public Properties
+
+    public static bool IsEnabled { get; private set; }
+
+    #endregion
+
     #region Loading
 
-    public override void Load() => 
-        MainThreadSystem.Enqueue(() => On_Main.DoDraw += HideSky);
+    public override void Load() 
+    {
+        if (!ModLoader.TryGetMod("YouBoss", out Mod youBoss))
+            return;
 
-    public override void Unload() => 
+        IsEnabled = true;
+
+        Assembly youBossAsm = youBoss.Code;
+
+        TerraBladeSkyType = youBossAsm.GetType("YouBoss.Content.NPCs.Bosses.TerraBlade.SpecificEffectManagers.TerraBladeSky");
+        ArgumentNullException.ThrowIfNull(TerraBladeSkyType);
+
+        TerraBladeSkyOpacityInfo = TerraBladeSkyType?.GetField("Opacity", NonPublic | Static);
+        ArgumentNullException.ThrowIfNull(TerraBladeSkyOpacityInfo);
+
+        MainThreadSystem.Enqueue(() =>
+            On_Main.DoDraw += HideSky);
+    }
+
+    public override void Unload() =>
         MainThreadSystem.Enqueue(() => On_Main.DoDraw -= HideSky);
 
     #endregion
@@ -30,10 +63,11 @@ public sealed class YouBossSystem : ModSystem
     {
         orig(self, gameTime);
 
-        if (!(SkyManager.Instance[TerraBladeSky.SkyKey]?.IsActive() ?? false) || SkyManager.Instance[TerraBladeSky.SkyKey] is not TerraBladeSky sky)
+        if (!SkyManager.Instance[SkyKey].IsActive() || SkyManager.Instance[SkyKey].GetType() != TerraBladeSkyType)
             return;
 
-        float opacity = 1f - TerraBladeSky.Opacity;
+        float opacity = (float)(TerraBladeSkyOpacityInfo?.GetValue(null) ?? 0f);
+        opacity = 1f - opacity;
 
         if (StarSystem.StarAlpha >= opacity)
             StarSystem.StarAlphaOverride = opacity;

@@ -1,7 +1,4 @@
 ﻿using Daybreak.Common.Features.Hooks;
-using Daybreak.Common.Rendering;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;

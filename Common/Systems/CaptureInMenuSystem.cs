@@ -1,23 +1,40 @@
 ﻿using MonoMod.Cil;
 using System;
-using System.Reflection;
 using Terraria;
+using Terraria.GameContent.Events;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Systems;
-using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems;
 
 [Autoload(Side = ModSide.Client)]
 public sealed class CaptureInMenuSystem : ModSystem
 {
-    public override void Load() =>
-        MainThreadSystem.Enqueue(() => IL_Main.DoDraw += AllowCapturingOnMainMenu);
+    #region Loading
 
-    public override void Unload() =>
-        MainThreadSystem.Enqueue(() => IL_Main.DoDraw -= AllowCapturingOnMainMenu);
+    public override void Load()
+    {
+        MainThreadSystem.Enqueue(() =>
+        {
+            IL_Main.DoDraw += AllowCapturingOnMainMenu;
+            IL_Main.ClearVisualPostProcessEffects += DontDisableEffectsOnMenu;
+        });
+    }
+
+    public override void Unload()
+    {
+        MainThreadSystem.Enqueue(() =>
+        {
+            IL_Main.DoDraw -= AllowCapturingOnMainMenu;
+            IL_Main.ClearVisualPostProcessEffects -= DontDisableEffectsOnMenu;
+        });
+    }
+
+    #endregion
+
+    #region Allow Capturing
 
     private void AllowCapturingOnMainMenu(ILContext il)
     {
@@ -85,4 +102,37 @@ public sealed class CaptureInMenuSystem : ModSystem
             throw new ILEditException(Mod, il, e);
         }
     }
+
+    #endregion
+
+    #region Filter Deactivation
+
+    private void DontDisableEffectsOnMenu(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel jumpResettingTarget = c.DefineLabel();
+
+                // While we want filters (and rain) to not be force disabled, some effects should remain disabled here.
+            c.GotoNext(MoveType.After,
+                i => i.MatchCall<CreditsRollEvent>(nameof(CreditsRollEvent.Reset)));
+
+            c.EmitBr(jumpResettingTarget);
+
+                // This will still disable all CustomSkys, as some may be unwanted on the menu.
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdsfld<SkyManager>(nameof(SkyManager.Instance)),
+                i => i.MatchCallvirt<SkyManager>(nameof(SkyManager.DeactivateAll)));
+
+            c.MarkLabel(jumpResettingTarget);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    #endregion
 }

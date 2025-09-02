@@ -1,10 +1,12 @@
-# Zens Sky
+﻿# Zens Sky
 This mod aims to overhaul Terraria's sky with a number of highly customizable visuals changes; some of which mirror the upcoming Terraria 1.4.5 update's visuals.
 
 ## Current Planned Features
 Checkbox shown next to currently complete features.
-- [x] Complete star overhaul[^StarStyles] including supernovae, and shooting stars.
-- [x] Sun and moon[^MoonStyles] overhaul that completely replaces the vanilla visuals.
+- [x] Complete star overhaul including supernovae, and shooting stars.
+    - Supernovae currently do not trigger on their own.
+- [x] Sun and moon overhaul that completely replaces the vanilla visuals.
+    - Including support for all [Moon Styles](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
 - [x] Minor ambience changes e.g. wind particles.
 - [x] Panel for configuring the titlescreen.
 - [x] Configuration to pixelate the sky.
@@ -21,12 +23,14 @@ This mod features cross compatibility with a large amount of popular mods that m
 - 'Calamity Fables' by IbanPlay\*[^CalamityFables]
 - 'Calamity Mod' by Ozzatron\*[^CalamityMod]
 - 'Dark Surface' by 2bluntz@once
+- 'Fancy Lighting' by Rex
 - 'High FPS Support' by Stellar
 - 'Lights And Shadows' by yiyang233\*[^LightsAndShadows]
 - 'Macrocosm [BETA]' by MechanicPluto24\*\*\*[^Macrocosm]
+- 'Rain Overhaul' by supchyan
+- 'Rain++' by shrek
 - 'Realistic Sky' by Lucille Karma
 - 'Red Sun and Realistic Sky' by Waffles22
-- 'Rain++' by shrek\*[^Rain++]
 - 'Wrath of the Gods' by Lucille Karma\*[^WrathOfTheGods]
 - 'You Boss' by Lucille Karma
 
@@ -49,14 +53,41 @@ There are two methods to do so.
 
    A full list of the available methods and their aliases can be found [here](https://github.com/search?q=repo%3AZenTheMod%2FZensSky%20ModCall&type=code), or by searching this repository for the ModCall attribute.
 2. At times Mod.Call may not allow you the features you want, in which case you may want to use the `weakReferences` build property, you can find specifics [here](https://github.com/tModLoader/tModLoader/wiki/build.txt).
-   This will alow you more customization if you require that, most notably with the ability to use `AdditionalMoonDrawing` over `AdditionalMoonStyles`.
 
 If you feel any feature lacks certain cross compatibility that you'd like, please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 
+## Credits
+
+### Developer 
+- Zoe/Zoey (`@z_e_n_.`)
+
+### Help with Development 
+- Sprunolia
+- Tomat
+- Ebonfly
+- Roton
+- Lion8Cake
+- jupiter.ryo
+- Azathoth
+- Plushie
+- Tuna
+- Oli
+
+### Textures 
+- Sprunolia
+- [​Space Engine](https://spaceengine.org/)
+- [​Solar System Scope Textures](https://www.solarsystemscope.com/textures/)
+- [​USGS](https://www.usgs.gov/)
+- ​[Björn Jónsson's Planetary Maps](https://bjj.mmedia.is/)
+- Ebonfly
+
+### 3D Modeling 
+- Sprunolia
+- Zoey
+- Yonmaruyon
+
 ### Footnotes
-[^StarStyles]: Includes five different star visual styles to choose from.
-[^MoonStyles]: Unique high definition visuals for every vanilla [Moon Style](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
-[^BetterNightSky]: Lacks support for some visuals.
+[^BetterNightSky]: May lack support for some visuals.
 [^CalamityFables]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
     - Throne
     - Iris
@@ -68,11 +99,10 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
     - Greenhouse
     - Square
     - Aletheia
-[^CalamityMod]: Untested, but I'm going to say that it works.
+[^CalamityMod]: Untested.
 [^LightsAndShadows]: There are a few issues I would like to fix; (e.g. the effect not showing on the titlescreen.)
-    However these issues are of Lights and Shadow's devolopers(s), and I don't intend to rewrite their mod to account for it.
+    However these issues are of Lights and Shadow's devoloper(s), and I don't intend to rewrite their mod to account for it.
 
     More specifically Lights and Shadows should move to a proper Filter based system to prevent common issues with detouring FilterManager.EndCapture.
-[^Macrocosm]: Currently no high resolution earth assets; although I will be working on including these (As well as other high resolution assets and models,) in the offical Macrocosm mod.
-[^Rain++]: Highly volatile.
+[^Macrocosm]: Working with dev team to make direct changes to mod over hacky implementation.
 [^WrathOfTheGods]: Currently no changes made to any stargazing scenes.

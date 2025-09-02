@@ -26,5 +26,10 @@ public sealed class RainController : SliderController
         Main.maxRaining = MenuConfig.Instance.Rain;
 
         Main.cloudAlpha = MenuConfig.Instance.Rain;
+
+        Main.raining = Main.IsItRaining;
+
+            // TODO: Better implementation.
+        Main.ChangeRain();
     }
 }

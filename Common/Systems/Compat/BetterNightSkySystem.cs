@@ -31,9 +31,6 @@ public sealed class BetterNightSkySystem : ModSystem
 {
     #region Private Fields
 
-    private delegate void orig_On_Main_DrawStarsInBackground(On_Main.orig_DrawStarsInBackground orig, Main self, Main.SceneArea sceneArea, bool artificial);
-    private static Hook? RemoveSecondaryOrig;
-
     private static ILHook? PatchLoad;
     private static ILHook? PatchUnload;
 
@@ -66,11 +63,8 @@ public sealed class BetterNightSkySystem : ModSystem
 
         ModifyMoonTexture += UseBigMoonTexture;
 
-        MethodInfo? on_Main_DrawStarsInBackground = typeof(BetterNightSky.BetterNightSky).GetMethod(nameof(On_Main_DrawStarsInBackground), NonPublic | Static);
-
-        if (on_Main_DrawStarsInBackground is not null)
-            RemoveSecondaryOrig = new(on_Main_DrawStarsInBackground,
-                DoubleDetour);
+            // Remove the hook used for their stars.
+        On_Main.DrawStarsInBackground -= On_Main_DrawStarsInBackground;
 
                 // This is placed before the following check purely for a strange bugfix.
             // When using our moon rework the scale is derived from the texture for accuracy,
@@ -107,21 +101,12 @@ public sealed class BetterNightSkySystem : ModSystem
 
     public override void Unload() 
     { 
-        RemoveSecondaryOrig?.Dispose();
-
         PatchLoad?.Dispose();
         PatchUnload?.Dispose();
 
         PatchConfigReloading?.Dispose();
         PatchNeedsReload?.Dispose();
     }
-
-    #endregion
-
-    #region Stars
-
-    private void DoubleDetour(orig_On_Main_DrawStarsInBackground orig, On_Main.orig_DrawStarsInBackground origorig, Main self, Main.SceneArea sceneArea, bool artificial) =>
-        origorig(self, sceneArea, artificial);
 
     #endregion
 

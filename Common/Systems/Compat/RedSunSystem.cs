@@ -13,6 +13,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Ambience;
 using ZensSky.Common.Systems.Menu;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
@@ -55,20 +56,22 @@ public sealed class RedSunSystem : ModSystem
 
     #region Loading
 
-        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
 
-        MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod("ChangePositionAndDrawDayMoon", NonPublic | Instance);
+        MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod(nameof(GeneralLightingIL.ChangePositionAndDrawDayMoon), NonPublic | Instance);
 
-        if (changePositionAndDrawDayMoon is not null)
-            PatchSunAndMoonDrawing = new(changePositionAndDrawDayMoon,
-                ModifyDrawing);
+        MainThreadSystem.Enqueue(() =>
+        {
+            if (changePositionAndDrawDayMoon is not null)
+                PatchSunAndMoonDrawing = new(changePositionAndDrawDayMoon,
+                    ModifyDrawing);
+        });
     }
 
-    public override void Unload() => 
-        PatchSunAndMoonDrawing?.Dispose();
+    public override void Unload() =>
+        MainThreadSystem.Enqueue(() => PatchSunAndMoonDrawing?.Dispose());
 
     public override void PostSetupContent() =>
         SkyColorSystem.ModifyInMenu += ModContent.GetInstance<GeneralLighting>().ModifySunLightColor;
@@ -182,6 +185,10 @@ public sealed class RedSunSystem : ModSystem
 
             c.EmitLdloca(moonAlpha);
             c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
+
+                // With the 'FancyLighting' mod enabled the game will attempt to render the moon here with the shader used for the sun.
+            if (FancyLightingSystem.IsEnabled)
+                c.EmitDelegate(() => { Main.pixelShader.CurrentTechnique.Passes[0].Apply(); });
 
             int moonPosition = -1;
             int moonColor = -1;

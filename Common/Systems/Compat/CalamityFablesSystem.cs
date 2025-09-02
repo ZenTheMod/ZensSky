@@ -48,6 +48,7 @@ public sealed class CalamityFablesSystem : ModSystem
 
     #region Loading
 
+        // CalamityFables is a Both-Sided mod, meaning we cannot deliberatly load before or after it with build.txt sorting.
     public override void PostSetupContent() 
     {
         PriorMoonStyles = TextureAssets.Moon.Length;
@@ -57,14 +58,18 @@ public sealed class CalamityFablesSystem : ModSystem
 
         IsEnabled = true;
 
-            // I don't feel like adding a project reference for a massive mod just for moon styles of all things.
         Assembly fablessAsm = fables.Code;
 
         Type? moddedMoons = fablessAsm.GetType("CalamityFables.Core.ModdedMoons");
+        ArgumentNullException.ThrowIfNull(moddedMoons);
 
         FieldInfo? vanillaMoonCount = moddedMoons?.GetField("VanillaMoonCount", Public | Static);
+        ArgumentNullException.ThrowIfNull(vanillaMoonCount);
 
-        PriorMoonStyles = (int?)vanillaMoonCount?.GetValue(null) ?? PriorMoonStyles;
+        int? count = (int?)vanillaMoonCount.GetValue(null);
+        ArgumentNullException.ThrowIfNull(count);
+
+        PriorMoonStyles = (int)count;
 
         for (int i = 0; i < FablesTextures.Moon.Length; i++)
             AddMoonStyle(PriorMoonStyles + i, FablesTextures.Moon[i]);

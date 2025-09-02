@@ -26,14 +26,17 @@
 		<Reference Include="BetterNightSky"> <!-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy -->
 			<HintPath>.\lib\BetterNightSky.dll</HintPath>
 		</Reference>
-		<Reference Include="DarkSurface"> <!-- 'Dark Surface' by 2bluntz@once -->
-			<HintPath>.\lib\DarkSurface.dll</HintPath>
+		<Reference Include="FancyLighting"> <!-- 'Fancy Lighting' by Rex -->
+			<HintPath>.\lib\FancyLighting.dll</HintPath>
 		</Reference>
 		<Reference Include="Lights"> <!-- 'Lights And Shadows' by yiyang233 -->
 			<HintPath>.\lib\Lights.dll</HintPath>
 		</Reference>
 		<Reference Include="Macrocosm"> <!-- 'Macrocosm [BETA]' by MechanicPluto24 -->
 			<HintPath>.\lib\Macrocosm.dll</HintPath>
+		</Reference>
+		<Reference Include="RainOverhaul"> <!-- 'Rain Overhaul' by supchyan -->
+			<HintPath>.\lib\RainOverhaul.dll</HintPath>
 		</Reference>
 		<Reference Include="RealisticSky"> <!-- 'Realistic Sky' by Lucille Karma -->
 			<HintPath>.\lib\RealisticSky.dll</HintPath>
@@ -47,12 +50,9 @@
 		<Reference Include="SubworldLibrary"> <!-- 'Subworld Library' by John Snail -->
 			<HintPath>.\lib\SubworldLibrary.dll</HintPath>
 		</Reference>
-		<Reference Include="YouBoss"> <!-- 'You Boss' by Lucille Karma -->
-			<HintPath>.\lib\YouBoss.dll</HintPath>
-		</Reference>
 		
 		<!-- Include necessary libraries -->
-		<Reference Include="Daybreak"> <!-- 'DAYBREAK' by 2024 ***** Winter Sale's Workshop -->
+		<Reference Include="Daybreak"> <!-- 'DAYBREAK' by 2024 ***** Winter Sale -->
 			<HintPath>.\lib\Daybreak.dll</HintPath>
 		</Reference>
 	</ItemGroup>
@@ -69,14 +69,15 @@
 		<!-- Include mods with difficult to access types -->
 		<Publicize Include="BetterNightSky" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
-		<Publicize Include="DarkSurface" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		<Publicize Include="FancyLighting" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		
+		<Publicize Include="RainOverhaul" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
 		
 		<Publicize Include="RealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
 		
-		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		<Publicize Include="RedSunAndRealisticSky" IncludeVirtualMembers="true" IncludeCompilerGeneratedMembers="false" />
 		
-		<Publicize Include="YouBoss" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
-
+		<Publicize Include="Macrocosm" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 	</ItemGroup>
 
 	<!-- Locate all effect files (For whatever reason this condition stops files from being automatically removed) -->

@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
-using rail;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
