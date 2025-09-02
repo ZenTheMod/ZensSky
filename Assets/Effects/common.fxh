@@ -49,18 +49,18 @@ float inOutCubic(float t)
 
     // https://bottosson.github.io/posts/oklab / https://www.shadertoy.com/view/ttcyRS
 static const float3x3 kCONEtoLMS = float3x3(
-         0.4121656120, 0.2118591070, 0.0883097947,
-         0.5362752080, 0.6807189584, 0.2818474174,
-         0.0514575653, 0.1074065790, 0.6302613616);
+         .4121656120, .2118591070, .0883097947,
+         .5362752080, .6807189584, .2818474174,
+         .0514575653, .1074065790, .6302613616);
     
 static const float3x3 kLMStoCONE = float3x3(
-         4.0767245293, -1.2681437731, -0.0041119885,
-        -3.3072168827, 2.6093323231, -0.7034763098,
-         0.2307590544, -0.3411344290, 1.7068625689);
+         4.0767245293, -1.2681437731, -.0041119885,
+        -3.3072168827, 2.6093323231, -.7034763098,
+         .2307590544, -.3411344290, 1.7068625689);
 
 float3 toOklab(float3 rgb)
 {
-    return pow(saturate(mul(kCONEtoLMS, rgb)), 0.33333);
+    return pow(mul(kCONEtoLMS, rgb), .33333);
 }
 
 float3 toRGB(float3 oklab)

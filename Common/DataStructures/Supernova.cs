@@ -32,7 +32,7 @@ public struct Supernova
     private const float MinAlpha = .25f;
     private const float MaxAlpha = 1f;
 
-    private const float Scale = .033f;
+    private const float Scale = .04f;
 
     private readonly Color EndingColor = Color.White;
 

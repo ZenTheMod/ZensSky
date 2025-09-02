@@ -73,22 +73,22 @@ float4 explosion(float2 uv, float dist, float4 exploColor)
     
     float4 explo = exploColor * (5 - inOutCubic(expand) * .7);
     
-    return oklabLerp(0, explo, saturate(radius - dist - expand));
+    return /*oklabL*/ lerp(float4(0, 0, 0, 0), explo, saturate(radius - dist - expand));
 }
 
 float4 supernova(float2 uv)
 {
     float dist = length(uv) * 2;
     
-    float4 exploColor = explosionColor; // oklabLerp(explosionStart, explosionColor, expand);
+    float4 exploColor = oklabLerp(explosionStart, explosionColor, expand);
     
     float4 expl = explosion(uv, dist, exploColor);
     
-    float4 neb = nebula(uv, -normalize(uv) * .015, dist);
+    float4 neb = nebula(uv, -normalize(uv) * .07, dist);
     
     neb *= inCubic(saturate(expand * 3));
     
-    neb = oklabLerp(neb.a * exploColor, neb, expand);
+    neb = oklabLerp(exploColor * neb.a, neb, expand);
     
     float4 col = neb + (expl * (1 - expand + neb.a));
     
