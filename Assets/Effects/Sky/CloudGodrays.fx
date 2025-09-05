@@ -11,22 +11,16 @@ float2 screenSize;
 
 int sampleCount;
 
-float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos)
+float blur(float2 uv, float2 lightuv, int samples)
 {
-    float2 dist = (lightpos - screenCoords) / min(screenSize.x, screenSize.y);
+    float2 screen = screenSize / min(screenSize.x, screenSize.y);
+    
+    float2 dir = (lightuv - uv) * screen;
     
         // Use 1. to avoid integer division.
-    float2 dtc = dist * (1. / samples);
+    float2 dtc = dir * (1. / samples);
     
     float size = 3.9 / max(lightSize, .001);
-    
-    float light = saturate(length(dist) * size);
-    
-    light *= light;
-    light = 1 - light;
-    
-    if (light <= 0)
-        return 0;
     
     float occ = 0;
     
@@ -37,6 +31,11 @@ float blur(float2 uv, float2 screenCoords, int samples, float2 lightpos)
     {
         uv += dtc;
         
+        float light = saturate(length((lightuv - uv) * screen) * size);
+    
+        light *= light;
+        light = 1 - light;
+    
         occ += light -
         	tex2D(Occluders, uv);
     }
@@ -52,7 +51,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
     
     float4 color = lightColor;
     
-    color.a *= blur(coords, screenCoords, sampleCount, lightPosition);
+    float2 lightuv = lightPosition / screenSize;
+    float2 uv = coords;
+    
+    color.a *= blur(uv, lightuv, sampleCount);
     
     if (useTexture)
         color *= tex2D(Body, .5);
