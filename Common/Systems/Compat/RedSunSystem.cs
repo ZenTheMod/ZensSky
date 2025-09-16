@@ -38,7 +38,7 @@ public sealed class RedSunSystem : ModSystem
 
     private static ILHook? PatchSunAndMoonDrawing;
 
-    private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
+    private static readonly bool SkipDrawing = SkyConfig.Instance.UseSunAndMoon;
 
     #endregion
 

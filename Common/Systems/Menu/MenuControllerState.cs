@@ -10,6 +10,7 @@ using Terraria.ModLoader.Config;
 using Terraria.UI;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Menu.Elements;
+using ZensSky.Core.UI;
 
 namespace ZensSky.Common.Systems.Menu;
 
@@ -33,7 +34,7 @@ public sealed class MenuControllerState : UIState
     public UIPanel? Panel;
     public UIList? Controllers;
 
-    public FixedImageButton? ResetButton;
+    public MenuImageButton? ResetButton;
 
     #endregion
 
@@ -92,7 +93,7 @@ public sealed class MenuControllerState : UIState
         Panel.Append(Controllers);
 
             // Use our modified scrollbar to prevent hovering while grabbing the sun or moon.
-        FixedScrollbar uIScrollbar = new();
+        MenuScrollbar uIScrollbar = new();
 
         uIScrollbar.SetView(100f, 1000f); // This seems to be important ?
         uIScrollbar.Height.Set(-HeaderHeight, 1f);
@@ -104,7 +105,7 @@ public sealed class MenuControllerState : UIState
 
         Controllers.SetScrollbar(uIScrollbar);
 
-        List<MenuControllerElement> controllers = MenuControllerSystem.Controllers;
+        List<MenuController> controllers = MenuControllerSystem.Controllers;
         for (int i = 0; i < controllers.Count; i++)
         {
                 // Recreate the instance for easier debugging.
@@ -113,7 +114,7 @@ public sealed class MenuControllerState : UIState
             if (instance is null)
                 continue;
 
-            controllers[i] = (MenuControllerElement)instance;
+            controllers[i] = (MenuController)instance;
 
             controllers[i].Width.Set(0f, 1f);
 

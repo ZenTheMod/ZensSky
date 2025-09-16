@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -56,17 +57,19 @@ public static class StarRendering
     #region Stars
 
     [ModCall("DrawAllStars")]
-    public static void DrawStars(SpriteBatch spriteBatch, float alpha)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void DrawStars(SpriteBatch spriteBatch, float alpha) =>
+        DrawStars(spriteBatch, alpha, -StarRotation, Stars, SkyConfig.Instance.StarStyle);
+
+    public static void DrawStars(SpriteBatch spriteBatch, float alpha, float rotation, Star[] stars, StarVisual style)
     {
         Texture2D texture;
 
         Vector2 origin;
 
-        float rotation = -StarRotation;
+        ReadOnlySpan<Star> activeStars = [.. stars.Where(s => s.IsActive)];
 
-        ReadOnlySpan<Star> activeStars = [.. Stars.Where(s => s.IsActive)];
-
-        switch (SkyConfig.Instance.StarStyle)
+        switch (style)
         {
             case StarVisual.Vanilla:
                 for (int i = 0; i < activeStars.Length; i++)
@@ -98,9 +101,9 @@ public static class StarRendering
                 return;
 
             case StarVisual.Random:
-                for (int i = 0; i < Stars.Length; i++)
-                    if (Stars[i].IsActive)
-                        DrawStar(spriteBatch, alpha, rotation, Stars[i], (StarVisual)(i % 3 + 1));
+                for (int i = 0; i < stars.Length; i++)
+                    if (stars[i].IsActive)
+                        DrawStar(spriteBatch, alpha, rotation, stars[i], (StarVisual)(i % 3 + 1));
                 return;
         }
     }

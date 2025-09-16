@@ -13,28 +13,23 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
-using ZensSky.Core.Exceptions;
 using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
 
 [Autoload(Side = ModSide.Client)]
-public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadable where T : IComparable<T>
+public abstract class LockedSliderElement<T> : NoDrawRangeElement<T> where T : IComparable<T>
 {
     #region Private Fields
 
     private const string LockTooltipKey = "LockReason";
 
-    private const float TheMagicNumber = 167f;
+    private const float SliderWidth = 167f;
 
     private const float LockedBackgroundMultiplier = .4f;
 
     private static readonly Color LockedGradient = new(40, 40, 40);
-
-    private static ILHook? PatchDrawSelf;
-
-    private static bool Drawing = false;
 
     #endregion
 
@@ -48,48 +43,6 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
 
     public bool IsLocked =>
         (bool)(TargetMember?.GetValue(TargetInstance) ?? false) == Mode;
-
-    #endregion
-
-    #region Loading
-
-    public void Load(Mod mod)
-    {
-        Main.QueueMainThreadAction(() => {
-            MethodInfo? drawSelf = typeof(RangeElement).GetMethod("DrawSelf", NonPublic | Instance);
-
-            if (drawSelf is not null)
-                PatchDrawSelf = new(drawSelf,
-                    SkipRangeElementDrawing);
-        });
-    }
-
-    public void Unload() => 
-        Main.QueueMainThreadAction(() => PatchDrawSelf?.Dispose());
-
-    private void SkipRangeElementDrawing(ILContext il)
-    {
-        try
-        {
-            ILCursor c = new(il);
-
-            ILLabel jumpret = c.DefineLabel();
-
-            c.GotoNext(MoveType.After,
-                i => i.MatchCall<ConfigElement>("DrawSelf"));
-
-            c.EmitDelegate(() => Drawing);
-            c.EmitBrfalse(jumpret);
-
-            c.EmitRet();
-
-            c.MarkLabel(jumpret);
-        }
-        catch (Exception e)
-        {
-            throw new ILEditException(ModContent.GetInstance<ZensSky>(), il, e);
-        }
-    }
 
     #endregion
 
@@ -142,11 +95,8 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
-            // I genuinely hate that what I'd indeally want is ONLY possible in IL.
-        Drawing = true;
         backgroundColor = IsLocked ? UICommon.DefaultUIBlue * LockedBackgroundMultiplier : UICommon.DefaultUIBlue;
         base.DrawSelf(spriteBatch);
-        Drawing = false;
 
         rightHover = null;
 
@@ -171,54 +121,48 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T>, ILoadab
                 Proportion = ratio;
         }
 
-        if (rightHover is not null && rightLock is null && PlayerInput.Triggers.JustPressed.MouseLeft)
+        if (rightHover is not null &&
+            rightLock is null &&
+            PlayerInput.Triggers.JustPressed.MouseLeft)
             rightLock = rightHover;
     }
 
     public void DrawSlider(SpriteBatch spriteBatch, float perc, out float ratio)
     {
-        perc = MathHelper.Clamp(perc, -0.05f, 1.05f);
+        perc = MathHelper.Clamp(perc, -.05f, 1.05f);
 
         Texture2D colorBar = TextureAssets.ColorBar.Value;
-        Texture2D colorBarHighlight = TextureAssets.ColorHighlight.Value;
         Texture2D gradient = MiscTextures.Gradient;
         Texture2D colorSlider = TextureAssets.ColorSlider.Value;
         Texture2D lockIcon = UITextures.Lock;
 
         IngameOptions.valuePosition.X -= colorBar.Width;
-        Rectangle rectangle = new((int)IngameOptions.valuePosition.X, (int)IngameOptions.valuePosition.Y - (int)(colorBar.Height * .5f), colorBar.Width, colorBar.Height);
-        Rectangle destinationRectangle = rectangle;
 
-        float x = rectangle.X + 5f;
-        float y = rectangle.Y + 4f;
+        Rectangle rectangle = new(
+            (int)IngameOptions.valuePosition.X,
+            (int)IngameOptions.valuePosition.Y - (int)(colorBar.Height * .5f),
+            colorBar.Width,
+            colorBar.Height);
 
-        spriteBatch.Draw(colorBar, rectangle, IsLocked ? Color.Gray : Color.White);
-
-        Rectangle inner = new((int)x, (int)y, (int)TheMagicNumber + 2, 8);
-
-            // Draw the gradient
-        spriteBatch.Draw(gradient, inner, null, IsLocked ? LockedGradient : SliderColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
-
-        rectangle.Inflate(-5, 2);
-
-            // Logic.
-        bool isHovering = rectangle.Contains(new Point(Main.mouseX, Main.mouseY)) || rightLock == this;
+        bool isHovering = rectangle.Contains(Utilities.MousePosition) || rightLock == this;
 
         if (rightLock != this && rightLock is not null || IsLocked)
             isHovering = false;
 
-        if (isHovering)
-            spriteBatch.Draw(colorBarHighlight, destinationRectangle, Main.OurFavoriteColor);
+        Color color = IsLocked ? Color.Gray : Color.White;
+
+        Utilities.DrawVanillaSlider(spriteBatch, color, isHovering, out ratio, out Rectangle destinationRectangle, out Rectangle inner);
+
+        spriteBatch.Draw(gradient, inner, null, IsLocked ? LockedGradient : SliderColor, 0f, Vector2.Zero, SpriteEffects.None, 0f);
 
         Vector2 lockOffset = new(0, -4);
 
         if (IsLocked)
             spriteBatch.Draw(lockIcon, inner.Center() + lockOffset, null, Color.White, 0f, lockIcon.Size() * .5f, 1f, SpriteEffects.None, 0f);
         else
-            spriteBatch.Draw(colorSlider, new Vector2(x + TheMagicNumber * perc, y + 4f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
+            spriteBatch.Draw(colorSlider, new(destinationRectangle.X + (SliderWidth * perc), destinationRectangle.Y + 4f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
 
         IngameOptions.inBar = isHovering;
-        ratio = Utilities.Saturate((Main.mouseX - rectangle.X) / (float)rectangle.Width);
     }
 
     #endregion

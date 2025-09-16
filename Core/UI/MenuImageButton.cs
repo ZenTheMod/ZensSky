@@ -6,9 +6,9 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.ID;
 using Terraria.UI;
 
-namespace ZensSky.Common.Systems.Menu.Elements;
+namespace ZensSky.Core.UI;
 
-public sealed class FixedImageButton(Asset<Texture2D> texture) : UIImageButton(texture)
+public sealed class MenuImageButton(Asset<Texture2D> texture) : UIImageButton(texture)
 {
     public override void MouseOver(UIMouseEvent evt)
     {

@@ -162,7 +162,7 @@ public struct Supernova
         Contract += Increment * ContractMultiplier * Multiplier;
         Contract = Utilities.Saturate(Contract);
 
-        float colorInterpolator = Easings.OutPolynomial(Contract, 5);
+        float colorInterpolator = Easings.OutQuint(Contract);
         Target->Color = Color.Lerp(StartingColor, EndingColor, colorInterpolator);
 
             // Have the star increase in scale slightly before shrinking.

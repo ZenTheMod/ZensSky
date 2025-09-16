@@ -24,7 +24,7 @@ public sealed class SunAndMoonSystem : ModSystem
     private const float MinSunBrightness = .82f;
     private const float MinMoonBrightness = .65f;
 
-    private static readonly bool SkipDrawing = SkyConfig.Instance.SunAndMoonRework;
+    private static readonly bool SkipDrawing = SkyConfig.Instance.UseSunAndMoon;
 
     #endregion
 

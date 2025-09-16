@@ -76,7 +76,7 @@ public sealed class BetterNightSkySystem : ModSystem
             PatchUnload = new(doUnloads,
                 JumpReset);
 
-        if (!SkyConfig.Instance.SunAndMoonRework)
+        if (!SkyConfig.Instance.UseSunAndMoon)
             return;
 
         MethodInfo? onModLoad = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.OnModLoad), Public | Instance);
@@ -149,7 +149,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 c.EmitLdcI4(4);
             }
 
-            if (!SkyConfig.Instance.SunAndMoonRework)
+            if (!SkyConfig.Instance.UseSunAndMoon)
                 return;
 
             c.GotoNext(i => i.MatchRet());

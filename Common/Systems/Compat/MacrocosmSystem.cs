@@ -15,7 +15,6 @@ using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
-using MacrocosmSky = Macrocosm.Common.Drawing.Sky;
 
 namespace ZensSky.Common.Systems.Compat;
 
@@ -107,7 +106,7 @@ public sealed class MacrocosmSystem : ModSystem
                 i => i.MatchLdfld<MoonSky>(nameof(MoonSky.starsNight)),
                 i => i.MatchLdarg(spriteBatchIndex),
                 i => i.MatchLdloc(out brightnessIndex),
-                i => i.MatchCallvirt<MacrocosmSky::Stars>(nameof(MacrocosmSky::Stars.DrawAll)));
+                i => i.MatchCallvirt<Stars>(nameof(Stars.DrawAll)));
 
             c.MarkLabel(jumpStarDrawingTarget);
 
@@ -128,7 +127,7 @@ public sealed class MacrocosmSystem : ModSystem
             c.MoveAfterLabels();
 
                 // Skip over sun drawing.
-            if (SkyConfig.Instance.SunAndMoonRework || RealisticSkySystem.IsEnabled)
+            if (SkyConfig.Instance.UseSunAndMoon || RealisticSkySystem.IsEnabled)
             {
                 c.EmitDelegate(() => ShowSun);
                 c.EmitBrtrue(jumpSunDrawingTarget);
@@ -152,7 +151,7 @@ public sealed class MacrocosmSystem : ModSystem
 
                     SetInfo(sun.Center, sun.Color, sun.Rotation, sun.Scale, true);
 
-                        // EventSystem.DemonSun
+                        // TODO: Test EventSystem.DemonSun.
                     if (sun.ShouldDraw())
                         DrawSun(spriteBatch, device);
                 });

@@ -49,10 +49,10 @@ public static class WindRendering
     {
         orig(self);
 
-        if (!Main.gameMenu || !SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        if (!Main.gameMenu || !SkyConfig.Instance.UseWindParticles || SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        if (SkyConfig.Instance.PixelatedSky)
+        if (SkyConfig.Instance.UsePixelatedSky)
             DrawPixelated();
         else
             DrawWind();
@@ -62,10 +62,10 @@ public static class WindRendering
     {
         orig(self);
 
-        if (Main.gameMenu || !SkyConfig.Instance.WindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        if (Main.gameMenu || !SkyConfig.Instance.UseWindParticles || SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        if (SkyConfig.Instance.PixelatedSky)
+        if (SkyConfig.Instance.UsePixelatedSky)
             DrawPixelated();
         else
             DrawWind();
@@ -77,7 +77,7 @@ public static class WindRendering
 
     private static void DrawPixelated()
     {
-        if (!SkyConfig.Instance.PixelatedSky || 
+        if (!SkyConfig.Instance.UsePixelatedSky || 
             !SkyEffects.PixelateAndQuantize.IsReady || 
             Main.mapFullscreen)
             return;

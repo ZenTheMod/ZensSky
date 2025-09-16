@@ -7,9 +7,9 @@ using Terraria.ID;
 using Terraria.UI;
 using ZensSky.Core.Utils;
 
-namespace ZensSky.Common.Systems.Menu.Elements;
+namespace ZensSky.Core.UI;
 
-public sealed class FixedScrollbar : UIScrollbar
+public sealed class MenuScrollbar : UIScrollbar
 {
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {

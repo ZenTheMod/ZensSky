@@ -185,7 +185,7 @@ public sealed class PixelateSkySystem : ModSystem
 
     private static void PrepareTarget()
     {
-        if (!SkyConfig.Instance.PixelatedSky || !SkyEffects.PixelateAndQuantize.IsReady)
+        if (!SkyConfig.Instance.UsePixelatedSky || !SkyEffects.PixelateAndQuantize.IsReady)
             return;
 
         HasDrawn = false;
@@ -223,7 +223,7 @@ public sealed class PixelateSkySystem : ModSystem
 
     private static void DrawTarget()
     {
-        if (!SkyConfig.Instance.PixelatedSky || 
+        if (!SkyConfig.Instance.UsePixelatedSky || 
             SkyTarget is null ||
             !SkyEffects.PixelateAndQuantize.IsReady || 
             Main.mapFullscreen || 

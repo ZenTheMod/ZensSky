@@ -1,12 +1,25 @@
 ﻿using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.UI;
+using ZensSky.Core.UI;
 
 namespace ZensSky.Common.Systems.Menu.Elements;
 
-public abstract class SliderController : MenuControllerElement
+public abstract class SliderController : MenuController
 {
+    #region Private Fields
+
+    protected const float DefaultHeight = 75f;
+
+    #endregion
+
+    #region Public Fields
+
     public readonly UISlider? Slider;
+
+    #endregion
+
+    #region Public Properties
 
     public abstract float MaxRange { get; }
     public abstract float MinRange { get; }
@@ -15,10 +28,12 @@ public abstract class SliderController : MenuControllerElement
 
     public abstract ref float Modifying {  get; }
 
+    #endregion
+
     public SliderController()
         : base()
     {
-        Height.Set(75f, 0f);
+        Height.Set(DefaultHeight, 0f);
 
         Slider = new();
 
@@ -26,7 +41,7 @@ public abstract class SliderController : MenuControllerElement
 
         Slider.InnerColor = InnerColor;
 
-        FixedImageButton leftButton = new(ButtonTextures.ArrowLeft)
+        MenuImageButton leftButton = new(ButtonTextures.ArrowLeft)
         {
             HAlign = 0f
         };
@@ -47,7 +62,7 @@ public abstract class SliderController : MenuControllerElement
 
         leftButton.OnMouseOver += DisableHoveringWhileGrabbingSunOrMoon;
 
-        FixedImageButton rightButton = new(ButtonTextures.ArrowRight)
+        MenuImageButton rightButton = new(ButtonTextures.ArrowRight)
         {
             HAlign = 1f
         };

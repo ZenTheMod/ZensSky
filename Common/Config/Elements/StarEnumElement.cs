@@ -16,6 +16,8 @@ namespace ZensSky.Common.Config.Elements;
 
 public sealed class StarEnumElement : ConfigElement<StarVisual>
 {
+    #region Private Fields
+
     private const float TimeMultiplier = 1.2f;
 
     private Star DisplayStar = new() 
@@ -29,50 +31,39 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
         IsActive = true
     };
 
-    public string[]? EnumNames;
+    private string[]? EnumNames;
 
-    public int Max;
+    #endregion
+
+    #region Binding
 
     public override void OnBind()
     {
         base.OnBind();
 
-        OnLeftClick += delegate
-        {
-            if ((int)Value >= Max - 1)
-            {
-                Value = 0;
-                return;
-            }
+        OnLeftClick +=
+            delegate { Value.NextEnum(); };
 
-            Value++;
-        };
-
-        OnRightClick += delegate
-        {
-            if (Value == 0)
-            {
-                Value = (StarVisual)(Max - 1);
-                return;
-            }
-
-            Value--;
-        };
+        OnRightClick +=
+            delegate { Value.PreviousEnum(); };
 
         EnumNames = Enum.GetNames(typeof(StarVisual));
 
         for (int i = 0; i < EnumNames.Length; i++)
         {
             FieldInfo? enumFieldFieldInfo = MemberInfo.Type.GetField(EnumNames[i]);
-            if (enumFieldFieldInfo != null)
-            {
-                string name = ConfigManager.GetLocalizedLabel(new PropertyFieldWrapper(enumFieldFieldInfo));
-                EnumNames[i] = name;
-            }
-        }
 
-        Max = EnumNames.Length;
+            if (enumFieldFieldInfo is null)
+                continue;
+
+            string name = ConfigManager.GetLocalizedLabel(new(enumFieldFieldInfo));
+            EnumNames[i] = name;
+        }
     }
+
+    #endregion
+
+    #region Drawing
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
@@ -105,4 +96,6 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
 
         StarRendering.DrawStar(spriteBatch, 1, 0f, DisplayStar, style);
     }
+
+    #endregion
 }

@@ -445,7 +445,7 @@ public static class SunAndMoonRendering
     {
         if (!ZensSky.CanDrawSky || 
             RedSunSystem.IsEnabled || 
-            !SkyConfig.Instance.SunAndMoonRework || 
+            !SkyConfig.Instance.UseSunAndMoon || 
             (!ShowSun && !ShowMoon))
         {
             if (!RedSunSystem.IsEnabled)

@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
 
-namespace ZensSky.Common.Systems.Menu.Elements;
+namespace ZensSky.Core.UI;
 
 public sealed class HoverImageButton : UIElement
 {
@@ -40,13 +40,7 @@ public sealed class HoverImageButton : UIElement
 
     #endregion
 
-    protected override void DrawSelf(SpriteBatch spriteBatch)
-    {
-        CalculatedStyle dims = GetDimensions();
-
-        spriteBatch.Draw(InnerTexture.Value, dims.ToRectangle(), InnerColor);
-        spriteBatch.Draw(OuterTexture.Value, dims.ToRectangle(), IsMouseHovering ? OuterHoverColor : OuterColor);
-    }
+    #region Updating
 
     public override void MouseOver(UIMouseEvent evt)
     {
@@ -68,6 +62,21 @@ public sealed class HoverImageButton : UIElement
             return;
 
         string tooltip = Language.GetTextValue(HoverText);
+
         Main.instance.MouseText(tooltip);
     }
+
+    #endregion
+
+    #region Drawing
+
+    protected override void DrawSelf(SpriteBatch spriteBatch)
+    {
+        CalculatedStyle dims = GetDimensions();
+
+        spriteBatch.Draw(InnerTexture.Value, dims.ToRectangle(), InnerColor);
+        spriteBatch.Draw(OuterTexture.Value, dims.ToRectangle(), IsMouseHovering ? OuterHoverColor : OuterColor);
+    }
+
+    #endregion
 }

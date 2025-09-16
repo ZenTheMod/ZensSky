@@ -1,5 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using Terraria.ModLoader.Config;
 using ZensSky.Core.Config;
 
@@ -11,7 +10,7 @@ namespace ZensSky.Common.Config;
 [HideConfig]
 public sealed class MenuConfig : ModConfig
 {
-        // ConfigManager.Add Sets any instance fields to the ModConfig type.
+        // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
     public static MenuConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -45,12 +44,12 @@ public sealed class MenuConfig : ModConfig
     [DefaultValue(false)]
     public bool UseMenuButtonColor;
 
-    [DefaultValue(typeof(Vector3), "0, 0, 0")]
-    public Vector3 MenuButtonColor = new();
+    [DefaultValue(typeof(Color), "0, 0, 0, 0")]
+    public Color MenuButtonColor = new();
 
     [DefaultValue(false)]
     public bool UseMenuButtonHoverColor;
 
-    [DefaultValue(typeof(Vector3), "0, 0, 0")]
-    public Vector3 MenuButtonHoverColor = new();
+    [DefaultValue(typeof(Color), "0, 0, 0, 0")]
+    public Color MenuButtonHoverColor = new();
 }

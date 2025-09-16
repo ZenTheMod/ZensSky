@@ -5,13 +5,23 @@ using Terraria.ModLoader;
 namespace ZensSky.Common.Systems.Menu.Elements;
 
 [Autoload(Side = ModSide.Client)]
-public abstract class MenuControllerElement : UIPanel, ILoadable
+public abstract class MenuController : UIPanel, ILoadable
 {
+    #region Public Fields
+
     public UIText? UIName;
+
+    #endregion
+
+    #region Public Properties
 
     public abstract int Index { get; }
 
     public abstract string Name { get; }
+
+    #endregion
+
+    #region Loading
 
     public virtual void OnLoad() { }
 
@@ -28,7 +38,11 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
 
     public virtual void Refresh() { }
 
-    public MenuControllerElement()
+    #endregion
+
+    #region Public Constructors
+
+    public MenuController()
     {
         UIName = new(Language.GetText(Name))
         {
@@ -38,10 +52,16 @@ public abstract class MenuControllerElement : UIPanel, ILoadable
         Append(UIName);
     }
 
+    #endregion
+
+    #region Sorting
+
     public override int CompareTo(object obj)
     {
-        if (obj is MenuControllerElement element)
+        if (obj is MenuController element)
             return element.Index > Index ? -1: 1;
         return 0;
     }
+
+    #endregion
 }

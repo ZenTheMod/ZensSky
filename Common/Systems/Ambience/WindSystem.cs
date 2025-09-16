@@ -52,7 +52,7 @@ public sealed class WindSystem : ModSystem
         if (Main.dedServ ||
             (Main.gamePaused && !Main.gameMenu) ||
             HighFPSSupportSystem.IsPartialTick ||
-            !SkyConfig.Instance.WindParticles ||
+            !SkyConfig.Instance.UseWindParticles ||
             SkyConfig.Instance.WindOpacity <= 0)
             return;
 

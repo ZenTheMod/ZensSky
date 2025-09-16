@@ -9,6 +9,63 @@ Configs: {
 		Random.Label: Random
 		Tooltip: ""
 	}
+
+	Gradient: {
+		Tooltip: ""
+
+		MaxSegments: {
+			Label: Max Segments
+			Tooltip: ""
+		}
+	}
+
+	GradientSegment: {
+		Tooltip: ""
+
+		Position: {
+			Label: Position
+			Tooltip: ""
+		}
+
+		Color: {
+			Label: Color
+			Tooltip: ""
+		}
+
+		Easing: {
+			Label: Easing
+			Tooltip: ""
+		}
+	}
+
+	EasingStyle: {
+		Tooltip: ""
+		Linear.Label: Linear
+		InCubic.Label: In Cubic
+		OutCubic.Label: Out Cubic
+		InOutCubic.Label: In Out Cubic
+		InQuart.Label: In Quart
+		OutQuart.Label: Out Quart
+		InOutQuart.Label: In Out Quart
+		InQuint.Label: In Quint
+		OutQuint.Label: Out Quint
+		InOutQuint.Label: In Out Quint
+		InSine.Label: In Sine
+		OutSine.Label: Out Sine
+		InOutSine.Label: In Out Sine
+		InExpo.Label: In Expo
+		OutExpo.Label: Out Expo
+		InOutExpo.Label: In Out Expo
+		InCirc.Label: In Circ
+		OutCirc.Label: Out Circ
+		InOutCirc.Label: In Out Circ
+		InElastic.Label: In Elastic
+		OutElastic.Label: Out Elastic
+		InOutElastic.Label: In Out Elastic
+		InBack.Label: In Back
+		OutBack.Label: Out Back
+		InOutBack.Label: In Out Back
+	}
 }
 
 MenuController: {
@@ -20,6 +77,6 @@ MenuController: {
 	Parallax: Parallax Direction
 	CloudDensity: Cloud Density
 	ButtonColor: Menu Button Colors
-	ButtonColorHoverFalse: Swap to Hover Color (<right> to reset current)
-	ButtonColorHoverTrue: Swap to Normal Color (<right> to reset current)
+	ColorDisplayHover: Button Color (<right> to reset.)
+	HoverColorDisplayHover: Button Hover Color (<right> to reset.)
 }

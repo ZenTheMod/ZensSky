@@ -116,7 +116,7 @@ public sealed class SkyColorSystem : ModSystem
         if (!SkyConfig.Instance.PitchBlackBackground || DarkSurfaceSystem.IsEnabled)
             return;
 
-        float interpolator = Easings.InPolynomial(StarSystem.StarAlpha, 3);
+        float interpolator = Easings.InCubic(StarSystem.StarAlpha);
 
         backgroundColor = Color.Lerp(Main.ColorOfTheSkies, Color.Black, interpolator);
         tileColor = Color.Lerp(Main.ColorOfTheSkies, Color.Black, interpolator);

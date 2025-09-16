@@ -4,6 +4,7 @@ using ZensSky.Common.Config.Elements;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Config.Elements;
+using ZensSky.Core.DataStructures;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.
@@ -12,7 +13,7 @@ namespace ZensSky.Common.Config;
 
 public sealed class SkyConfig : ModConfig
 {
-        // ConfigManager.Add Sets any instance fields to the ModConfig type.
+        // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
     public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -21,10 +22,10 @@ public sealed class SkyConfig : ModConfig
 
     [ReloadRequired]
     [DefaultValue(true)]
-    public bool SunAndMoonRework;
+    public bool UseSunAndMoon;
 
     [DefaultValue(false)]
-    [LockedElement(typeof(SkyConfig), nameof(SunAndMoonRework), false)]
+    [LockedElement(typeof(SkyConfig), nameof(UseSunAndMoon), false)]
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool TransparentMoonShadow;
 
@@ -47,10 +48,10 @@ public sealed class SkyConfig : ModConfig
     [Header("Pixelation")]
 
     [DefaultValue(false)]
-    public bool PixelatedSky;
+    public bool UsePixelatedSky;
 
     [DefaultValue(16)]
-    [LockedElement(typeof(SkyConfig), nameof(PixelatedSky), false)]
+    [LockedElement(typeof(SkyConfig), nameof(UsePixelatedSky), false)]
     [CustomModConfigItem(typeof(LockedIntSlider))]
     [SliderColor(240, 103, 135)]
     [Range(8, 256)]
@@ -59,10 +60,10 @@ public sealed class SkyConfig : ModConfig
     [Header("Clouds")]
 
     [DefaultValue(true)]
-    public bool CloudsEnabled;
+    public bool UseCloudLighting;
 
     [DefaultValue(32)]
-    [LockedElement(typeof(SkyConfig), nameof(CloudsEnabled), false)]
+    [LockedElement(typeof(SkyConfig), nameof(UseCloudLighting), false)]
     [CustomModConfigItem(typeof(LockedIntSlider))]
     [SliderColor(240, 103, 135)]
     [Range(4, 64)]
@@ -71,10 +72,10 @@ public sealed class SkyConfig : ModConfig
     [Header("Ambient")]
 
     [DefaultValue(true)]
-    public bool WindParticles;
+    public bool UseWindParticles;
 
     [DefaultValue(.85f)]
-    [LockedElement(typeof(SkyConfig), nameof(WindParticles), false)]
+    [LockedElement(typeof(SkyConfig), nameof(UseWindParticles), false)]
     [CustomModConfigItem(typeof(LockedFloatSlider))]
     [SliderColor(148, 203, 227)]
     [Range(0f, 1f)]
@@ -84,4 +85,8 @@ public sealed class SkyConfig : ModConfig
     [LockedElement(typeof(DarkSurfaceSystem), nameof(DarkSurfaceSystem.IsEnabled), true)]
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool PitchBlackBackground;
+
+    [CustomModConfigItem(typeof(GradientElement))]
+    public Gradient SkyGradient =
+        [new(0f, Color.Black), new(.333f, Color.Yellow), new(.5f, Color.Green), new(1f, Color.White)];
 }

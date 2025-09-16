@@ -7,7 +7,7 @@ using Terraria.ID;
 using Terraria.UI;
 using ZensSky.Core.Utils;
 
-namespace ZensSky.Common.Systems.Menu.Elements;
+namespace ZensSky.Core.UI;
 
 public sealed class UISlider : UIElement
 {
@@ -23,7 +23,7 @@ public sealed class UISlider : UIElement
 
     #endregion
 
-    #region Constructor
+    #region Public Constructors
 
     public UISlider()
     {
@@ -36,6 +36,8 @@ public sealed class UISlider : UIElement
     }
 
     #endregion
+
+    #region Interactions
 
     public override void LeftMouseDown(UIMouseEvent evt)
     {
@@ -66,6 +68,10 @@ public sealed class UISlider : UIElement
         SoundEngine.PlaySound(SoundID.MenuTick);
     }
 
+    #endregion
+
+    #region Drawing
+
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
         CalculatedStyle dims = GetDimensions();
@@ -91,7 +97,7 @@ public sealed class UISlider : UIElement
 
         Texture2D blip = TextureAssets.ColorSlider.Value;
 
-        Vector2 blipOrigin = blip.Size() * 0.5f;
+        Vector2 blipOrigin = blip.Size() * .5f;
         Vector2 blipPosition = new(size.X + Ratio * size.Width, size.Center.Y);
 
         spriteBatch.Draw(blip, blipPosition, null, Color.White, 0f, blipOrigin, 1f, 0, 0f);
@@ -103,4 +109,6 @@ public sealed class UISlider : UIElement
         spriteBatch.Draw(texture, new Rectangle(dimensions.X + 6, dimensions.Y, dimensions.Width - 12, dimensions.Height), new(6, 0, 2, texture.Height), color);
         spriteBatch.Draw(texture, new Rectangle(dimensions.X + dimensions.Width - 6, dimensions.Y, 6, dimensions.Height), new(8, 0, 6, texture.Height), color);
     }
+
+    #endregion
 }

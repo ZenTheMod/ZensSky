@@ -42,6 +42,8 @@ public sealed class MenuControllerSystem : ModSystem
 
     #region Public Properties
 
+    public static MenuControllerState State => MenuController;
+
     public static bool InUI => MenuControllerInterface?.CurrentState is not null;
 
     public static bool Hovering => InUI && MenuController?.Panel?.IsMouseHovering is true;
@@ -50,7 +52,7 @@ public sealed class MenuControllerSystem : ModSystem
 
     #region Public Fields
 
-    public static readonly List<MenuControllerElement> Controllers = [];
+    public static readonly List<MenuController> Controllers = [];
 
     #endregion
 

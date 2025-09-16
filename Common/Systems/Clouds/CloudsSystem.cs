@@ -111,7 +111,7 @@ public sealed class CloudsSystem : ModSystem
                     canDrawClouds &&
                     (Main.numClouds > 0 || Main.cloudBGAlpha > 0) &&
                     Main.screenPosition.Y < (Main.worldSurface * 16) + 16 &&
-                    SkyConfig.Instance.CloudsEnabled &&
+                    SkyConfig.Instance.UseCloudLighting &&
                     (ShowCloudLighting = true) &&
                     SkyEffects.CloudLighting.IsReady &&
                     SkyEffects.CloudGodrays.IsReady &&
@@ -353,7 +353,7 @@ public sealed class CloudsSystem : ModSystem
             moonColor != Color.Black;
 
         Texture2D? moonTexture =
-            SkyConfig.Instance.SunAndMoonRework ? MoonTexture.Value : null;
+            SkyConfig.Instance.UseSunAndMoon ? MoonTexture.Value : null;
 
         if (showSun)
             DrawLight(spriteBatch, sunPosition, sunColor, sunSize, device);
@@ -425,7 +425,7 @@ public sealed class CloudsSystem : ModSystem
             // Decrease the intensity at noon to make the clouds not just be pure white.
             // And alter the intensity depending on the moon phase, where a new moon would cast no light.
         if (day)
-            color *= MathHelper.Lerp(SunNoonAlpha, 1f, Easings.InPolynomial(distanceFromCenter, 4));
+            color *= MathHelper.Lerp(SunNoonAlpha, 1f, Easings.InQuart(distanceFromCenter));
         else
             color *= MathF.Abs(4 - Main.moonPhase) * .25f;
 

@@ -8,6 +8,7 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using static System.Reflection.BindingFlags;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZensSky.Core.Utils;
 
@@ -15,15 +16,20 @@ public static partial class Utilities
 {
     #region Public Properties
 
-    public static Rectangle ScreenDimensions => new(0, 0, Main.screenWidth, Main.screenHeight);
+    public static Rectangle ScreenDimensions =>
+        new(0, 0, Main.screenWidth, Main.screenHeight);
 
-    public static Vector2 ScreenSize => new(Main.screenWidth, Main.screenHeight);
+    public static Vector2 ScreenSize =>
+        new(Main.screenWidth, Main.screenHeight);
 
-    public static Vector2 HalfScreenSize => ScreenSize * .5f;
+    public static Vector2 HalfScreenSize =>
+        ScreenSize * .5f;
 
-    public static Vector2 MousePosition => new(PlayerInput.MouseX, PlayerInput.MouseY);
+    public static Vector2 MousePosition =>
+        new(PlayerInput.MouseX, PlayerInput.MouseY);
 
-    public static Vector2 UIMousePosition => UserInterface.ActiveInstance.MousePosition;
+    public static Vector2 UIMousePosition =>
+        UserInterface.ActiveInstance.MousePosition;
 
     #endregion
 
@@ -95,7 +101,7 @@ public static partial class Utilities
     ///     <see cref="false"/> – The instance should be found based on preceding order.<br/>
     ///     <see cref="true"/> – The instance should be found based on accending order.<br/>
     /// </param>
-    public static T CompareFor<T>(this T[] array, Func<T, IComparable> getComparable, bool accending = true)
+    public static int CompareFor<T>(this T[] array, Func<T, IComparable> getComparable, bool accending = true)
     {
         int index = 0;
 
@@ -114,7 +120,7 @@ public static partial class Utilities
             }
         }
 
-        return array[index];
+        return index;
     }
 
     /// <param name="accending">

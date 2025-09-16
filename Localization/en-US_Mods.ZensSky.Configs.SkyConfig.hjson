@@ -8,7 +8,7 @@ Headers: {
 	Pixelation: Pixelation
 }
 
-SunAndMoonRework: {
+UseSunAndMoon: {
 	Label: "[i:237] Sun And Moon Overhaul"
 	Tooltip: If the visual overhaul of the sun and moon is enabled or not.
 }
@@ -40,7 +40,7 @@ DrawRealisticStars: {
 	LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
 }
 
-PixelatedSky: {
+UsePixelatedSky: {
 	Label: "[i:3725] Pixelated Sky"
 	Tooltip:
 		'''
@@ -55,7 +55,7 @@ ColorSteps: {
 	LockReason: Requires 'Pixelated Sky' to be enabled!
 }
 
-CloudsEnabled: {
+UseCloudLighting: {
 	Label: "[i:751] Fancy Cloud Lighting"
 	Tooltip: If clouds have added lighting.
 }
@@ -72,7 +72,7 @@ CloudLightingSamples: {
 	LockReason: Requires 'Fancy Cloud Lighting' to be enabled!
 }
 
-WindParticles: {
+UseWindParticles: {
 	Label: "[i:751] Wind Particles"
 	Tooltip: Enables small wind wisp particles.
 }
@@ -87,4 +87,9 @@ PitchBlackBackground: {
 	Label: "[i:237] Pitch Black Background"
 	Tooltip: Makes the background pitch black during night.
 	LockReason: The mod 'Dark Surface' is enabled!
+}
+
+SkyGradient: {
+	Label: Sky Gradient
+	Tooltip: ""
 }

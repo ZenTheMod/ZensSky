@@ -10,7 +10,6 @@
 		<!-- Enable nullable types -->
 		<Nullable>enable</Nullable>
 		
-		<!-- Use the preview version to allow for null conditional assigment -->
 		<LangVersion>preview</LangVersion>
 	
 		<!-- Hides the following warnings: 
