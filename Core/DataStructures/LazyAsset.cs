@@ -11,6 +11,8 @@ public readonly record struct LazyAsset<T> where T : class
 
     private readonly Lazy<Asset<T>> _asset;
 
+    private readonly string _key;
+
     #endregion
 
     #region Public Properties
@@ -28,13 +30,19 @@ public readonly record struct LazyAsset<T> where T : class
         Asset.IsLoaded &&
         !Asset.IsDisposed;
 
+    public readonly string Key =>
+        _key;
+
     #endregion
 
     #region Public Constructors
 
     /// <inheritdoc cref="ModContent.Request{T}"/>
-    public LazyAsset(string name) =>
+    public LazyAsset(string name)
+    {
+        _key = name;
         _asset = new(() => ModContent.Request<T>(name));
+    }
 
     #endregion
 

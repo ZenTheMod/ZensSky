@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.DataStructures;
 
+[Serializable]
 public class Gradient : List<GradientSegment>
 {
     #region Private Fields
@@ -11,35 +13,17 @@ public class Gradient : List<GradientSegment>
 
     #endregion
 
-    #region Public Properties
-
-    public int MaxSegments { get; init; }
-
-    #endregion
-
     #region Public Constructors
 
-    public Gradient(int maxColors = DefaultMaxColors)
-    {
-        MaxSegments = maxColors;
+    public Gradient() : base() { }
 
-        Add(new(0f, Color.Black));
-        Add(new(1f, Color.White));
-    }
+    public Gradient(int maxColors) : base(maxColors) { }
 
-    public Gradient(GradientSegment[] segments, int maxColors = DefaultMaxColors)
-    {
-        MaxSegments = maxColors;
-
-        AddRange(segments);
-
-        Sort();
-    }
+    public Gradient(IEnumerable<GradientSegment> segments) : base(segments) { }
 
     public Gradient(Color[] colors, int maxColors = DefaultMaxColors)
+        : base(maxColors)
     {
-        MaxSegments = maxColors;
-
         for (int i = 0; i < colors.Length; i++)
         {
             float position = i / (float)colors.Length;
@@ -52,12 +36,6 @@ public class Gradient : List<GradientSegment>
     #endregion
 
     #region Public Methods
-
-    public new void Add(GradientSegment segment)
-    {
-        if (Count < MaxSegments)
-            base.Add(segment);
-    }
 
     public void Add(float position, Color color) =>
         Add(new(position, color));

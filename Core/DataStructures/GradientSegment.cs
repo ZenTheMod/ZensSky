@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json.Converters;
+using System;
+using System.Text.Json.Serialization;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.DataStructures;
 
+[Serializable]
 public class GradientSegment : IComparable<GradientSegment>
 {
     #region Public Properties
@@ -11,19 +14,20 @@ public class GradientSegment : IComparable<GradientSegment>
 
     public Color Color { get; set; }
 
+    [JsonConverter(typeof(StringEnumConverter))]
     public EasingStyle Easing { get; set; }
 
     #endregion
 
     #region Public Constructors
 
-    public GradientSegment(float position, Color color)
+    public GradientSegment(float position, Color color, EasingStyle easing = EasingStyle.Linear)
     {
         Position = Utilities.Saturate(position);
 
         Color = color;
 
-        Easing = EasingStyle.Linear;
+        Easing = easing;
     }
 
     #endregion

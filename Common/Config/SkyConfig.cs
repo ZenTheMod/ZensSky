@@ -5,6 +5,7 @@ using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Config.Elements;
 using ZensSky.Core.DataStructures;
+using ZensSky.Core.Utils;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.
@@ -88,5 +89,5 @@ public sealed class SkyConfig : ModConfig
 
     [CustomModConfigItem(typeof(GradientElement))]
     public Gradient SkyGradient =
-        [new(0f, Color.Black), new(.333f, Color.Yellow), new(.5f, Color.Green), new(1f, Color.White)];
+        [new(0f, Color.Black, EasingStyle.InOutCubic), new(.333f, Color.Yellow, EasingStyle.OutElastic), new(.5f, Color.Green, EasingStyle.InExpo), new(1f, Color.White)];
 }

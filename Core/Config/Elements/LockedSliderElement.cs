@@ -160,7 +160,7 @@ public abstract class LockedSliderElement<T> : NoDrawRangeElement<T> where T : I
         if (IsLocked)
             spriteBatch.Draw(lockIcon, inner.Center() + lockOffset, null, Color.White, 0f, lockIcon.Size() * .5f, 1f, SpriteEffects.None, 0f);
         else
-            spriteBatch.Draw(colorSlider, new(destinationRectangle.X + (SliderWidth * perc), destinationRectangle.Y + 4f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
+            spriteBatch.Draw(colorSlider, new(destinationRectangle.X + 5f + (SliderWidth * perc), destinationRectangle.Y + 8f), null, Color.White, 0f, colorSlider.Size() * .5f, 1f, SpriteEffects.None, 0f);
 
         IngameOptions.inBar = isHovering;
     }
