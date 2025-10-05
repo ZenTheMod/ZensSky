@@ -10,6 +10,7 @@
 		<!-- Enable nullable types -->
 		<Nullable>enable</Nullable>
 		
+		<!-- For whatever reason neither '14' nor '14.0' are valid and cause issues -->
 		<LangVersion>preview</LangVersion>
 	
 		<!-- Hides the following warnings: 

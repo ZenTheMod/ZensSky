@@ -21,7 +21,7 @@ public sealed class ModCallSystem : ModSystem
     {
         Assembly assembly = Mod.Code;
 
-        MethodInfo[] methods = assembly.GetAllDecoratedMethods<ModCallAttribute>();
+        IEnumerable<MethodInfo> methods = assembly.GetAllDecoratedMethods<ModCallAttribute>();
 
         foreach (MethodInfo method in methods)
         {

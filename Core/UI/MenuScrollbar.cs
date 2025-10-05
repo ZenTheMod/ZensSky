@@ -13,15 +13,15 @@ public sealed class MenuScrollbar : UIScrollbar
 {
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
-        CalculatedStyle dimensions = GetDimensions();
-        CalculatedStyle innerDimensions = GetInnerDimensions();
+        Rectangle dims = this.Dimensions;
+        Rectangle innerDims = this.InnerDimensions;
 
         Vector2 mousePosition = Utilities.UIMousePosition;
 
         if (_isDragging)
         {
-            float position = mousePosition.Y - innerDimensions.Y - _dragYOffset;
-            _viewPosition = MathHelper.Clamp(position / innerDimensions.Height * _maxViewSize, 0f, _maxViewSize - _viewSize);
+            float position = mousePosition.Y - innerDims.Y - _dragYOffset;
+            _viewPosition = MathHelper.Clamp(position / innerDims.Height * _maxViewSize, 0f, _maxViewSize - _viewSize);
         }
 
         Rectangle handleRectangle = GetHandleRectangle();
@@ -32,7 +32,7 @@ public sealed class MenuScrollbar : UIScrollbar
         if (!isHoveringOverHandle && _isHoveringOverHandle && Main.hasFocus)
             SoundEngine.PlaySound(SoundID.MenuTick);
 
-        DrawBar(spriteBatch, _texture.Value, dimensions.ToRectangle(), Color.White);
+        DrawBar(spriteBatch, _texture.Value, dims, Color.White);
         DrawBar(spriteBatch, _innerTexture.Value, handleRectangle, Color.White * (_isDragging || _isHoveringOverHandle ? 1f : 0.85f));
     }
 

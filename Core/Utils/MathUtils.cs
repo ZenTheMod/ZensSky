@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using Terraria;
-using Terraria.UI;
 using Terraria.Utilities;
 
 namespace ZensSky.Core.Utils;
@@ -33,13 +32,6 @@ public static partial class Utilities
 
     public static bool Contains(this Rectangle rectangle, Vector2 position) =>
         rectangle.Contains((int)position.X, (int)position.Y);
-
-    #endregion
-
-    #region UI
-
-    public static Vector2 Size(this CalculatedStyle dims) =>
-        new(dims.Width, dims.Height);
 
     #endregion
 }

@@ -1,38 +1,75 @@
-﻿using Macrocosm.Common.Utils;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Linq;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.ModLoader.Config.UI;
-using Terraria.UI;
-using ZensSky.Common.Config;
 using ZensSky.Core.DataStructures;
+using ZensSky.Core.UI;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.Config.Elements;
 
-public class GradientElement : ConfigElement<Gradient>
+public class GradientElement : DropDownConfigElement<Gradient>
 {
-    #region Private Fields
+    #region Public Fields
 
-    private const float SliderWidth = 167f;
+    public GradientSlider? Slider;
+
+    public ColorPicker? Picker;
 
     #endregion
 
     #region Public Properties
 
-    public GradientSegment? TargetSegment { get; private set; }
+    public override float ExpandedHeight => 380f;
 
     #endregion
 
-    #region Binding
+    #region Drop Down
 
-    public override void OnBind()
+    protected override void OnExpand()
     {
-        base.OnBind();
+        Slider = new(Value);
 
+        Slider.Top.Set(BaseHeight + 5, 0f);
 
+        Slider.HAlign = .5f;
+
+        Slider.Width.Set(-20f, 1f);
+
+            // For whatever reason most -- maybe all(?) -- ConfigElements don't make any sound for hovering, nor clicking.
+        Slider.Mute = true;
+
+        Slider.OnSegmentSelected +=
+            (s) => Picker?.Color = s.TargetSegment.Color;
+
+        Append(Slider);
+
+        Picker = new();
+
+        Picker.Top.Set(BaseHeight + 40, 0f);
+
+        Picker.Left.Set(10, 0f);
+
+        Picker.Width.Set(-10f, .5f);
+
+        Picker.Mute = true;
+
+        Append(Picker);
+
+        Picker.Color = Slider.TargetSegment.Color;
+    }
+
+    #endregion
+
+    #region Updating
+
+    public override void Update(GameTime gameTime)
+    {
+        base.Update(gameTime);
+
+        if (Slider is not null &&
+            Picker is not null)
+            Slider.TargetSegment.Color = Picker.Color;
     }
 
     #endregion
@@ -43,42 +80,21 @@ public class GradientElement : ConfigElement<Gradient>
     {
         base.DrawSelf(spriteBatch);
 
-        CalculatedStyle dimensions = GetDimensions();
-
-            // Not sure the purpose of this.
-        IngameOptions.valuePosition = new(dimensions.X + dimensions.Width - 10f, dimensions.Y + 16f);
-
-        DrawSlider(spriteBatch);
+        if (!MenuOpen)
+            DrawDisplaySlider(spriteBatch);
     }
 
-    public void DrawSlider(SpriteBatch spriteBatch)
+    protected void DrawDisplaySlider(SpriteBatch spriteBatch)
     {
+        Rectangle dims = this.Dimensions;
+
+        IngameOptions.valuePosition = new(dims.X + dims.Width - 10f, dims.Y + 16f);
+
         Texture2D colorBar = TextureAssets.ColorBar.Value;
-        Texture2D colorSlider = TextureAssets.ColorSlider.Value;
 
         IngameOptions.valuePosition.X -= colorBar.Width;
 
-        Rectangle rectangle = new(
-            (int)IngameOptions.valuePosition.X,
-            (int)IngameOptions.valuePosition.Y - (int)(colorBar.Height * .5f),
-            colorBar.Width,
-            colorBar.Height);
-
-        bool isHovering = rectangle.Contains(Utilities.MousePosition);
-
-        Utilities.DrawVanillaSlider(spriteBatch, Color.White, isHovering, out _, out _, out Rectangle inner);
-
-        IngameOptions.inBar = isHovering;
-
-        SkyConfig.Instance.SkyGradient =
-            [new(0f, Color.Green, EasingStyle.InExpo),
-            new(.31f, Color.Black, EasingStyle.OutExpo),
-            new(.75f, Color.White, EasingStyle.OutExpo),
-            new(.88f, Color.Yellow, EasingStyle.InExpo),
-            new(.9f, Color.White, EasingStyle.OutExpo),
-            new(.97f, Color.Yellow, EasingStyle.InExpo),
-            new(.975f, Color.Brown),
-            new(1f, Color.Brown)];
+        Utilities.DrawVanillaSlider(spriteBatch, Color.White, false, out _, out _, out Rectangle inner);
 
         for (int i = 0; i < inner.Width; i++)
         {

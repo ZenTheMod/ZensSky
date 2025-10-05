@@ -129,5 +129,22 @@ public static partial class Utilities
         ratio = Saturate((Main.mouseX - rectangle.X) / (float)rectangle.Width);
     }
 
+    public static void DrawSplitConfigPanel(SpriteBatch spriteBatch, Color color, Rectangle dims, int split = 15)
+    {
+        Texture2D texture = TextureAssets.SettingsPanel.Value;
+
+            // Left/Right bars.
+        spriteBatch.Draw(texture, new Rectangle(dims.X, dims.Y + 2, 2, dims.Height - 4), new(0, 2, 1, 1), color);
+        spriteBatch.Draw(texture, new Rectangle(dims.X + dims.Width - 2, dims.Y + 2, 2, dims.Height - 4), new(0, 2, 1, 1), color);
+
+            // Up/Down bars.
+        spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y, dims.Width - 4, 2), new(2, 0, 1, 1), color);
+        spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y + dims.Height - 2, dims.Width - 4, 2), new(2, 0, 1, 1), color);
+
+            // Inner Panel.
+        spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y + 2, dims.Width - 4, split - 2), new(2, 2, 1, 1), color);
+        spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y + split, dims.Width - 4, dims.Height - split - 2), new(2, 16, 1, 1), color);
+    }
+
     #endregion
 }

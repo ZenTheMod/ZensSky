@@ -10,6 +10,7 @@ using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Space;
+using ZensSky.Core.Utils;
 using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.Config.Elements;
@@ -35,7 +36,7 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
 
     #endregion
 
-    #region Binding
+    #region Initialization
 
     public override void OnBind()
     {
@@ -69,7 +70,7 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
     {
         base.DrawSelf(spriteBatch);
 
-        CalculatedStyle dims = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
         string text = EnumNames?[(int)Value] ?? string.Empty;
 

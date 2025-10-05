@@ -42,9 +42,11 @@ public sealed class ButtonColorController : MenuController
 
     #region Private Properties
 
-    private static ref Color Modifying => ref SettingHover ? ref MenuConfig.Instance.MenuButtonHoverColor : ref MenuConfig.Instance.MenuButtonColor;
+    private static ref Color Modifying =>
+        ref SettingHover ? ref MenuConfig.Instance.MenuButtonHoverColor : ref MenuConfig.Instance.MenuButtonColor;
 
-    private static ref bool ModifyingUse => ref SettingHover ? ref MenuConfig.Instance.UseMenuButtonHoverColor : ref MenuConfig.Instance.UseMenuButtonColor;
+    private static ref bool ModifyingUse =>
+        ref SettingHover ? ref MenuConfig.Instance.UseMenuButtonHoverColor : ref MenuConfig.Instance.UseMenuButtonColor;
 
     private bool ShowPicker
     {
@@ -248,12 +250,10 @@ public sealed class ButtonColorController : MenuController
     {
         MenuConfig config = MenuConfig.Instance;
 
-        if (config.UseMenuButtonColor &&
-            !SettingHover)
-            ButtonColor = Picker.Color;
-        if (config.UseMenuButtonHoverColor &&
-            SettingHover)
-            ButtonHoverColor = Picker.Color;
+        if (config.UseMenuButtonColor)
+            ButtonColor = config.MenuButtonColor;
+        if (config.UseMenuButtonHoverColor)
+            ButtonHoverColor = config.MenuButtonHoverColor;
     }
 
     public override void Update(GameTime gameTime)

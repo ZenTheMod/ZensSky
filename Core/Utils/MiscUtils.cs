@@ -8,7 +8,6 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using static System.Reflection.BindingFlags;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZensSky.Core.Utils;
 
@@ -76,14 +75,22 @@ public static partial class Utilities
         return true;
     }
 
+    #region Attributes
+
     /// <returns>All methods in <paramref name="assembly"/> with the attribute <typeparamref name="T"/>.</returns>
-    public static MethodInfo[] GetAllDecoratedMethods<T>(this Assembly assembly, BindingFlags flags = Public | NonPublic | Static) where T : Attribute =>
-        [.. 
-            assembly.GetTypes()
+    public static IEnumerable<MethodInfo> GetAllDecoratedMethods<T>(this Assembly assembly, BindingFlags flags = Public | NonPublic | Static, bool inherit = true) where T : Attribute =>
+        assembly.GetTypes()
             .SelectMany(t => t.GetMethods(flags))
-            .Where(m => m.GetCustomAttribute<T>() is not null &&
-                !m.IsGenericMethod)
-        ];
+            .Where(m => m.GetCustomAttribute<T>(inherit) is not null &&
+                !m.IsGenericMethod);
+
+
+    /// <returns>All types in <paramref name="assembly"/> with the attribute <typeparamref name="T"/>.</returns>
+    public static IEnumerable<Type> GetAllDecoratedTypes<T>(this Assembly assembly, bool inherit = true) where T : Attribute =>
+        assembly.GetTypes()
+            .Where(m => m.GetCustomAttribute<T>(inherit) is not null);
+
+    #endregion
 
     /// <summary>
     /// <inheritdoc cref="ModContent.GetInstance"/><br/>
@@ -95,51 +102,52 @@ public static partial class Utilities
 
     #endregion
 
-    #region Arrays
+    #region Collections
 
     /// <param name="accending">
-    ///     <see cref="false"/> – The instance should be found based on preceding order.<br/>
-    ///     <see cref="true"/> – The instance should be found based on accending order.<br/>
+    ///     <see cref="false"/> – The instance of <typeparamref name="T"/> should be found based on preceding order.<br/>
+    ///     <see cref="true"/> – The instance of <typeparamref name="T"/> should be found based on accending order.<br/>
     /// </param>
-    public static int CompareFor<T>(this T[] array, Func<T, IComparable> getComparable, bool accending = true)
-    {
-        int index = 0;
-
-        IComparable lastcomparison = getComparable(array[0]);
-
-        for (int i = 1; i < array.Length; i++)
-        {
-            T item = array[i];
-
-            IComparable compare = getComparable(item);
-
-            if ((compare.CompareTo(lastcomparison) >= 0) == accending)
-            {
-                index = i;
-                lastcomparison = compare;
-            }
-        }
-
-        return index;
-    }
-
-    /// <param name="accending">
-    ///     <see cref="false"/> – The instance should be found based on preceding order.<br/>
-    ///     <see cref="true"/> – The instance should be found based on accending order.<br/>
-    /// </param>
-    public static T CompareFor<T>(this IEnumerable<T> collection, Func<T, IComparable> getComparable, bool accending = true)
+    public static T CompareFor<T>(
+        this IEnumerable<T> collection,
+        Func<T, IComparable> getComparable,
+        bool accending = true)
     {
         T matching = collection.First();
-        IComparable lastcomparison = getComparable(matching);
+        IComparable lastComparison = getComparable(matching);
 
         foreach (T item in collection)
         {
             IComparable compare = getComparable(item);
 
-            if ((compare.CompareTo(lastcomparison) >= 0) == accending)
+            if ((compare.CompareTo(lastComparison) >= 0) == accending)
             {
                 matching = item;
-                lastcomparison = compare;
+                lastComparison = compare;
+            }
+        }
+
+        return matching;
+    }
+
+    /// <inheritdoc cref="CompareFor{T}(IEnumerable{T}, Func{T, IComparable}, bool)"/>
+    public static T CompareFor<T, TComparable>(
+        this IEnumerable<T> collection,
+        Func<T, TComparable> getComparable,
+        out TComparable lastComparison,
+        bool accending = true) where TComparable : IComparable
+    {
+        T matching = collection.First();
+        lastComparison = getComparable(matching);
+
+        foreach (T item in collection)
+        {
+            TComparable compare = getComparable(item);
+
+            if ((compare.CompareTo(lastComparison) >= 0) == accending)
+            {
+                matching = item;
+                lastComparison = compare;
             }
         }
 

@@ -24,6 +24,8 @@ public sealed class ColorSquare : UIElement
 
     public bool IsHeld;
 
+    public bool Mute;
+
     #endregion
 
     #region Public Properties
@@ -79,7 +81,8 @@ public sealed class ColorSquare : UIElement
         if (!IsMouseHovering || IsHeld)
             return;
 
-        SoundEngine.PlaySound(SoundID.MenuTick);
+        if (!Mute)
+            SoundEngine.PlaySound(SoundID.MenuTick);
     }
 
     public override void Update(GameTime gameTime)
@@ -89,15 +92,13 @@ public sealed class ColorSquare : UIElement
         if (!IsHeld)
             return;
 
-        CalculatedStyle dims = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
-        Rectangle rect = dims.ToRectangle();
+        dims.Inflate(-4, -4);
 
-        rect.Inflate(-4, -4);
+        Vector2 position = Vector2.Clamp(Utilities.UIMousePosition, dims.Position(), dims.Position() + dims.Size());
 
-        Vector2 position = Vector2.Clamp(Utilities.UIMousePosition, rect.Position(), rect.Position() + rect.Size());
-
-        PickerPosition = (position - rect.Position()) / rect.Size();
+        PickerPosition = (position - dims.Position()) / dims.Size();
     }
 
     public override void Recalculate()
@@ -116,13 +117,11 @@ public sealed class ColorSquare : UIElement
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
-        CalculatedStyle dims = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
-        Rectangle rect = dims.ToRectangle();
+        spriteBatch.Draw(MiscTextures.Pixel, dims, Color.Black);
 
-        spriteBatch.Draw(MiscTextures.Pixel, rect, Color.Black);
-
-        rect.Inflate(-2, -2);
+        dims.Inflate(-2, -2);
 
         bool hovering =
             ContainsPoint(Utilities.UIMousePosition) &&
@@ -132,19 +131,19 @@ public sealed class ColorSquare : UIElement
         Color outline = hovering || IsHeld ?
             Main.OurFavoriteColor : Outline;
 
-        spriteBatch.Draw(MiscTextures.Pixel, rect, outline);
+        spriteBatch.Draw(MiscTextures.Pixel, dims, outline);
 
-        rect.Inflate(-2, -2);
+        dims.Inflate(-2, -2);
 
-        spriteBatch.Draw(ButtonTextures.ColorSelector[0], rect, Color.White);
-        spriteBatch.Draw(ButtonTextures.ColorSelector[1], rect, Utilities.HSVToColor(Hue));
+        spriteBatch.Draw(ButtonTextures.ColorSelector[0], dims, Color.White);
+        spriteBatch.Draw(ButtonTextures.ColorSelector[1], dims, Utilities.HSVToColor(Hue));
 
         Texture2D picker = UITextures.Dot;
 
         Vector2 pickerOrigin = picker.Size() * .5f;
 
-        Vector2 position = PickerPosition * rect.Size();
-        position += rect.Position();
+        Vector2 position = PickerPosition * dims.Size();
+        position += dims.Position();
 
             // Round the position to have it be unable to lie inbetween pixels.
         position = Terraria.Utils.Round(position);

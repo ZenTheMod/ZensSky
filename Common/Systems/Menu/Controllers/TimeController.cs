@@ -80,12 +80,12 @@ public sealed class TimeController : SliderController
             c.GotoNext(MoveType.After,
                 i => i.MatchLdcR8(33.88235294117647)); // I shit you not this is the hardcoded value.
 
-            c.EmitDelegate((double time) => time * MenuConfig.Instance.TimeMultiplier);
+            c.EmitDelegate((double time) => time * Modifying);
 
             c.GotoNext(MoveType.After,
                 i => i.MatchLdcR8(30.857142857142858));
 
-            c.EmitDelegate((double time) => time * MenuConfig.Instance.TimeMultiplier);
+            c.EmitDelegate((double time) => time * Modifying);
 
                 // Refresh the moon type when the time is set to night.
             c.GotoNext(MoveType.Before,

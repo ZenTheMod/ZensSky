@@ -27,14 +27,15 @@ public abstract class MenuController : UIPanel, ILoadable
 
     public virtual void OnUnload() { }
 
-    public void Load(Mod mod) 
+    void ILoadable.Load(Mod mod) 
     { 
         MenuControllerSystem.Controllers.Add(this); 
         OnLoad();
         Refresh();
     }
 
-    public void Unload() => OnUnload();
+    void ILoadable.Unload() =>
+        OnUnload();
 
     public virtual void Refresh() { }
 

@@ -90,6 +90,10 @@ PitchBlackBackground: {
 }
 
 SkyGradient: {
-	Label: Sky Gradient
-	Tooltip: ""
+	Label: Atmosphere Gradient
+	Tooltip:
+		'''
+		The color of the 'Atmosphere' effect over time.
+		Click to expand this panel.
+		'''
 }

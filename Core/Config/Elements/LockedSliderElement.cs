@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using MonoMod.Cil;
-using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -12,14 +10,14 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
-using Terraria.UI;
 using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
 
 [Autoload(Side = ModSide.Client)]
-public abstract class LockedSliderElement<T> : NoDrawRangeElement<T> where T : IComparable<T>
+[HideRangeSlider]
+public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T> where T : IComparable<T>
 {
     #region Private Fields
 
@@ -46,7 +44,7 @@ public abstract class LockedSliderElement<T> : NoDrawRangeElement<T> where T : I
 
     #endregion
 
-    #region Binding
+    #region Initialization
 
     public override void OnBind()
     {
@@ -103,10 +101,10 @@ public abstract class LockedSliderElement<T> : NoDrawRangeElement<T> where T : I
         if (!Main.mouseLeft)
             rightLock = null;
 
-        CalculatedStyle dimensions = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
             // Not sure the purpose of this.
-        IngameOptions.valuePosition = new(dimensions.X + dimensions.Width - 10f, dimensions.Y + 16f);
+        IngameOptions.valuePosition = new(dims.X + dims.Width - 10f, dims.Y + 16f);
 
         DrawSlider(spriteBatch, Proportion, out float ratio);
 

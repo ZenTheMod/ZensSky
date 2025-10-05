@@ -6,6 +6,7 @@ using Terraria.Audio;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.UI;
+using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.UI;
 
@@ -72,10 +73,10 @@ public sealed class HoverImageButton : UIElement
 
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
-        CalculatedStyle dims = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
-        spriteBatch.Draw(InnerTexture.Value, dims.ToRectangle(), InnerColor);
-        spriteBatch.Draw(OuterTexture.Value, dims.ToRectangle(), IsMouseHovering ? OuterHoverColor : OuterColor);
+        spriteBatch.Draw(InnerTexture.Value, dims, InnerColor);
+        spriteBatch.Draw(OuterTexture.Value, dims, IsMouseHovering ? OuterHoverColor : OuterColor);
     }
 
     #endregion

@@ -10,8 +10,8 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
-using Terraria.UI;
 using Terraria.UI.Chat;
+using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
@@ -39,7 +39,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
     #endregion
 
-    #region Binding
+    #region Initialization
 
     public override void OnBind()
     {
@@ -98,7 +98,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
         Texture2D texture = UITextures.LockedSettingsToggle;
 
-        CalculatedStyle dimensions = GetDimensions();
+        Rectangle dims = this.Dimensions;
 
         string text = Value ? Lang.menu[126].Value : Lang.menu[124].Value; // On / Off
 
@@ -110,9 +110,9 @@ public sealed class LockedBoolElement : ConfigElement<bool>
         Vector2 textSize = font.MeasureString(text);
         Vector2 origin = new(textSize.X, 0);
 
-        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, new Vector2(dimensions.X + dimensions.Width - 36f, dimensions.Y + 8f), Color.White, 0f, origin, new(0.8f));
+        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, new Vector2(dims.X + dims.Width - 36f, dims.Y + 8f), Color.White, 0f, origin, new(0.8f));
 
-        Vector2 position = new(dimensions.X + dimensions.Width - 28, dimensions.Y + 4);
+        Vector2 position = new(dims.X + dims.Width - 28, dims.Y + 4);
         Rectangle rectangle = texture.Frame(2, 2, Value.ToInt(), IsLocked.ToInt());
 
         spriteBatch.Draw(texture, position, rectangle, Color.White, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);

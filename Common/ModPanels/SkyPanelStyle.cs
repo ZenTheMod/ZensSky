@@ -98,10 +98,10 @@ public sealed class SkyPanelStyle : ModPanelStyleExt
             element.LoadTextures();
         }
 
-        CalculatedStyle dims = element.GetDimensions();
+        Rectangle dims = element.Dimensions;
 
-        Vector2 size = Vector2.Transform(new(dims.Width, dims.Height), Main.UIScaleMatrix);
-        Vector2 position = Vector2.Transform(new(dims.X, dims.Y), Main.UIScaleMatrix);
+        Vector2 size = Vector2.Transform(dims.Size(), Main.UIScaleMatrix);
+        Vector2 position = Vector2.Transform(dims.Position(), Main.UIScaleMatrix);
 
         Rectangle source = new((int)position.X, (int)position.Y, 
             (int)size.X, (int)size.Y);

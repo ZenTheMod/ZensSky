@@ -14,6 +14,12 @@ public sealed class ColorPicker : UIElement
 
     #endregion
 
+    #region Public Fields
+
+    public bool Mute;
+
+    #endregion
+
     #region Public Properties
 
     public Color Color
@@ -59,6 +65,9 @@ public sealed class ColorPicker : UIElement
         base.Update(gameTime);
 
         Picker.Hue = HueSlider.Ratio;
+
+        Picker.Mute = Mute;
+        HueSlider.Mute = Mute;
     }
 
     public override void Recalculate()

@@ -22,8 +22,7 @@ public record struct WindParticle
 
     private const float SinAmplitude = .1f;
 
-    private const float LoopMin = 0.47f;
-    private const float LoopMax = 0.53f;
+    private const float LoopRange = 0.03f;
 
     private const float Magnitude = 13f;
 
@@ -114,7 +113,11 @@ public record struct WindParticle
 
         if (ShouldLoop)
         {
-            float interpolator = Utils.Remap(LifeTime, LoopMin, LoopMax, 0f, 1f);
+            float range = LoopRange / MathHelper.Clamp(MathF.Abs(wind), .01f, 1);
+            range *= .5f;
+
+            float interpolator = Utils.Remap(LifeTime, .5f - range, .5f + range, 0f, 1f);
+
             newVelocity = newVelocity.RotatedBy(MathHelper.TwoPi * interpolator * -MathF.Sign(wind));
         }
 
