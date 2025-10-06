@@ -41,35 +41,27 @@ Configs: {
 	EasingStyle: {
 		Tooltip: ""
 		Linear.Label: Linear
-
 		InCubic.Label: In Cubic
 		OutCubic.Label: Out Cubic
 		InOutCubic.Label: In Out Cubic
-
 		InQuart.Label: In Quart
 		OutQuart.Label: Out Quart
 		InOutQuart.Label: In Out Quart
-
 		InQuint.Label: In Quint
 		OutQuint.Label: Out Quint
 		InOutQuint.Label: In Out Quint
-
 		InSine.Label: In Sine
 		OutSine.Label: Out Sine
 		InOutSine.Label: In Out Sine
-
 		InExpo.Label: In Exponential
 		OutExpo.Label: Out Exponential
 		InOutExpo.Label: In Out Exponential
-
 		InCirc.Label: In Circ
 		OutCirc.Label: Out Circ
 		InOutCirc.Label: In Out Circ
-
 		InElastic.Label: In Elastic
 		OutElastic.Label: Out Elastic
 		InOutElastic.Label: In Out Elastic
-
 		InBack.Label: In Back
 		OutBack.Label: Out Back
 		InOutBack.Label: In Out Back

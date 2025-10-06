@@ -14,7 +14,7 @@ namespace ZensSky.Common.Config;
 
 public sealed class SkyConfig : ModConfig
 {
-        // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
+    // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
     public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;

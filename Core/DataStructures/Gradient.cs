@@ -50,11 +50,16 @@ public class Gradient : List<GradientSegment>
         if (Count == 1)
             return this[0].Color;
 
-        if (position <= this[0].Position)
-            return this[0].Color;
+        if (position <= this[0].Position || position >= this[^1].Position)
+        {
+            float p = position >= this[^1].Position ? position - 1 : position;
 
-        if (position >= this[^1].Position)
-            return this[^1].Color;
+            float t = (p - (this[^1].Position - 1)) / (this[0].Position - (this[^1].Position - 1));
+
+            t = Easings.Ease(this[^1].Easing, t);
+
+            return Color.Lerp(this[^1].Color, this[0].Color, t);
+        }
 
         for (int i = 0; i < Count - 1; i++)
         {

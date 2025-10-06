@@ -14,6 +14,7 @@ public class GradientSlider : UISlider
 {
     #region Public Events
 
+        // TODO: Generic impl of UIElementAction.
     public event Action<GradientSlider>? OnSegmentSelected;
 
     #endregion
@@ -47,20 +48,52 @@ public class GradientSlider : UISlider
 
         IsHeld = false;
 
-        if (Main.alreadyGrabbingSunOrMoon)
+        if (evt.Target != this ||
+            Main.alreadyGrabbingSunOrMoon)
             return;
 
         Rectangle dims = this.Dimensions;
 
         float ratio = Utilities.Saturate((evt.MousePosition.X - dims.X) / dims.Width);
 
-        if (evt.Target == this && HoveredSegment is not null)
-        {
+        if (HoveredSegment is not null)
             TargetSegment = HoveredSegment;
+        else if (Gradient.Count < Gradient.Capacity)
+        {
+            Color color = Gradient.GetColor(ratio);
+
+            GradientSegment newSegment = new(ratio, color);
+
+            Gradient.Add(newSegment);
+
+            TargetSegment = newSegment;
+        }
+
+        OnSegmentSelected?.Invoke(this);
+
+        IsHeld = true;
+    }
+
+    public override void RightMouseDown(UIMouseEvent evt)
+    {
+        base.RightMouseDown(evt);
+
+        if (evt.Target != this ||
+            Main.alreadyGrabbingSunOrMoon ||
+            Gradient.Count <= 2)
+            return;
+
+        Rectangle dims = this.Dimensions;
+
+        float ratio = Utilities.Saturate((evt.MousePosition.X - dims.X) / dims.Width);
+
+        if (HoveredSegment is not null)
+        {
+            Gradient.Remove(HoveredSegment);
+
+            TargetSegment = Gradient[0];
 
             OnSegmentSelected?.Invoke(this);
-
-            IsHeld = true;
         }
     }
 

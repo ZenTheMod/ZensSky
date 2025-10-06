@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.ModLoader.Config.UI;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.UI;
 using ZensSky.Core.Utils;
@@ -67,9 +68,11 @@ public class GradientElement : DropDownConfigElement<Gradient>
     {
         base.Update(gameTime);
 
-        if (Slider is not null &&
-            Picker is not null)
-            Slider.TargetSegment.Color = Picker.Color;
+        if (Slider is null ||
+            Picker is null)
+            return;
+
+        Slider.TargetSegment.Color = Picker.Color;
     }
 
     #endregion
@@ -82,6 +85,17 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
         if (!MenuOpen)
             DrawDisplaySlider(spriteBatch);
+
+        if (Slider is null ||
+            Picker is null)
+            return;
+
+        if (Slider.IsHeld)
+        {
+            string tooltip = Utilities.GetReadableTime(Slider.TargetSegment.Position * 24f);
+
+            UIModConfig.Tooltip = tooltip;
+        }
     }
 
     protected void DrawDisplaySlider(SpriteBatch spriteBatch)

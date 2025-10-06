@@ -32,7 +32,25 @@ public static partial class Utilities
 
     #endregion
 
-    #region Async
+    #region Time
+
+    public static string GetReadableTime() =>
+        GetReadableTime(Terraria.Utils.GetDayTimeAs24FloatStartingFromMidnight());
+
+    public static string GetReadableTime(float time)
+    {
+        int hour = (int)MathF.Floor(time % 24);
+
+        int minute = (int)MathF.Floor(time % 1 * 100 * .6f);
+
+        DateTime date = new(1, 1, 1, hour, minute, 0);
+
+        return date.ToShortTimeString();
+    }
+
+    #endregion
+
+    #region Tasks
 
     /// <summary>
     /// Blocks thread until <paramref name="condition"/> returns <see cref="true"/> or timeout occurs.

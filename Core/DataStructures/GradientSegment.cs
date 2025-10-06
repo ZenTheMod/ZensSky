@@ -10,7 +10,8 @@ public class GradientSegment : IComparable<GradientSegment>
 {
     #region Public Properties
 
-    public float Position { get; set; }
+    public float Position
+        { get; set => field = Utilities.Saturate(value); }
 
     public Color Color { get; set; }
 
