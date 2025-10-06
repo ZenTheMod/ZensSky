@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using ZensSky.Core.Config;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.DataStructures;
 
 [Serializable]
+[NoConfigLocalization]
 public class Gradient : List<GradientSegment>
 {
     #region Private Fields

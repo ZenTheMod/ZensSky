@@ -6,7 +6,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
-using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Space;

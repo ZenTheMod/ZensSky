@@ -11,6 +11,12 @@ namespace ZensSky.Core.Config.Elements;
 
 public class GradientElement : DropDownConfigElement<Gradient>
 {
+    #region Private Fields
+
+    private const string SliderHoverKey = "Mods.ZensSky.Configs.GradientSliderHover";
+
+    #endregion
+
     #region Public Fields
 
     public GradientSlider? Slider;
@@ -93,6 +99,12 @@ public class GradientElement : DropDownConfigElement<Gradient>
         if (Slider.IsHeld)
         {
             string tooltip = Utilities.GetReadableTime(Slider.TargetSegment.Position * 24f);
+
+            UIModConfig.Tooltip = tooltip;
+        }
+        else if (Slider.IsMouseHovering)
+        {
+            string tooltip = Utilities.GetTextValueWithGlyphs(SliderHoverKey);
 
             UIModConfig.Tooltip = tooltip;
         }
