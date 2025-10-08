@@ -1,0 +1,3 @@
+[submodule "SourceGeneration"]
+	path = SourceGeneration
+	url = https://github.com/ZenTheMod/SourceGeneration
