@@ -91,9 +91,12 @@
 	</PropertyGroup>
 	
 	<!-- Effect File Compilation -->
-	<Target Name="BuildEffects" BeforeTargets="BuildMod" Condition="$([MSBuild]::IsOSPlatform('Windows'))" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
+	<Target Name="BuildEffects" BeforeTargets="BuildMod" Inputs="@(EffectFiles->'%(RecursiveDir)%(FileName)%(Extension)')" Outputs="@(EffectFiles->'%(RecursiveDir)%(FileName).fxc')">
 		<!-- Echo here so it logs which file is being compiled -->
-		<Exec Command="@(EffectFiles->'echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+		<Exec Condition="$([MSBuild]::IsOSPlatform('Windows'))" Command="@(EffectFiles->'echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
+		
+		<!-- See https://github.com/Ebonfly/EbonModMirror/commit/e74e062a7630dd3e6b5c5f8a8d047dd1f447527e, Ebonfly feel free to yell at me -->
+		<Exec Condition="$([MSBuild]::IsOSPlatform('Linux'))" Command="@(EffectFiles->'wine echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
 	</Target>
 	
 	<!-- Source Generation -->
@@ -104,5 +107,5 @@
 		<AdditionalFiles Include="Assets\**" />
 		<ProjectReference Include=".\SourceGeneration\SourceGeneration.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 	</ItemGroup>
-	
+
 </Project>
