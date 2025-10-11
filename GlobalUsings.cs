@@ -3,11 +3,11 @@ global using Color = Microsoft.Xna.Framework.Color;
 global using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
     // Asset Namespaces.
-global using CompatEffects = ZensSky.Assets.Effects.Compat;
-global using SkyEffects = ZensSky.Assets.Effects.Sky;
-global using UIEffects = ZensSky.Assets.Effects.UI;
+global using CompatEffects = ZensSky.GeneratedAssets.Effects.Compat;
+global using SkyEffects = ZensSky.GeneratedAssets.Effects.Sky;
+global using UIEffects = ZensSky.GeneratedAssets.Effects.UI;
 
-global using Models = ZensSky.Assets.Models;
+global using Models = ZensSky.GeneratedAssets.Models;
 
 global using SkyTextures = ZensSky.GeneratedAssets.Textures.Sky.Textures;
 global using FablesTextures = ZensSky.GeneratedAssets.Textures.Sky.FablesMoons.Textures;

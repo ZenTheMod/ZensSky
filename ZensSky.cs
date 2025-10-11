@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
-using ZensSky.Core.AssetReaders;
+using ZensSky.GeneratedAssets.AssetReaders;
 using ZensSky.Core.Systems;
 using ZensSky.Core.Systems.ModCall;
 using ZensSky.Core.Systems.Net;
@@ -94,7 +94,7 @@ public sealed class ZensSky : Mod
     public override IContentSource CreateDefaultContentSource()
     {
         if (!Main.dedServ)
-            AddContent(new OBJReader());
+            AddContent(new OBJModelReader());
 
         return base.CreateDefaultContentSource();
     }
