@@ -101,12 +101,9 @@
 	
 	<!-- Source Generation -->
 	<ItemGroup>
-		<!-- Prevents files from causing overlap -->
-		<Compile Remove="ZourceGen\**" />
 		<!-- Add every asset as an additional file so that our source generator can find it -->
 		<AdditionalFiles Include="Assets\**" />
-		<ProjectReference Include=".\ZourceGen\shader-reader\ShaderDecompiler.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
-		<ProjectReference Include=".\ZourceGen\ZourceGen.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
+		<PackageReference Include="ZourceGen" Version="1.0.3" ReferenceOutputAssembly="false" OutputItemType="Analyzer" />
 	</ItemGroup>
-	
+
 </Project>
