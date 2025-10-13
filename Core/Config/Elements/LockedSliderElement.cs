@@ -15,7 +15,6 @@ using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
 
-[Autoload(Side = ModSide.Client)]
 [HideRangeSlider]
 public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T> where T : IComparable<T>
 {

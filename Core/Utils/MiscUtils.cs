@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -46,6 +47,26 @@ public static partial class Utilities
         DateTime date = new(1, 1, 1, hour, minute, 0);
 
         return date.ToShortTimeString();
+    }
+
+    #endregion
+
+    #region Color
+
+    public static Color FromHex3(string hexString)
+    {
+        Color output = new();
+
+        if (uint.TryParse(hexString, NumberStyles.HexNumber, CultureInfo.CurrentCulture, out uint hex))
+        {
+            uint r = (hex >> 16) & 0xFFu;
+            uint g = (hex >> 8) & 0xFFu;
+            uint b = hex & 0xFFu;
+
+            output = new((int)r, (int)g, (int)b);
+        }
+
+        return output;
     }
 
     #endregion
@@ -171,6 +192,9 @@ public static partial class Utilities
 
         return matching;
     }
+
+    public static IEnumerable<char> Range(this char start, char end) =>
+        Enumerable.Range(start, end - start + 1).Select(i => (char)i);
 
     #endregion
 }

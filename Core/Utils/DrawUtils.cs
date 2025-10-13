@@ -1,10 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
 using System;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader.Config.UI;
+using Terraria.UI.Chat;
+using static ReLogic.Graphics.DynamicSpriteFont;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ZensSky.Core.Utils;
 
@@ -144,6 +149,78 @@ public static partial class Utilities
             // Inner Panel.
         spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y + 2, dims.Width - 4, split - 2), new(2, 2, 1, 1), color);
         spriteBatch.Draw(texture, new Rectangle(dims.X + 2, dims.Y + split, dims.Width - 4, dims.Height - split - 2), new(2, 16, 1, 1), color);
+    }
+
+    #endregion
+
+    #region Text
+
+    public static void SlowDrawStringWithShadow(this SpriteBatch spriteBatch,
+        DynamicSpriteFont font,
+        string text,
+        Vector2 position,
+        Color color,
+        Vector2 origin,
+        Vector2 scale,
+        out int hoveredChar,
+        bool drawBlinker = false,
+        int blinkerIndex = -1)
+    {
+        bool first = true;
+        float lastKerning = 0f;
+
+        hoveredChar = 0;
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            char c = text[i];
+
+            spriteBatch.DrawStringWithShadow(font, c.ToString(), position, color, Color.Black, 0f, origin, scale);
+
+            if (drawBlinker &&
+                i == blinkerIndex)
+            {
+                Vector2 blinkerPosition = new(position.X - (2f * scale.X), position.Y);
+
+                spriteBatch.DrawStringWithShadow(font, "|", blinkerPosition, color, Color.Black, 0f, origin, scale);
+            }
+
+            Vector2 charSize = font.MeasureChar(c, first, lastKerning, out lastKerning);
+
+            if (MousePosition.X >= position.X && MousePosition.X <= position.X + charSize.X)
+                hoveredChar = MousePosition.X >= position.X + (charSize.X * .5f) ? i + 1 : i;
+
+            position.X += font.MeasureChar(c, first, lastKerning, out lastKerning).X;
+            first = false;
+        }
+
+        if (MousePosition.X >= position.X)
+            hoveredChar = text.Length;
+
+        if (drawBlinker &&
+            blinkerIndex >= text.Length)
+        {
+            Vector2 blinkerPosition = new(position.X - (2f * scale.X), position.Y);
+
+            spriteBatch.DrawStringWithShadow(font, "|", blinkerPosition, color, Color.Black, 0f, origin, scale);
+        }
+    }
+
+    public static void DrawStringWithShadow(this SpriteBatch spriteBatch,
+        DynamicSpriteFont font,
+        string text,
+        Vector2 position,
+        Color color,
+        Color shadowColor,
+        float rotation,
+        Vector2 origin,
+        Vector2 scale,
+        float spread = 2f)
+    {
+        for (int i = 0; i < ChatManager.ShadowDirections.Length; i++)
+            spriteBatch.DrawString(font, text, position + ChatManager.ShadowDirections[i] * spread, shadowColor, rotation, origin, scale, SpriteEffects.None, 0f);
+
+        spriteBatch.DrawString(font, text, position, color, rotation, origin, scale, SpriteEffects.None, 0f);
     }
 
     #endregion

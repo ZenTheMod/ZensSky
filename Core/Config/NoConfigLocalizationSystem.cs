@@ -10,6 +10,7 @@ using static System.Reflection.BindingFlags;
 namespace ZensSky.Core.Config;
 
     // Possibly the dumbest thing ever written.
+[Autoload(Side = ModSide.Client)]
 public sealed class NoConfigLocalizationSystem : ModSystem
 {
     #region Private Fields

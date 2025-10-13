@@ -98,7 +98,15 @@ public sealed class ButtonColorController : MenuController
 
         Picker = new();
 
-        Picker.Top.Set(60f, 0f);
+        Picker.Top.Set(56f, 0f);
+
+        Picker.OnAcceptInput += (p) =>
+        {
+            ModifyingUse = true;
+            Modifying = p.Color;
+
+            Refresh();
+        };
 
         ColorDisplay = CreateColorDisplay(false);
         HoverColorDisplay = CreateColorDisplay(true);
@@ -264,10 +272,9 @@ public sealed class ButtonColorController : MenuController
         {
             ModifyingUse = true;
             Modifying = Picker.Color;
+
             Refresh();
         }
-        else
-            Picker.Color = Modifying;
 
         ColorDisplay.InnerColor = ButtonColor;
         HoverColorDisplay.InnerColor = ButtonHoverColor;
@@ -294,9 +301,7 @@ public sealed class ButtonColorController : MenuController
             return;
         }
 
-        float width = GetDimensions().Width;
-
-        Height.Set(width + 90f, 0f);
+        Height.Set(75 + Picker.Dimensions.Height + 16, 0f);
     }
 
     #endregion
@@ -312,7 +317,7 @@ public sealed class ButtonColorController : MenuController
 
         display.Top.Set(20f, 0f);
 
-        display.Left.Set(-14f, isHover ? .6666f : .3333f);
+        display.Left.Set(-14f, isHover ? .666f : .333f);
 
         display.OnLeftMouseDown += (evt, listeningElement) => ShowColor(isHover);
 
@@ -332,6 +337,8 @@ public sealed class ButtonColorController : MenuController
             ShowPicker = true;
 
         SettingHover = isHover;
+
+        Picker.Color = Modifying;
 
         SoundEngine.PlaySound(in SoundID.MenuOpen);
     }

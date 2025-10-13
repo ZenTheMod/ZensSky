@@ -3,7 +3,6 @@ using MonoMod.RuntimeDetour;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Core.Exceptions;
@@ -12,6 +11,7 @@ using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config;
 
+[Autoload(Side = ModSide.Client)]
 public sealed class HideRangeSliderSystem : ModSystem
 {
     #region Private Fields

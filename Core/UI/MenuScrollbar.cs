@@ -11,6 +11,24 @@ namespace ZensSky.Core.UI;
 
 public sealed class MenuScrollbar : UIScrollbar
 {
+    #region Public Fields
+
+    public bool Mute;
+
+    #endregion
+
+    #region Interactions
+
+    public override void LeftMouseDown(UIMouseEvent evt)
+    {
+        if (!Main.alreadyGrabbingSunOrMoon)
+            base.LeftMouseDown(evt);
+    }
+
+    #endregion
+
+    #region Drawing
+
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
         Rectangle dims = this.Dimensions;
@@ -29,16 +47,16 @@ public sealed class MenuScrollbar : UIScrollbar
 
         _isHoveringOverHandle = handleRectangle.Contains(mousePosition.ToPoint()) && !Main.alreadyGrabbingSunOrMoon;
 
-        if (!isHoveringOverHandle && _isHoveringOverHandle && Main.hasFocus)
+        if (!isHoveringOverHandle &&
+            _isHoveringOverHandle &&
+            Main.hasFocus &&
+            !Mute)
             SoundEngine.PlaySound(SoundID.MenuTick);
 
+            // TODO: Use a white background texture to support all colors.
         DrawBar(spriteBatch, _texture.Value, dims, Color.White);
         DrawBar(spriteBatch, _innerTexture.Value, handleRectangle, Color.White * (_isDragging || _isHoveringOverHandle ? 1f : 0.85f));
     }
 
-    public override void LeftMouseDown(UIMouseEvent evt)
-    {
-        if (!Main.alreadyGrabbingSunOrMoon)
-            base.LeftMouseDown(evt);
-    }
+    #endregion
 }

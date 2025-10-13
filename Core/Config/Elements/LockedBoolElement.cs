@@ -90,6 +90,8 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
     #endregion
 
+    #region Drawing
+
     protected override void DrawSelf(SpriteBatch spriteBatch)
     {
             // Change the background color before drawing the base ConfigElement<T>.
@@ -117,4 +119,6 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
         spriteBatch.Draw(texture, position, rectangle, Color.White, 0f, Vector2.Zero, Vector2.One, SpriteEffects.None, 0f);
     }
+
+    #endregion
 }

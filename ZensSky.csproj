@@ -64,6 +64,8 @@
 		<!-- Include Terraria/tModLoader, and FNA -->
 		<Publicize Include="tModLoader" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
+		<Publicize Include="tModLoader;ReLogic" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		
 		<Publicize Include="tModLoader;FNA" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 
 		<!-- Include mods with difficult to access types -->

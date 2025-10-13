@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.Config.UI;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.UI;
@@ -27,7 +28,8 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
     #region Public Properties
 
-    public override float ExpandedHeight => 380f;
+    public override float ExpandedHeight =>
+        500;
 
     #endregion
 
@@ -53,7 +55,7 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
         Picker = new();
 
-        Picker.Top.Set(BaseHeight + 40, 0f);
+        Picker.Top.Set(BaseHeight + 36, 0f);
 
         Picker.Left.Set(10, 0f);
 
