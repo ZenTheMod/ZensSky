@@ -38,6 +38,8 @@ public abstract class DropDownConfigElement<T> : ConfigElement<T>
                 OnExpand();
             else
                 OnContract();
+
+            Recalculate();
         }
     }
 

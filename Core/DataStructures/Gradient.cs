@@ -15,17 +15,28 @@ public class Gradient : List<GradientSegment>
 
     #endregion
 
+    #region Public Fields
+
+    public readonly int MaxColors;
+
+    #endregion
+
     #region Public Constructors
 
-    public Gradient() : base() { }
+    public Gradient() : base() =>
+        MaxColors = DefaultMaxColors;
 
-    public Gradient(int maxColors) : base(maxColors) { }
+    public Gradient(int maxColors) : base(maxColors) =>
+        MaxColors = DefaultMaxColors;
 
-    public Gradient(IEnumerable<GradientSegment> segments) : base(segments) { }
+    public Gradient(IEnumerable<GradientSegment> segments) : base(segments) =>
+        MaxColors = DefaultMaxColors;
 
     public Gradient(Color[] colors, int maxColors = DefaultMaxColors)
         : base(maxColors)
     {
+        MaxColors = DefaultMaxColors;
+
         for (int i = 0; i < colors.Length; i++)
         {
             float position = i / (float)colors.Length;

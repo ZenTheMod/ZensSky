@@ -58,7 +58,7 @@ public class GradientSlider : UISlider
 
         if (HoveredSegment is not null)
             TargetSegment = HoveredSegment;
-        else if (Gradient.Count < Gradient.Capacity)
+        else if (Gradient.Count < Gradient.MaxColors)
         {
             Color color = Gradient.GetColor(ratio);
 
@@ -68,6 +68,8 @@ public class GradientSlider : UISlider
 
             TargetSegment = newSegment;
         }
+        else
+            return;
 
         OnSegmentSelected?.Invoke(this);
 

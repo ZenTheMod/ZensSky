@@ -88,6 +88,9 @@ public sealed class SkyConfig : ModConfig
     public bool PitchBlackBackground;
 
     [CustomModConfigItem(typeof(GradientElement))]
-    public Gradient SkyGradient =
-        [new(0f, Color.Black, EasingStyle.InOutCubic), new(.333f, Color.Yellow, EasingStyle.OutElastic), new(.5f, Color.Green, EasingStyle.InExpo), new(1f, Color.White)];
+    public Gradient SkyGradient = new(32)
+    {
+        new(0f, Color.Black),
+        new(1f, Color.White)
+    };
 }

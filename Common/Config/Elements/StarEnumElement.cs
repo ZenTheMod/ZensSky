@@ -41,11 +41,11 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
     {
         base.OnBind();
 
-        OnLeftClick +=
-            delegate { Value.NextEnum(); };
+        OnLeftClick += (_, _) =>
+            Value = Value.NextEnum();
 
-        OnRightClick +=
-            delegate { Value.PreviousEnum(); };
+        OnRightClick += (_, _) =>
+            Value = Value.PreviousEnum();
 
         EnumNames = Enum.GetNames(typeof(StarVisual));
 

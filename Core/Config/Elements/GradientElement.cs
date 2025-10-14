@@ -28,8 +28,7 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
     #region Public Properties
 
-    public override float ExpandedHeight =>
-        500;
+    public override float ExpandedHeight => BaseHeight + 36 + 300f + 52f + 20;
 
     #endregion
 
@@ -59,13 +58,26 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
         Picker.Left.Set(10, 0f);
 
-        Picker.Width.Set(-10f, .5f);
+        Picker.Width.Set(1f, 0f);
+        Picker.MinWidth.Set(300f, 0f);
 
         Picker.Mute = true;
 
         Append(Picker);
 
         Picker.Color = Slider.TargetSegment.Color;
+
+        UIPanel test = new();
+
+        test.Top.Set(BaseHeight + 36, 0f);
+
+        test.Left.Set(315f, 0f);
+
+        test.Width.Set(-325f, 1f);
+
+        test.Height.Set(-BaseHeight - 46, 1f);
+
+        Append(test);
     }
 
     #endregion

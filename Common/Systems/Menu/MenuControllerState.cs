@@ -49,12 +49,12 @@ public sealed class MenuControllerState : UIState
             // Setup the container panel.
         Panel = new();
 
-        Panel.Width.Set(400f, 0f);
+        Panel.Width.Set(386f, 0f);
         Panel.MaxWidth.Set(0f, 0.8f);
-        Panel.MinWidth.Set(300f, 0f);
+        Panel.MinWidth.Set(374f, 0f);
 
         Panel.Height.Set(500f, 0f);
-        Panel.MaxHeight.Set(0f, 0.7f);
+        Panel.MaxHeight.Set(0f, 1f);
         Panel.MinHeight.Set(200f, 0f);
 
         Panel.Top.Set(Bottom.Y - Panel.Height.GetValue(dims.Height) - VerticalGap, 0f);
