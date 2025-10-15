@@ -2,10 +2,24 @@
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Core.Systems;
+using ZensSky.Common.Systems.Sky.Space;
+using ZensSky.Core;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="FancyLightingMod._Main_DrawSunAndMoon"/><br/>
+///         Unapply unwanted shader effect on the sun when the Sun and Moon Rework is active.
+///     </item>
+///     <item>
+///         <see cref="FancySkyRendering._Main_DrawStarsInBackground"/><br/>
+///         Reapply hook to allow it to take priority over <see cref="StarRendering.DrawStarsInBackground"/>.
+///     </item>
+/// </list>
+/// </summary>
 [JITWhenModsEnabled("FancyLighting")]
 [ExtendsFromMod("FancyLighting")]
 [Autoload(Side = ModSide.Client)]

@@ -21,6 +21,8 @@ public sealed class RainController : SliderController
 
     #endregion
 
+    #region Updating
+
     public override void Refresh() 
     {
         Main.maxRaining = MenuConfig.Instance.Rain;
@@ -29,7 +31,8 @@ public sealed class RainController : SliderController
 
         Main.raining = Main.IsItRaining;
 
-            // TODO: Better implementation.
         Main.ChangeRain();
     }
+
+    #endregion
 }

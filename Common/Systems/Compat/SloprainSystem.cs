@@ -12,6 +12,9 @@ using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Allows for manually queuing draw actions into the shader used by Rain++.
+/// </summary>
 [JITWhenModsEnabled("Sloprain")]
 [ExtendsFromMod("Sloprain")]
 [Autoload(Side = ModSide.Client)]

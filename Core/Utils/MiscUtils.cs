@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,6 +10,7 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using static System.Reflection.BindingFlags;
+using static Terraria.GameContent.Skies.VortexSky;
 
 namespace ZensSky.Core.Utils;
 
@@ -144,8 +146,16 @@ public static partial class Utilities
     #region Collections
 
     /// <param name="accending">
-    ///     <see cref="false"/> – The instance of <typeparamref name="T"/> should be found based on preceding order.<br/>
-    ///     <see cref="true"/> – The instance of <typeparamref name="T"/> should be found based on accending order.<br/>
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <term><see cref="false"/></term>
+    ///             The instance of <typeparamref name="T"/> should be found based on preceding order.
+    ///         </item>
+    ///         <item>
+    ///             <term><see cref="true"/></term>
+    ///             The instance of <typeparamref name="T"/> should be found based on accending order.
+    ///         </item>
+    ///     </list>
     /// </param>
     public static T CompareFor<T>(
         this IEnumerable<T> collection,

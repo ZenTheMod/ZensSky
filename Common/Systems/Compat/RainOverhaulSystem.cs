@@ -6,11 +6,25 @@ using System.Reflection;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
-using ZensSky.Core.Systems;
+using ZensSky.Core;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="UpdateRainShaders"/><br/>
+///         Manually update the rain shader when on the main menu.
+///     </item>
+///     <item>
+///         <see cref="ApplyNoiseTexture"/><br/>
+///         See <a href="https://github.com/supchyan/terraria-rain-overhaul/issues/1">this issue</a> for more information.<br/>
+///         TL;DR Rain Overhaul assumes the use of a vanilla noise texture.
+///     </item>
+/// </list>
+/// </summary>
 [JITWhenModsEnabled("RainOverhaul")]
 [ExtendsFromMod("RainOverhaul")]
 [Autoload(Side = ModSide.Client)]
@@ -47,7 +61,6 @@ public sealed class RainOverhaulSystem : ModSystem
         MainThreadSystem.Enqueue(() =>
             On_Main.DoUpdate += UpdateRainShaders);
 
-            // See the issue https://github.com/supchyan/terraria-rain-overhaul/issues/1 for more details.
         MethodInfo? postUpdateTime = typeof(RainSystem).GetMethod(nameof(RainSystem.PostUpdateTime), Public | Instance);
 
         if (postUpdateTime is not null)

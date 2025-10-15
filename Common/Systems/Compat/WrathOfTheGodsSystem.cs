@@ -3,10 +3,13 @@ using System.Reflection;
 using Terraria.ModLoader;
 using ZensSky.Common.DataStructures;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Simply updates the internal sun/moon positions used by NoxusBoss.
+/// </summary>
 [ExtendsFromMod("NoxusBoss")]
 [Autoload(Side = ModSide.Client)]
 public sealed class WrathOfTheGodsSystem : ModSystem

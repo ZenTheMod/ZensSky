@@ -90,7 +90,15 @@ public sealed class SkyConfig : ModConfig
     [CustomModConfigItem(typeof(GradientElement))]
     public Gradient SkyGradient = new(32)
     {
-        new(0f, Color.Black),
-        new(1f, Color.White)
+        new(.1f, new(21, 19, 54)),
+        new(.16f, new(137, 61, 133)),
+        new(.25f, new(255, 148, 103)),
+        new(.37f, new(255, 231, 156)),
+        new(.5f, new(215, 238, 255)),
+        new(.65f, new(217, 230, 246)),
+        new(.74f, new(255, 248, 192)),
+        new(.83f, new(255, 109, 180)),
+        new(.92f, new(47, 14, 75)),
+        new(1f, new(13, 7, 36))
     };
 }

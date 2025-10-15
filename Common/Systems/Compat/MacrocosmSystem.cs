@@ -10,14 +10,29 @@ using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Space;
+using ZensSky.Common.Systems.Sky.Space;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonSystem;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonRendering;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Should be noted that this is likely to not work following the next Macrocosm update.<br/><br/>
+/// 
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="DrawStars"/><br/>
+///         Draws our stars over the Macrocosm ones.
+///     </item>
+///     <item>
+///         <see cref="ReverseRotation"/><br/>
+///         Reverse the direction of the sun's orbit when <see cref="RedSunSystem.FlipSunAndMoon"/> is enabled.
+///     </item>
+/// </list>
+/// </summary>
 [JITWhenModsEnabled("Macrocosm", "SubworldLibrary")]
 [ExtendsFromMod("Macrocosm", "SubworldLibrary")]
 [Autoload(Side = ModSide.Client)]

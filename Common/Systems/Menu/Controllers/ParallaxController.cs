@@ -4,11 +4,20 @@ using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Menu.Elements;
+using ZensSky.Core;
 using ZensSky.Core.Exceptions;
-using ZensSky.Core.Systems;
 
 namespace ZensSky.Common.Systems.Menu.Controllers;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="ChangeParallaxDirection"/><br/>
+///         Modifies the speed of the menu parallax.
+///     </item>
+/// </list>
+/// </summary>
 public sealed class ParallaxController : SliderController
 {
     #region Properties

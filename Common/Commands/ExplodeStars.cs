@@ -1,5 +1,5 @@
 ﻿using Terraria.ModLoader;
-using ZensSky.Common.Systems.Space;
+using ZensSky.Common.Systems.Sky.Space;
 
 namespace ZensSky.Common.Commands;
 

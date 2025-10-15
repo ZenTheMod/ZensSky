@@ -21,6 +21,8 @@ public sealed class WindController : SliderController
 
     #endregion
 
+    #region Updating
+
     public override void Refresh() 
     {
         if (!MenuConfig.Instance.UseWind)
@@ -30,5 +32,8 @@ public sealed class WindController : SliderController
         Main.windSpeedTarget = MenuConfig.Instance.Wind;
     }
 
-    public override void OnSet() => MenuConfig.Instance.UseWind = true;
+    public override void OnSet() =>
+        MenuConfig.Instance.UseWind = true;
+
+    #endregion
 }

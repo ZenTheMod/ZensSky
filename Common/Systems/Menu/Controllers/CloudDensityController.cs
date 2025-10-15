@@ -21,6 +21,8 @@ public sealed class CloudDensityController : SliderController
 
     #endregion
 
+    #region Updating
+
     public override void Refresh()
     {
         int prior = Main.numClouds;
@@ -39,5 +41,8 @@ public sealed class CloudDensityController : SliderController
             Cloud.resetClouds();
     }
 
-    public override void OnSet() => MenuConfig.Instance.UseCloudDensity = true;
+    public override void OnSet() =>
+        MenuConfig.Instance.UseCloudDensity = true;
+
+    #endregion
 }

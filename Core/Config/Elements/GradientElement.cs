@@ -63,9 +63,9 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
         Picker.Mute = true;
 
-        Append(Picker);
-
         Picker.Color = Slider.TargetSegment.Color;
+
+        Append(Picker);
 
         UIPanel test = new();
 

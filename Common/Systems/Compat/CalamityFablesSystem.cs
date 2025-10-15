@@ -9,13 +9,16 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Core.DataStructures;
-using ZensSky.Core.Systems;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonRendering;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonRendering;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonHooks;
+using ZensSky.Core;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Handles Calamity Fables' 16 additional moon styles when the Sun and Moon rework is active.
+/// </summary>
 [Autoload(Side = ModSide.Client)]
 public sealed class CalamityFablesSystem : ModSystem
 {

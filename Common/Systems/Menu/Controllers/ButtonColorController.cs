@@ -8,12 +8,21 @@ using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
-using ZensSky.Core.Systems;
 using ZensSky.Common.Systems.Menu.Elements;
 using ZensSky.Core.UI;
+using ZensSky.Core;
 
 namespace ZensSky.Common.Systems.Menu.Controllers;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="ModifyColors"/><br/>
+///         Modifies the color of the main menu buttons.
+///     </item>
+/// </list>
+/// </summary>
 public sealed class ButtonColorController : MenuController
 {
     #region Private Fields

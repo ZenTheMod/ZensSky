@@ -18,12 +18,38 @@ using ZensSky.Common.Config;
 using ZensSky.Core.Exceptions;
 using static BetterNightSky.BetterNightSky;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Space.StarHooks;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
+using static ZensSky.Common.Systems.Sky.Space.StarHooks;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonHooks;
 using BetterNightSystem = BetterNightSky.BetterNightSky.BetterNightSkySystem;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="On_Main_DrawStarsInBackground"/><br/>
+///         Deliberately unapply this hook to use our star rendering.
+///     </item>
+///     <item>
+///         <see cref="JumpReset"/><br/>
+///         Fix the resetting of star types to not index a texture out of bounds;
+///         additionally stops the replacement of moon textures when the Sun and Moon rework is active.
+///     </item>
+///     <item>
+///         <see cref="JumpReplacement"/><br/>
+///         Stops moon textures from being replaced when the Sun and Moon rework is active.
+///     </item>
+///     <item>
+///         <see cref="NoReloading"/><br/>
+///         Allows the config controling the large moon texture in this mod to be swapped freely when the Sun and Moon rework is active.
+///     </item>
+///     <item>
+///         <see cref="IgnoreReload"/><br/>
+///         Fixes the config menu for the above.
+///     </item>
+/// </list>
+/// </summary>
 [JITWhenModsEnabled("BetterNightSky")]
 [ExtendsFromMod("BetterNightSky")]
 [Autoload(Side = ModSide.Client)]
@@ -54,7 +80,6 @@ public sealed class BetterNightSkySystem : ModSystem
 
     #region Loading
 
-        // QueueMainThreadAction can be ignored as this mod is loaded first regardless.
     public override void Load()
     {
         IsEnabled = true;
@@ -63,13 +88,8 @@ public sealed class BetterNightSkySystem : ModSystem
 
         ModifyMoonTexture += UseBigMoonTexture;
 
-            // Remove the hook used for their stars.
         On_Main.DrawStarsInBackground -= On_Main_DrawStarsInBackground;
 
-                // This is placed before the following check purely for a strange bugfix.
-            // When using our moon rework the scale is derived from the texture for accuracy,
-            // however this mods replaces every moon asset; This is also alarming as the resetting of these textures is derived from an unclamped asset replacement (https://github.com/IDGCaptainRussia94/BetterNightSky/blob/master/BetterNightSky.cs#L439).
-            // Although I'm likely the only person in the world who cares about this.
         MethodInfo? doUnloads = typeof(BetterNightSystem).GetMethod(nameof(BetterNightSystem.DoUnloads), Public | Instance);
 
         if (doUnloads is not null)
@@ -112,26 +132,6 @@ public sealed class BetterNightSkySystem : ModSystem
 
     #region Skip Moon Replacement
 
-    private void JumpReplacement(ILContext il)
-    {
-        try
-        {
-            ILCursor c = new(il);
-
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdsfld<NightConfig>(nameof(NightConfig.Config)),
-                i => i.MatchLdfld<NightConfig>(nameof(NightConfig.UseHighResMoon)));
-
-            c.EmitPop();
-
-            c.EmitLdcI4(0);
-        }
-        catch (Exception e)
-        {
-            throw new ILEditException(Mod, il, e);
-        }
-    }
-
     private void JumpReset(ILContext il)
     {
         try
@@ -140,14 +140,21 @@ public sealed class BetterNightSkySystem : ModSystem
 
             ILLabel skipLoopTarget = c.DefineLabel();
 
-                // Unsure of the cause but occiasionally Main.DrawStar throws IndexOutOfRangeException, I'm hoping this fixes it.
-            if (c.TryGotoNext(MoveType.After,
-                i => i.MatchLdcI4(5)))
-            {
-                c.EmitPop();
+            // Make sure the reset star type does not try to index out of bounds.
+            c.TryGotoNext(MoveType.After,
+                i => i.MatchLdcI4(4));
 
-                c.EmitLdcI4(4);
-            }
+            c.EmitPop();
+
+            c.EmitLdcI4(3);
+
+            c.TryGotoNext(MoveType.After,
+                i => i.MatchLdcI4(5));
+
+            c.EmitPop();
+
+            c.EmitLdcI4(4);
+
 
             if (!SkyConfig.Instance.UseSunAndMoon)
                 return;
@@ -166,6 +173,26 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchBr(out _));
 
             c.EmitBr(skipLoopTarget);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    private void JumpReplacement(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdsfld<NightConfig>(nameof(NightConfig.Config)),
+                i => i.MatchLdfld<NightConfig>(nameof(NightConfig.UseHighResMoon)));
+
+            c.EmitPop();
+
+            c.EmitLdcI4(0);
         }
         catch (Exception e)
         {

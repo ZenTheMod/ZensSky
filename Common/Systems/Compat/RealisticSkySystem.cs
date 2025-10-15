@@ -14,19 +14,47 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Terraria;
+using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.SunAndMoon;
 using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using ZensSky.Common.DataStructures;
+using ZensSky.Common.Systems.Sky.Space;
+using ZensSky.Common.Systems.Sky.SunAndMoon;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Space.StarHooks;
-using static ZensSky.Common.Systems.SunAndMoon.SunAndMoonHooks;
-using ZensSky.Common.Systems.Space;
+using static ZensSky.Common.Systems.Sky.Space.StarHooks;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// A poor taste fork attempting to implement the below can be found <a href="https://github.com/ZenTheMod/Realistic-Sky">here</a>.<br/><br/>
+/// 
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="RemoveBias"/><br/>
+///         Removes the restriction on sun/moon orbit, allowing once again for it to be dragged on the menu.
+///     </item>
+///     <item>
+///         <see cref="StarRotation"/><br/>
+///         Corrects Realistic Sky's star matrix to use <see cref="StarSystem.StarRotation"/>.
+///     </item>
+///     <item>
+///         <see cref="GalaxyRotation"/><br/>
+///         Corrects Realistic Sky's galaxy renderer to rotate around the center of the sky with <see cref="StarSystem.StarRotation"/>..
+///     </item>
+///     <item>
+///         <see cref="CommonRequestsInvertedGravity"/>/<see cref="CommonShaderInvertedGravity"/> + <see cref="ModifySunPosition"/><br/>
+///         Corrects various <see cref="ARenderTargetContentByRequest"/>s/renderers to correctly account for inverted gravity.
+///     </item>
+///     <item>
+///         <see cref="DrawSky"/><br/>
+///         Bulk patch to skip/modify/replace some rendering.
+///     </item>
+/// </list>
+/// </summary>
 [JITWhenModsEnabled("RealisticSky")]
 [ExtendsFromMod("RealisticSky")]
 [Autoload(Side = ModSide.Client)]
@@ -92,7 +120,6 @@ public sealed class RealisticSkySystem : ModSystem
             PatchStarRotation = new(calculatePerspectiveMatrix,
                 StarRotation);
 
-            // This is done so that when drawing the galaxy manually it'll rotate around the center of the screen, rather than the center of its sprite.
         MethodInfo? renderGalaxy = typeof(GalaxyRenderer).GetMethod(nameof(GalaxyRenderer.Render), Public | Static);
         if (renderGalaxy is not null)
             PatchGalaxyRotation = new(renderGalaxy,

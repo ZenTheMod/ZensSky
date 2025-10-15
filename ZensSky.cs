@@ -6,9 +6,9 @@ using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.GeneratedAssets.AssetReaders;
-using ZensSky.Core.Systems;
-using ZensSky.Core.Systems.ModCall;
-using ZensSky.Core.Systems.Net;
+using ZensSky.Core;
+using ZensSky.Core.Net;
+using ZensSky.Core.ModCall;
 
 
 #pragma warning disable CS8603 // Possible null reference return.

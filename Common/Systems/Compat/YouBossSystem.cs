@@ -4,13 +4,23 @@ using System.Reflection;
 using Terraria;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
-using ZensSky.Common.Systems.Space;
-using ZensSky.Common.Systems.SunAndMoon;
-using ZensSky.Core.Systems;
+using ZensSky.Common.Systems.Sky.Space;
+using ZensSky.Common.Systems.Sky.SunAndMoon;
+using ZensSky.Core;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Common.Systems.Compat;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="HideSky"/><br/>
+///         Hides our sky effects while this mod's effects are active.<br/>
+///         TODO: Not this lmao.
+///     </item>
+/// </list>
+/// </summary>
 [ExtendsFromMod("YouBoss")]
 [Autoload(Side = ModSide.Client)]
 public sealed class YouBossSystem : ModSystem

@@ -8,7 +8,7 @@ using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.DataStructures;
-using ZensSky.Common.Systems.Space;
+using ZensSky.Common.Systems.Sky.Space;
 using ZensSky.Core.Utils;
 using Star = ZensSky.Common.DataStructures.Star;
 
