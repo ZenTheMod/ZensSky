@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
-using Terraria.UI;
 using Terraria.Utilities;
 using ZensSky.Core;
 using ZensSky.Core.DataStructures;

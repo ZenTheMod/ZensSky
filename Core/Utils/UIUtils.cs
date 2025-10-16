@@ -11,8 +11,10 @@ public static partial class Utilities
 
     extension(UIElement element)
     {
+        /// <inheritdoc cref="UIElement.GetDimensions"/>
         public Rectangle Dimensions => element.GetDimensions().ToRectangle();
 
+        /// <inheritdoc cref="UIElement.GetInnerDimensions"/>
         public Rectangle InnerDimensions => element.GetInnerDimensions().ToRectangle();
     }
 

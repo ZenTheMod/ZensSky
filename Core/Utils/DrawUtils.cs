@@ -3,13 +3,10 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader.Config.UI;
 using Terraria.UI.Chat;
-using static ReLogic.Graphics.DynamicSpriteFont;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ZensSky.Core.Utils;
 

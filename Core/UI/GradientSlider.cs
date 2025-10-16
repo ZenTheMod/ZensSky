@@ -1,5 +1,4 @@
-﻿using Macrocosm.Content.Projectiles.Friendly.Melee;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Diagnostics.CodeAnalysis;

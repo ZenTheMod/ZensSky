@@ -1,5 +1,4 @@
-﻿using Daybreak.Common.Rendering;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System.Collections.Generic;
 using System.Linq;
@@ -66,8 +65,11 @@ public static class SunAndMoonHooks
     [method: ModCall] // add_ModifyMoonTexture, remove_ModifyMoonTexture.
     public static event hook_ModifyMoonTexture? ModifyMoonTexture;
 
+    /// <summary>
+    /// Used for adding details outside of the base moon style, above — and overriding if <paramref name="drawExtras"/> is false — <see cref="PreDrawMoonExtras"/>.
+    /// </summary>
     /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
-    /// <param name="drawExtras">Weither or not vanilla/base moon details (e.g. moon2 rings,) should be drawn.</param>
+    /// <param name="drawExtras">Weither or not base moon details (<see cref="PreDrawMoonExtras"/>/<see cref="PostDrawMoonExtras"/>) should be drawn.</param>
     /// <param name="eventMoon">If a vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
     /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
     public delegate bool hook_PreDrawMoon(
@@ -87,6 +89,9 @@ public static class SunAndMoonHooks
     [method: ModCall] // add_PreDrawMoon, remove_PreDrawMoon.
     public static event hook_PreDrawMoon? PreDrawMoon;
 
+    /// <summary>
+    /// Used for adding details outside of the base moon style, above <see cref="PostDrawMoonExtras"/>.
+    /// </summary>
     /// <param name="moon">The high res moon texture to be used.</param>
     /// <param name="eventMoon">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
     public delegate void hook_PostDrawMoon(
@@ -108,7 +113,7 @@ public static class SunAndMoonHooks
     #region Extras
 
     /// <summary>
-    /// Used for adding details to the base moon style, below the layer of PreDrawMoon.
+    /// Used for adding details to the base moon style, below <see cref="PreDrawMoon"/>.
     /// </summary>
     /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
     /// <param name="eventMoon">If a vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
@@ -130,7 +135,7 @@ public static class SunAndMoonHooks
     public static event hook_PreDrawMoonExtras? PreDrawMoonExtras;
 
     /// <summary>
-    /// Used for adding details to the base moon style, below the layer of PostDrawMoon.
+    /// Used for adding details to the base moon style, below <see cref="PostDrawMoon"/>.
     /// </summary>
     /// <inheritdoc cref="hook_PostDrawMoon"/>
     [method: ModCall] // add_PostDrawMoonExtras, remove_PostDrawMoonExtras.

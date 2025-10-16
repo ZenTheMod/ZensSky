@@ -5,7 +5,6 @@ using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core.Config.Elements;
 using ZensSky.Core.DataStructures;
-using ZensSky.Core.Utils;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor.
 #pragma warning disable CA2211 // Non-constant fields should not be visible.

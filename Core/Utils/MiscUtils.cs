@@ -10,7 +10,6 @@ using Terraria.GameInput;
 using Terraria.ModLoader;
 using Terraria.UI;
 using static System.Reflection.BindingFlags;
-using static Terraria.GameContent.Skies.VortexSky;
 
 namespace ZensSky.Core.Utils;
 
@@ -133,11 +132,8 @@ public static partial class Utilities
 
     #endregion
 
-    /// <summary>
-    /// <inheritdoc cref="ModContent.GetInstance"/><br/>
-    /// However uses <paramref name="type"/> over a generic argument.
-    /// </summary>
-    /// <returns>The instance of the object with type of <paramref name="type"/>.</returns>
+    /// <inheritdoc cref="ModContent.GetInstance"/>
+    /// <returns>The singleton instance of <paramref name="type"/>.</returns>
     public static object GetInstance(Type type) =>
         ContentInstance.contentByType[type].instance;
 
