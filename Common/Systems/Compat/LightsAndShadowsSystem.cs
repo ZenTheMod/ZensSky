@@ -13,7 +13,7 @@ namespace ZensSky.Common.Systems.Compat;
 /// Lights and Shadows has many issues relating to how they handle their infamous screen shader;<br/>
 /// you can notice this yourself by simply changing 'Wave Quality' in video settings to 'Off,'<br/>
 /// this will disable the wave screen shader used and — assuming no other screen shaders are active — completely hide the effect.<br/>
-/// The above happens due to the mod applying their shader via a hook of <see cref="FilterManager.EndCapture"/>;<br/>
+/// The above happens due to the mod applying their shader via a hook of <see cref="FilterManager.EndCapture"/>,<br/>
 /// instead of using a proper <see cref="Filter"/>.<br/><br/>
 /// 
 /// TODO: PR a fix to Lights and Shadows proper, as I don't feel like rewriting an entire mod for one mediocre visual 'overhaul.'<br/><br/>

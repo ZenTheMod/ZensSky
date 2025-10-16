@@ -36,7 +36,6 @@ This mod features cross compatibility with a large amount of popular mods that m
 - 'Realistic Sky' by Lucille Karma
 - 'Red Sun and Realistic Sky' by Waffles22
 - 'Wrath of the Gods' by Lucille Karma\*[^WrathOfTheGods]
-- 'You Boss' by Lucille Karma
 
 If any issues arise with any mods, including the above; please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 

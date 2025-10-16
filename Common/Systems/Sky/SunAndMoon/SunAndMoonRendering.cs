@@ -44,6 +44,8 @@ public static class SunAndMoonRendering
 
     private const float SunglassesScale = .3f;
 
+    private const float DefaultMoonSize = 62f;
+
     private const float SingleMoonPhase = .125f;
 
     private const float MoonRadius = .88f;
@@ -69,25 +71,12 @@ public static class SunAndMoonRendering
     private const float Moon8ExtraUpperScale = .22f;
     private const float Moon8ExtraLowerScale = .41f;
 
-    private const int BetterNightSkyMoonSize = 202;
-
     #endregion
 
     #region Public Properties
 
-    public static int MoonSize
-    {
-        get
-        {
-                // TODO: Move to BetterNightSkySystem.UseBigMoonTexture
-            if (NonEventMoon &&
-                BetterNightSkySystem.IsEnabled &&
-                BetterNightSkySystem.UseBigMoon)
-                return BetterNightSkyMoonSize;
-
-            return TextureAssets.Moon[NonEventMoon ? Main.moonType : 0].Value.Width + 12;
-        }
-    }
+    public static int MoonSize =>
+        TextureAssets.Moon[Main.moonType].Value.Width + 12;
 
     #endregion
 
@@ -102,10 +91,10 @@ public static class SunAndMoonRendering
         PreDrawSun += SunEclipsePreDraw;
         PostDrawSun += SunSunglassesPostDraw;
 
-        PreDrawMoon += Moon2PreDraw;
-        PostDrawMoon += Moon2PostDraw;
+        PreDrawMoonExtras += Moon2PreDrawExtras;
+        PostDrawMoonExtras += Moon2PostDrawExtras;
 
-        PreDrawMoon += Moon8PreDraw;
+        PreDrawMoonExtras += Moon8PreDrawExtras;
 
         PreDrawMoon += MoonGetFixedBoiPreDraw;
     }
@@ -258,17 +247,35 @@ public static class SunAndMoonRendering
 
         device.Textures[1] = MiscTextures.Pixel;
 
-        bool canDrawEdgeCases = NonEventMoon;
+        bool drawExtras = true;
 
-        if (InvokePreDrawMoon(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, device, canDrawEdgeCases))
+        bool eventMoon = EventMoon;
+
+            // This is stupid.
+        if (InvokePreDrawMoon(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, ref drawExtras, eventMoon, device))
         {
-            Vector2 size = new Vector2(MoonSize * scale) / moon.Value.Size();
+            bool drawPlanet = true;
 
-            ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
-            spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
+            if (drawExtras)
+                drawPlanet = InvokePreDrawMoonExtras(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, eventMoon, device);
+
+            if (drawPlanet)
+            {
+                Vector2 size = new(eventMoon || !drawExtras ? MoonSize : DefaultMoonSize);
+
+                size *= scale;
+
+                size /= moon.Value.Size();
+
+                ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
+                spriteBatch.Draw(moon.Value, position, null, moonColor, rotation, moon.Value.Size() * .5f, size, SpriteEffects.None, 0f);
+            }
+
+            if (drawExtras)
+                InvokePostDrawMoonExtras(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, eventMoon, device);
         }
 
-        InvokePostDrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device, canDrawEdgeCases);
+        InvokePostDrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, eventMoon, device);
     }
 
     public static void ApplyPlanetShader(float shadowAngle, Color shadowColor, Color? atmosphereColor = null, Color? atmosphereShadowColor = null)
@@ -293,50 +300,9 @@ public static class SunAndMoonRendering
 
     #region Vanilla Extras
 
-    #region Moon-GetFixedBoi Extras
-
-    private static bool MoonGetFixedBoiPreDraw(
-        SpriteBatch spriteBatch,
-        ref Asset<Texture2D> moon,
-        ref Vector2 position,
-        ref Color color,
-        ref float rotation,
-        ref float scale,
-        ref Color moonColor,
-        ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
-    {
-            // Unsure if the GFB moon overrides event moons.
-        if (!WorldGen.drunkWorldGen || !nonEventMoon)
-            return true;
-
-        Texture2D texture = SkyTextures.Moon[0];
-
-        Texture2D star = StarTextures.FourPointedStar.Value;
-
-        Vector2 starLeftOffset = SmileyLeftEyePosition.RotatedBy(rotation) * scale;
-        Vector2 starRightOffset = SmileyRightEyePosition.RotatedBy(rotation) * scale;
-
-        spriteBatch.Draw(star, position + starLeftOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
-        spriteBatch.Draw(star, position + starRightOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
-
-        spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
-        spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
-
-        ApplyPlanetShader(SmileyPhase, shadowColor);
-
-        Vector2 size = new Vector2(MoonSize * scale) / texture.Size();
-        spriteBatch.Draw(texture, position, null, moonColor, rotation - MathHelper.PiOver2, texture.Size() * .5f, size, SpriteEffects.None, 0f);
-
-        return false;
-    }
-
-    #endregion
-
     #region Moon-2 Extras
 
-    private static bool Moon2PreDraw(
+    private static bool Moon2PreDrawExtras(
         SpriteBatch spriteBatch,
         ref Asset<Texture2D> moon,
         ref Vector2 position,
@@ -345,10 +311,10 @@ public static class SunAndMoonRendering
         ref float scale,
         ref Color moonColor,
         ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
+        bool eventMoon,
+        GraphicsDevice device)
     {
-        if (Main.moonType != 2 || !nonEventMoon)
+        if (Main.moonType != 2 || eventMoon)
             return true;
 
         Texture2D rings = SkyTextures.Rings.Value;
@@ -358,7 +324,7 @@ public static class SunAndMoonRendering
         return true;
     }
 
-    private static void Moon2PostDraw(
+    private static void Moon2PostDrawExtras(
         SpriteBatch spriteBatch,
         Asset<Texture2D> moon,
         Vector2 position,
@@ -367,10 +333,10 @@ public static class SunAndMoonRendering
         float scale,
         Color moonColor,
         Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
+        bool eventMoon,
+        GraphicsDevice device)
     {
-        if (Main.moonType != 2 || !nonEventMoon)
+        if (Main.moonType != 2 || eventMoon)
             return;
 
         Texture2D rings = SkyTextures.Rings.Value;
@@ -407,7 +373,7 @@ public static class SunAndMoonRendering
 
     #region Moon-8 Extras
 
-    private static bool Moon8PreDraw(
+    private static bool Moon8PreDrawExtras(
         SpriteBatch spriteBatch,
         ref Asset<Texture2D> moon,
         ref Vector2 position,
@@ -416,10 +382,10 @@ public static class SunAndMoonRendering
         ref float scale,
         ref Color moonColor,
         ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
+        bool eventMoon,
+        GraphicsDevice device)
     {
-        if (Main.moonType != 8 || !nonEventMoon)
+        if (Main.moonType != 8 || eventMoon)
             return true;
 
         ApplyPlanetShader(Main.moonPhase * SingleMoonPhase, shadowColor);
@@ -444,24 +410,58 @@ public static class SunAndMoonRendering
 
     #endregion
 
+    #region Moon-GetFixedBoi
+
+    private static bool MoonGetFixedBoiPreDraw(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        ref Color moonColor,
+        ref Color shadowColor,
+        ref bool drawExtras,
+        bool eventMoon,
+        GraphicsDevice device)
+    {
+        // Unsure if the GFB moon overrides event moons.
+        if (!WorldGen.drunkWorldGen || eventMoon)
+            return true;
+
+        Texture2D texture = SkyTextures.Moon[0];
+
+        Texture2D star = StarTextures.FourPointedStar.Value;
+
+        Vector2 starLeftOffset = SmileyLeftEyePosition.RotatedBy(rotation) * scale;
+        Vector2 starRightOffset = SmileyRightEyePosition.RotatedBy(rotation) * scale;
+
+        spriteBatch.Draw(star, position + starLeftOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starRightOffset, null, (moonColor * .4f) with { A = 0 }, 0, star.Size() * .5f, scale * .33f, SpriteEffects.None, 0f);
+
+        spriteBatch.Draw(star, position + starLeftOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
+        spriteBatch.Draw(star, position + starRightOffset, null, color with { A = 0 }, MathHelper.PiOver4, star.Size() * .5f, scale * .2f, SpriteEffects.None, 0f);
+
+        ApplyPlanetShader(SmileyPhase, shadowColor);
+
+        Vector2 size = new Vector2(MoonSize * scale) / texture.Size();
+        spriteBatch.Draw(texture, position, null, moonColor, rotation - MathHelper.PiOver2, texture.Size() * .5f, size, SpriteEffects.None, 0f);
+
+        drawExtras = false;
+
+        return false;
+    }
+
+    #endregion
+
     #endregion
 
     private static void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
         if (!ZensSky.CanDrawSky || 
             RedSunSystem.IsEnabled || 
-            !SkyConfig.Instance.UseSunAndMoon || 
-            !ShowSun && !ShowMoon)
+            !SkyConfig.Instance.UseSunAndMoon)
         {
-            if (!RedSunSystem.IsEnabled)
-            {
-                ShowSun = true;
-                ShowMoon = true;
-            }
-
-            if (RealisticSkySystem.IsEnabled && Main.dayTime)
-                RealisticSkySystem.DrawSun();
-
             orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
             return;
         }
@@ -477,9 +477,6 @@ public static class SunAndMoonRendering
         spriteBatch.Restart(in snapshot);
 
         orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
-
-        ShowSun = true;
-        ShowMoon = true;
     }
 
     #endregion

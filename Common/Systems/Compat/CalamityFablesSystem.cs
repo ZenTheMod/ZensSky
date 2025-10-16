@@ -77,7 +77,7 @@ public sealed class CalamityFablesSystem : ModSystem
         for (int i = 0; i < FablesTextures.Moon.Length; i++)
             AddMoonStyle(PriorMoonStyles + i, FablesTextures.Moon[i]);
 
-        PreDrawMoon += MoonsFablesPreDraw;
+        PreDrawMoonExtras += MoonsFablesPreDrawExtras;
     }
 
     public override void Unload() =>
@@ -103,7 +103,7 @@ public sealed class CalamityFablesSystem : ModSystem
     #region Drawing
 
         // Handle a bunch of edge cases for moons with non standard visuals.
-    private static bool MoonsFablesPreDraw(
+    private static bool MoonsFablesPreDrawExtras(
         SpriteBatch spriteBatch,
         ref Asset<Texture2D> moon,
         ref Vector2 position,
@@ -112,10 +112,10 @@ public sealed class CalamityFablesSystem : ModSystem
         ref float scale,
         ref Color moonColor,
         ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
+        bool eventMoon,
+        GraphicsDevice device)
     {
-        if (!nonEventMoon || !IsEdgeCase())
+        if (eventMoon || !IsEdgeCase())
             return true;
 
         switch (Main.moonType - PriorMoonStyles)
@@ -199,7 +199,7 @@ public sealed class CalamityFablesSystem : ModSystem
         Matrix.CreateLookAt(Vector3.Zero, Vector3.UnitZ, Vector3.UnitY) *
         Matrix.CreateOrthographicOffCenter(-1, 1, 1, -1, -1, 1);
 
-        // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method. (Scrapped in favour of Sourcegen implementaion(?))
+        // TODO: Allow ApplyPlanetShader to take an Effect arg or create a seperate ApplyPlanetShaderParameters method; perhaps modify ZourceGen to allow sharing common parameters(?)
     private static void DrawCyst(SpriteBatch spriteBatch, Texture2D moon, Vector2 position, float rotation, float scale, Color moonColor, Color shadowColor)
     {
         if (!CompatEffects.Cyst.IsReady)

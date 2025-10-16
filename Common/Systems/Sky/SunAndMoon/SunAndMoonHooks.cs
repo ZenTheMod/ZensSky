@@ -60,17 +60,15 @@ public static class SunAndMoonHooks
     /// <summary>
     /// Used for modifying the moon texture without being tied to <see cref="Main.moonType"/>.
     /// </summary>
-    public delegate void hook_ModifyMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon);
+    public delegate void hook_ModifyMoonTexture(ref Asset<Texture2D> moon, bool eventMoon);
 
     /// <inheritdoc cref="hook_ModifyMoonTexture"/>
     [method: ModCall] // add_ModifyMoonTexture, remove_ModifyMoonTexture.
     public static event hook_ModifyMoonTexture? ModifyMoonTexture;
 
-    /// <summary>
-    /// Used for moon styles that may require custom drawing to create an high-res counterpart.
-    /// </summary>
     /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
-    /// <param name="nonEventMoon">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
+    /// <param name="drawExtras">Weither or not vanilla/base moon details (e.g. moon2 rings,) should be drawn.</param>
+    /// <param name="eventMoon">If a vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
     /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
     public delegate bool hook_PreDrawMoon(
         SpriteBatch spriteBatch,
@@ -81,18 +79,16 @@ public static class SunAndMoonHooks
         ref float scale,
         ref Color moonColor,
         ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon);
+        ref bool drawExtras,
+        bool eventMoon,
+        GraphicsDevice device);
 
     /// <inheritdoc cref="hook_PreDrawMoon"/>
     [method: ModCall] // add_PreDrawMoon, remove_PreDrawMoon.
     public static event hook_PreDrawMoon? PreDrawMoon;
 
-    /// <summary>
-    /// Used for moon styles that may require custom drawing to create an high-res counterpart.
-    /// </summary>
     /// <param name="moon">The high res moon texture to be used.</param>
-    /// <param name="nonEventMoon">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
+    /// <param name="eventMoon">If NO vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
     public delegate void hook_PostDrawMoon(
         SpriteBatch spriteBatch,
         Asset<Texture2D> moon,
@@ -102,12 +98,45 @@ public static class SunAndMoonHooks
         float scale,
         Color moonColor,
         Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon);
+        bool eventMoon,
+        GraphicsDevice device);
 
     /// <inheritdoc cref="hook_PostDrawMoon"/>
     [method: ModCall] // add_PostDrawMoon, remove_PostDrawMoon.
     public static event hook_PostDrawMoon? PostDrawMoon;
+
+    #region Extras
+
+    /// <summary>
+    /// Used for adding details to the base moon style, below the layer of PreDrawMoon.
+    /// </summary>
+    /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
+    /// <param name="eventMoon">If a vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
+    /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
+    public delegate bool hook_PreDrawMoonExtras(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        ref Color moonColor,
+        ref Color shadowColor,
+        bool eventMoon,
+        GraphicsDevice device);
+
+    /// <inheritdoc cref="hook_PreDrawMoonExtras"/>
+    [method: ModCall] // add_PreDrawMoonExtras, remove_PreDrawMoonExtras.
+    public static event hook_PreDrawMoonExtras? PreDrawMoonExtras;
+
+    /// <summary>
+    /// Used for adding details to the base moon style, below the layer of PostDrawMoon.
+    /// </summary>
+    /// <inheritdoc cref="hook_PostDrawMoon"/>
+    [method: ModCall] // add_PostDrawMoonExtras, remove_PostDrawMoonExtras.
+    public static event hook_PostDrawMoon? PostDrawMoonExtras;
+
+    #endregion
 
     #endregion
 
@@ -199,8 +228,8 @@ public static class SunAndMoonHooks
 
     [ModCall("ModifyMoonTexture")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void InvokeModifyMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon) =>
-        ModifyMoonTexture?.Invoke(ref moon, nonEventMoon);
+    public static void InvokeModifyMoonTexture(ref Asset<Texture2D> moon, bool eventMoon) =>
+        ModifyMoonTexture?.Invoke(ref moon, eventMoon);
 
     [ModCall("PreDrawMoon")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -213,8 +242,9 @@ public static class SunAndMoonHooks
         ref float scale,
         ref Color moonColor,
         ref Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon)
+        ref bool drawExtras,
+        bool eventMoon,
+        GraphicsDevice device)
     {
         bool ret = true;
 
@@ -223,7 +253,7 @@ public static class SunAndMoonHooks
 
         foreach (hook_PreDrawMoon handler in
             PreDrawMoon.GetInvocationList().Select(h => (hook_PreDrawMoon)h))
-            ret &= handler(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, device, nonEventMoon);
+            ret &= handler(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, ref drawExtras, eventMoon, device);
 
         return ret;
     }
@@ -239,9 +269,62 @@ public static class SunAndMoonHooks
         float scale,
         Color moonColor,
         Color shadowColor,
-        GraphicsDevice device,
-        bool nonEventMoon) =>
-        PostDrawMoon?.Invoke(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, device, nonEventMoon);
+        bool eventMoon,
+        GraphicsDevice device) =>
+        PostDrawMoon?.Invoke(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, eventMoon, device);
+
+    #region Extras
+
+    [ModCall]
+    public static void AddPreDrawMoonExtras(hook_PreDrawMoonExtras preDrawExtras) =>
+        PreDrawMoonExtras += preDrawExtras;
+
+    [ModCall]
+    public static void AddPostDrawMoonExtras(hook_PostDrawMoon postDrawExtras) =>
+        PostDrawMoonExtras += postDrawExtras;
+
+    [ModCall("PreDrawMoonExtras")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool InvokePreDrawMoonExtras(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        ref Color moonColor,
+        ref Color shadowColor,
+        bool eventMoon,
+        GraphicsDevice device)
+    {
+        bool ret = true;
+
+        if (PreDrawMoonExtras is null)
+            return true;
+
+        foreach (hook_PreDrawMoonExtras handler in
+            PreDrawMoonExtras.GetInvocationList().Select(h => (hook_PreDrawMoonExtras)h))
+            ret &= handler(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, eventMoon, device);
+
+        return ret;
+    }
+
+    [ModCall("PostDrawMoonExtras")]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void InvokePostDrawMoonExtras(
+        SpriteBatch spriteBatch,
+        Asset<Texture2D> moon,
+        Vector2 position,
+        Color color,
+        float rotation,
+        float scale,
+        Color moonColor,
+        Color shadowColor,
+        bool eventMoon,
+        GraphicsDevice device) =>
+        PostDrawMoonExtras?.Invoke(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, eventMoon, device);
+
+    #endregion
 
     #endregion
 
@@ -289,7 +372,13 @@ public static class SunAndMoonHooks
         PreDrawMoon = null;
         PostDrawMoon = null;
 
+        PreDrawMoonExtras = null;
+        PostDrawMoonExtras = null;
+
         OnUpdateSunAndMoonInfo = null;
+
+        PreDrawSunAndMoon = null;
+        PostDrawSunAndMoon = null;
     }
 
     #endregion

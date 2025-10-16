@@ -78,7 +78,7 @@ public sealed class SunAndMoonSystem : ModSystem
             else if (Main.snowMoon)
                 ret = SkyTextures.MoonSnow;
 
-            InvokeModifyMoonTexture(ref ret, NonEventMoon);
+            InvokeModifyMoonTexture(ref ret, EventMoon);
 
             return ret;
         }
@@ -87,7 +87,7 @@ public sealed class SunAndMoonSystem : ModSystem
     /// <summary>
     /// If no moon texture changing events are active.
     /// </summary>
-    public static bool NonEventMoon =>
+    public static bool EventMoon =>
         !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
 
     #endregion

@@ -104,14 +104,10 @@ public sealed class RedSunSystem : ModSystem
             c.EmitDelegate(() =>
             {
                 if (!ZensSky.CanDrawSky ||
-                !SkipDrawing ||
-                (!ShowSun && !ShowMoon))
+                !SkipDrawing)
                     return;
 
                 Draw();
-
-                ShowSun = true;
-                ShowMoon = true;
             });
 
             c.GotoNext(MoveType.After,

@@ -57,6 +57,8 @@ public sealed class BetterNightSkySystem : ModSystem
 {
     #region Private Fields
 
+    private const float BigMoonScale = 4f;
+
     private static ILHook? PatchLoad;
     private static ILHook? PatchUnload;
 
@@ -86,7 +88,7 @@ public sealed class BetterNightSkySystem : ModSystem
 
         PostDrawStars += StarsSpecialPostDraw;
 
-        ModifyMoonTexture += UseBigMoonTexture;
+        PreDrawMoon += BigMoonPreDraw;
 
         On_Main.DrawStarsInBackground -= On_Main_DrawStarsInBackground;
 
@@ -301,14 +303,31 @@ public sealed class BetterNightSkySystem : ModSystem
         spriteBatch.End();
     }
 
-    private static void UseBigMoonTexture(ref Asset<Texture2D> moon, bool nonEventMoon)
+    private bool BigMoonPreDraw(
+        SpriteBatch spriteBatch,
+        ref Asset<Texture2D> moon,
+        ref Vector2 position,
+        ref Color color,
+        ref float rotation,
+        ref float scale,
+        ref Color moonColor,
+        ref Color shadowColor,
+        ref bool drawExtras,
+        bool eventMoon,
+        GraphicsDevice device)
     {
-        if (IsEnabled &&
-            UseBigMoon &&
-            nonEventMoon)
-            moon = SkyTextures.BetterNightSkyMoon;
+        if (!IsEnabled ||
+            !UseBigMoon ||
+            eventMoon)
+            return true;
 
-        return;
+        moon = SkyTextures.BetterNightSkyMoon;
+
+        scale *= BigMoonScale;
+
+        drawExtras = false;
+
+        return false;
     }
 
     #endregion
