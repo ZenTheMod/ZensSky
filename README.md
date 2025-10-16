@@ -1,4 +1,4 @@
-﻿# Zens Sky
+﻿# Zen Skies
 This mod aims to overhaul Terraria's sky with a number of highly customizable visuals changes; some of which mirror the upcoming Terraria 1.4.5 update's visuals.
 
 ## Current Planned Features
