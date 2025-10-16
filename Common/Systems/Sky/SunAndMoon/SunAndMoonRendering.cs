@@ -251,11 +251,12 @@ public static class SunAndMoonRendering
 
         bool eventMoon = EventMoon;
 
-            // This is stupid.
+            // Run moon drawing not tied to a specific moon style outside of the extra drawing.
         if (InvokePreDrawMoon(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, ref drawExtras, eventMoon, device))
         {
             bool drawPlanet = true;
 
+                // Draw the moon style's extras (e.g. rings/debris) if applicable,
             if (drawExtras)
                 drawPlanet = InvokePreDrawMoonExtras(spriteBatch, ref moon, ref position, ref color, ref rotation, ref scale, ref moonColor, ref shadowColor, eventMoon, device);
 
