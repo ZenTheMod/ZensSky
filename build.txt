@@ -1,5 +1,5 @@
-displayName = Zen's Sky
-author = Zen
+displayName = Zen Skies
+author = Zoey
 version = 1.1.1.0
 side = NoSync
 	# Sort this mod AFTER 'FancyLighting' to have hooks apply in the correct order.
