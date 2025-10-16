@@ -85,10 +85,10 @@ public sealed class SunAndMoonSystem : ModSystem
     }
 
     /// <summary>
-    /// If no moon texture changing events are active.
+    /// If any changing events are active.
     /// </summary>
     public static bool EventMoon =>
-        !WorldGen.drunkWorldGen && !Main.pumpkinMoon && !Main.snowMoon;
+        WorldGen.drunkWorldGen || Main.pumpkinMoon || Main.snowMoon;
 
     #endregion
 
