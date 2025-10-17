@@ -10,20 +10,20 @@ namespace ZensSky.Core.DataStructures;
 /// <example>
 /// Example:<br/>
 /// <code>
-/// spriteBatch.End(out var snapshot);
+///     spriteBatch.End(out var snapshot);
 ///
-/// using (new RenderTargetSwap(ref MyTarget, width, height))
-/// {
-///     device.Clear(/* color */);
+///     using (new RenderTargetSwap(ref MyTarget, width, height))
+///     {
+///         device.Clear(/* color */);
+///         
+///         spriteBatch.Begin(/* whatever paramaters */);
+///         
+///             // Drawcode here.
 ///     
-///     spriteBatch.Begin(/* whatever paramaters */);
-///     
-///         // Drawcode here.
+///         spriteBatch.End();
+///     }
 /// 
-///     spriteBatch.End();
-/// }
-/// 
-/// spriteBatch.Begin(in snapshot);
+///     spriteBatch.Begin(in snapshot);
 /// </code>
 /// </example>
 /// 

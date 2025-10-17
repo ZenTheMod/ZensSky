@@ -101,15 +101,6 @@ public sealed class RedSunSystem : ModSystem
 
             ILLabel? jumpSunOrMoonGrabbing = c.DefineLabel();
 
-            c.EmitDelegate(() =>
-            {
-                if (!ZensSky.CanDrawSky ||
-                !SkipDrawing)
-                    return;
-
-                Draw();
-            });
-
             c.GotoNext(MoveType.After,
                 i => i.MatchLdarg3(),
                 i => i.MatchLdfld<Main.SceneArea>("bgTopY"));
@@ -291,19 +282,6 @@ public sealed class RedSunSystem : ModSystem
         {
             throw new ILEditException(Mod, il, e);
         }
-    }
-
-    private static void Draw()
-    {
-        SpriteBatch spriteBatch = Main.spriteBatch;
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-        
-        spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
-
-        DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, ShowMoon);
-
-        spriteBatch.Restart(in snapshot);
     }
 
     #endregion

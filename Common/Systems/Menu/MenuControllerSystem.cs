@@ -41,7 +41,7 @@ namespace ZensSky.Common.Systems.Menu;
 ///     </item>
 ///     <item>
 ///         <see cref="CloseMenuOnResolutionChanged"/><br/>
-///         Self explanitory.
+///         Self-explanitory.
 ///     </item>
 ///     <item>
 ///         <see cref="RefreshOnSave"/><br/>

@@ -113,15 +113,10 @@ public static class SunAndMoonRendering
     {
         ForceInfo = false;
 
-        if (InvokePreDrawSunAndMoon(spriteBatch))
-        {
-            if (showSun)
-                DrawSun(spriteBatch, device);
-            if (showMoon)
-                DrawMoon(spriteBatch, device);
-        }
-
-        InvokePostDrawSunAndMoon(spriteBatch);
+        if (showSun)
+            DrawSun(spriteBatch, device);
+        if (showMoon)
+            DrawMoon(spriteBatch, device);
     }
 
     #region Sun Drawing
@@ -277,6 +272,8 @@ public static class SunAndMoonRendering
         }
 
         InvokePostDrawMoon(spriteBatch, moon, position, color, rotation, scale, moonColor, shadowColor, eventMoon, device);
+
+        MoonTexture = moon;
     }
 
     public static void ApplyPlanetShader(float shadowAngle, Color shadowColor, Color? atmosphereColor = null, Color? atmosphereShadowColor = null)
@@ -459,25 +456,35 @@ public static class SunAndMoonRendering
 
     private static void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        MoonTexture = GetBaseMoonTexture();
+
         if (!ZensSky.CanDrawSky || 
-            RedSunSystem.IsEnabled || 
             !SkyConfig.Instance.UseSunAndMoon)
         {
-            orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
+            if (InvokePreDrawSunAndMoon(spriteBatch))
+                orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
+
+            InvokePostDrawSunAndMoon(spriteBatch);
             return;
         }
 
-        SpriteBatch spriteBatch = Main.spriteBatch;
         GraphicsDevice device = Main.instance.GraphicsDevice;
 
-        spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+        if (InvokePreDrawSunAndMoon(spriteBatch))
+        {
+            spriteBatch.End(out var snapshot);
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointWrap, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
 
-        DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, !Main.dayTime && ShowMoon);
+            DrawSunAndMoon(spriteBatch, device, Main.dayTime && ShowSun, !Main.dayTime && ShowMoon);
 
-        spriteBatch.Restart(in snapshot);
+            spriteBatch.Restart(in snapshot);
+        }
 
         orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
+
+        InvokePostDrawSunAndMoon(spriteBatch);
     }
 
     #endregion

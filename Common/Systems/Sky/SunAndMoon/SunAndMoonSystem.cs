@@ -33,7 +33,7 @@ public sealed class SunAndMoonSystem : ModSystem
     private const float MinSunBrightness = .82f;
     private const float MinMoonBrightness = .65f;
 
-    private static readonly bool SkipDrawing = SkyConfig.Instance.UseSunAndMoon;
+    private static readonly bool UseSunAndMoon = SkyConfig.Instance.UseSunAndMoon;
 
     #endregion
 
@@ -64,25 +64,11 @@ public sealed class SunAndMoonSystem : ModSystem
     /// </summary>
     public static Asset<Texture2D> MoonTexture
     {
-        [ModCall(nameof(MoonTexture), $"Get{nameof(MoonTexture)}")]
-        get
-        {
-            Asset<Texture2D> ret = SkyTextures.Moon[Math.Min(Main.moonType, SkyTextures.Moon.Length - 1)];
-
-            if (ExtraMoonStyles.TryGetValue(Main.moonType,
-                out Asset<Texture2D>? style))
-                ret = style;
-
-            if (Main.pumpkinMoon)
-                ret = SkyTextures.MoonPumpkin;
-            else if (Main.snowMoon)
-                ret = SkyTextures.MoonSnow;
-
-            InvokeModifyMoonTexture(ref ret, EventMoon);
-
-            return ret;
-        }
+        get =>
+            UseSunAndMoon ? field : GetBaseMoonTexture();
+        set;
     }
+        = Asset<Texture2D>.Empty;
 
     /// <summary>
     /// If any changing events are active.
@@ -168,7 +154,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
             c.EmitBr(sunSkipTarget);
 
-            if (SkipDrawing)
+            if (UseSunAndMoon)
                 c.GotoNext(MoveType.Before,
                     i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
                     i => i.MatchBrtrue(out _));
@@ -224,7 +210,7 @@ public sealed class SunAndMoonSystem : ModSystem
                 i => i.MatchNewobj<Vector2>(),
                 i => i.MatchLdloc(out moonScale));
 
-            if (SkipDrawing)
+            if (UseSunAndMoon)
                 c.GotoNext(MoveType.Before,
                     i => i.MatchLdsfld<Main>(nameof(Main.dayTime)),
                     i => i.MatchBrfalse(out _));
@@ -285,6 +271,25 @@ public sealed class SunAndMoonSystem : ModSystem
     #endregion
 
     #region Public Methods
+
+    [ModCall]
+    public static Asset<Texture2D> GetBaseMoonTexture()
+    {
+        Asset<Texture2D> ret = SkyTextures.Moon[Math.Min(Main.moonType, SkyTextures.Moon.Length - 1)];
+
+        if (ExtraMoonStyles.TryGetValue(Main.moonType,
+            out Asset<Texture2D>? style))
+            ret = style;
+
+        if (Main.pumpkinMoon)
+            ret = SkyTextures.MoonPumpkin;
+        else if (Main.snowMoon)
+            ret = SkyTextures.MoonSnow;
+
+        InvokeModifyMoonTexture(ref ret, EventMoon);
+
+        return ret;
+    }
 
     /// <summary>
     /// Updates sun and moon positions as well as updating other mod's values.

@@ -2,12 +2,14 @@ displayName = Zen Skies
 author = Zoey
 version = 1.1.1.0
 side = NoSync
-	# Sort this mod AFTER 'FancyLighting' to have hooks apply in the correct order.
-sortAfter = FancyLighting
-	# Sort this mod BEFORE the following to prevent possible race conditions.
-	# Notably sort this mod BEFORE 'RedSunAndRealisticSky' to have its hooks apply after ours.
-sortBefore = BetterNightSky. FancyLighting, RedSunAndRealisticSky, Lights, RealisticSky
+
+sortAfter = FancyLighting, RedSunAndRealisticSky
+sortBefore = BetterNightSky. FancyLighting, Lights, RealisticSky
+
 weakReferences = BetterNightSky@1.24, FancyLighting@1.0.0, Lights@1.4.2, Macrocosm@0.1.0.11, RainOverhaul@1.7, RealisticSky@1.0.24, RedSunAndRealisticSky@1.0.2, Sloprain@1.3.0.0, SubworldLibrary@2.2.3.1
+
 modReferences = Daybreak@1.4.0
+
 buildIgnore = lib\*, .vs\*, *.tmp, SourceGeneration\*, Properties\*, *.csproj, *.user, obj\*, bin\*, *.config, .git\*, .github\*, LICENSE, .editorconfig, .gitignore, .gitattributes, Assets\Effects\Compiler\*, *.mp4, TemplateEngineHost\*
+
 homepage = https://github.com/ZenTheMod/ZensSky

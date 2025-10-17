@@ -76,10 +76,14 @@ public sealed class TimeController : SliderController
                 if (Main.time >= 0)
                     return;
 
+                double timeRatio =
+                    Main.dayTime ? Main.nightLength / Main.dayLength :
+                    Main.dayLength / Main.nightLength;
+
                 if (Main.dayTime)
                     Main.moonPhase = (Main.moonPhase - 1) % 8;
 
-                Main.time = (Main.dayTime ? Main.nightLength : Main.dayLength) - 1;
+                Main.time = (Main.dayTime ? Main.nightLength : Main.dayLength) + (Main.time * timeRatio);
                 Main.dayTime = !Main.dayTime;
 
                     // Prevent changing moon type while loading into a world.
