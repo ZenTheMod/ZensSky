@@ -5,7 +5,28 @@ using ZensSky.Core.Utils;
 namespace ZensSky.Core.DataStructures;
 
 /// <summary>
-/// Allows for esay swapping and use of a <see cref="RenderTarget2D"/>, with the <see cref="using"/> keyword.
+/// Wraps <see cref="RenderTarget2D"/> application with a disposable pattern for use with a <see cref="using"/> statement.<br/><br/>
+/// 
+/// <example>
+/// Example:<br/>
+/// <code>
+/// spriteBatch.End(out var snapshot);
+///
+/// using (new RenderTargetSwap(ref MyTarget, width, height))
+/// {
+///     device.Clear(/* color */);
+///     
+///     spriteBatch.Begin(/* whatever paramaters */);
+///     
+///         // Drawcode here.
+/// 
+///     spriteBatch.End();
+/// }
+/// 
+/// spriteBatch.Begin(in snapshot);
+/// </code>
+/// </example>
+/// 
 /// </summary>
 public readonly ref struct RenderTargetSwap
 {
@@ -26,7 +47,7 @@ public readonly ref struct RenderTargetSwap
         OldTargets = device.GetRenderTargets();
         OldScissor = device.ScissorRectangle;
 
-            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
+            // Set the default RenderTargetUsage to PreserveContents to prevent clearing the prior targets when swapping back in Dispose().
         foreach (RenderTargetBinding oldTarget in OldTargets)
             if (oldTarget.RenderTarget is RenderTarget2D rt)
                 rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
@@ -39,7 +60,8 @@ public readonly ref struct RenderTargetSwap
             target?.Height ?? Main.graphics.PreferredBackBufferHeight);
     }
 
-    public RenderTargetSwap(ref RenderTarget2D? target,
+    public RenderTargetSwap(
+        ref RenderTarget2D? target,
         int width,
         int height,
         bool mipMap = false,
@@ -53,14 +75,8 @@ public readonly ref struct RenderTargetSwap
         OldTargets = device.GetRenderTargets();
         OldScissor = device.ScissorRectangle;
 
-            // Set the default RenderTargetUsage to PreserveContents to prevent causing black screens when swaping targets.
-        foreach (RenderTargetBinding oldTarget in OldTargets)
-            if (oldTarget.RenderTarget is RenderTarget2D rt)
-                rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-
-        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
-
-        Utilities.ReintializeTarget(ref target,
+        Utilities.ReintializeTarget(
+            ref target,
             device,
             width,
             height,
@@ -70,6 +86,12 @@ public readonly ref struct RenderTargetSwap
             preferredMultiSampleCount,
             usage);
 
+        foreach (RenderTargetBinding oldTarget in OldTargets)
+            if (oldTarget.RenderTarget is RenderTarget2D rt)
+                rt.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
+        device.PresentationParameters.RenderTargetUsage = RenderTargetUsage.PreserveContents;
+
         device.SetRenderTarget(target);
         device.ScissorRectangle = new(0, 0,
             target?.Width ?? Main.graphics.PreferredBackBufferWidth,
@@ -78,6 +100,8 @@ public readonly ref struct RenderTargetSwap
 
     #endregion
 
+    #region Disposable Pattern
+
     public void Dispose()
     {
         GraphicsDevice device = Main.instance.GraphicsDevice;
@@ -85,4 +109,6 @@ public readonly ref struct RenderTargetSwap
         device.SetRenderTargets(OldTargets);
         device.ScissorRectangle = OldScissor;
     }
+
+    #endregion
 }
