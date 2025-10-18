@@ -100,7 +100,7 @@
 		<!-- See https://github.com/Ebonfly/EbonModMirror/commit/e74e062a7630dd3e6b5c5f8a8d047dd1f447527e, Ebonfly feel free to yell at me -->
 		<Exec Condition="$([MSBuild]::IsOSPlatform('Linux'))" Command="@(EffectFiles->'wine echo ----- Compiling effect: %(RecursiveDir)%(FileName)%(Extension) ----- &amp;&amp; &quot;$(FxcCompilerPath)&quot; &quot;%(RecursiveDir)%(FileName)%(Extension)&quot; /T fx_2_0 /nologo /O2 /Fo &quot;%(RecursiveDir)%(FileName).fxc&quot; &#xA;&#xD;')" IgnoreExitCode="true" />
 	</Target>
-	
+
 	<!-- Source Generation -->
 	<ItemGroup>
 		<!-- Add every asset as an additional file so that our source generator can find it -->
