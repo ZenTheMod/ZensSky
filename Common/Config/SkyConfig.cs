@@ -86,18 +86,17 @@ public sealed class SkyConfig : ModConfig
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool PitchBlackBackground;
 
-    [CustomModConfigItem(typeof(GradientElement))]
+    [CustomModConfigItem(typeof(SkyGradientElement))]
     public Gradient SkyGradient = new(32)
     {
-        new(.1f, new(21, 19, 54)),
-        new(.16f, new(137, 61, 133)),
-        new(.25f, new(255, 148, 103)),
-        new(.37f, new(255, 231, 156)),
-        new(.5f, new(215, 238, 255)),
-        new(.65f, new(217, 230, 246)),
-        new(.74f, new(255, 248, 192)),
-        new(.83f, new(255, 109, 180)),
-        new(.92f, new(47, 14, 75)),
-        new(1f, new(13, 7, 36))
+        new(.15f, new(14, 14, 75)),
+        new(.195f, new(197, 101, 192)),
+        new(.21f, new(255, 151, 125)),
+        new(.25f, new(219, 188, 126)),
+        new(.375f, new(74, 111, 137)),
+        new(.6f, new(74, 111, 137)),
+        new(.7f, new(211, 200, 144)),
+        new(.75f, new(255, 109, 182)),
+        new(.82f, new(14, 14, 75))
     };
 }

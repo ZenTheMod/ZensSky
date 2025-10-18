@@ -9,7 +9,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Compat;
 using ZensSky.Core;
 using ZensSky.Core.ModCall;
 using ZensSky.Core.Utils;

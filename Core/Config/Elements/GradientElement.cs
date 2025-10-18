@@ -110,13 +110,7 @@ public class GradientElement : DropDownConfigElement<Gradient>
             Picker is null)
             return;
 
-        if (Slider.IsHeld)
-        {
-            string tooltip = Utilities.GetReadableTime(Slider.TargetSegment.Position * 24f);
-
-            UIModConfig.Tooltip = tooltip;
-        }
-        else if (Slider.IsMouseHovering)
+        if (Slider.IsMouseHovering && !Slider.IsHeld)
         {
             string tooltip = Utilities.GetTextValueWithGlyphs(SliderHoverKey);
 

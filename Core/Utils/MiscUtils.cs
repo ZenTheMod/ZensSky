@@ -32,6 +32,9 @@ public static partial class Utilities
     public static Vector2 UIMousePosition =>
         UserInterface.ActiveInstance.MousePosition;
 
+    public static float TimeRatio =>
+        Terraria.Utils.GetDayTimeAs24FloatStartingFromMidnight() / 24f;
+
     #endregion
 
     #region Time
