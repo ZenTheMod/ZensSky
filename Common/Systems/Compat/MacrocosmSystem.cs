@@ -73,7 +73,7 @@ public sealed class MacrocosmSystem : ModSystem
                 DrawStars);
 
             // Account for RedSun's reversal of the sun's orbit.
-        if (!RedSunSystem.IsEnabled || !RedSunSystem.FlipSunAndMoon)
+        if (!RedSunSystem.FlipSunAndMoon)
             return;
 
         MethodInfo? rotate = typeof(CelestialBody).GetMethod(nameof(CelestialBody.Rotate), Public | Instance);

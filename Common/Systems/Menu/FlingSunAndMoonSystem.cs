@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
+using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -78,14 +79,24 @@ public sealed class FlingSunAndMoonSystem : ModSystem
         Main.sunModY = (short)(Main.sunModY * SunMoonModMultiplier);
         Main.moonModY = (short)(Main.moonModY * SunMoonModMultiplier);
 
-        Main.time = timeLength *
-            ((position.X + SunMoonVelocity.X + sunMoonWidth) / (Utilities.ScreenSize.X + (sunMoonWidth * 2f)));
+        double newTime =
+            RedSunSystem.FlipSunAndMoon ?
+            RedSunFlinging(position, sunMoonWidth) :
+            (position.X + SunMoonVelocity.X + sunMoonWidth);
 
-            // Account for RedSun's reversal of the sun's orbit.
-        if (!RedSunSystem.IsEnabled || !RedSunSystem.FlipSunAndMoon)
-            return;
+        newTime /= Utilities.ScreenSize.X + (sunMoonWidth * 2f);
 
-        Main.time = timeLength - Main.time;
+        newTime *= timeLength;
+
+        Main.time = newTime;
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static double RedSunFlinging(Vector2 position, float sunMoonWidth)
+    {
+        float moonAdjust = Main.dayTime ? 0 : RedSunSystem.MoonAdjustment.X;
+
+        return Utilities.ScreenSize.X - (position.X + SunMoonVelocity.X) + moonAdjust + sunMoonWidth;
     }
 
     #endregion

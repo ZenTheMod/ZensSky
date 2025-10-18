@@ -16,7 +16,6 @@ using ZensSky.Common.Systems.Sky.SunAndMoon;
 using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonRendering;
 using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Compat;
@@ -56,10 +55,12 @@ public sealed class RedSunSystem : ModSystem
 
     public static bool IsEnabled { get; private set; }
 
-    public static bool FlipSunAndMoon
+    public static bool FlipSunAndMoon { get; private set; }
+
+    public static Vector2 MoonAdjustment
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
-        get => ModContent.GetInstance<ClientConfig>().FlipSunAndMoon;
+        get => new(GeneralLightingIL.MoonAdjustmentX(), GeneralLightingIL.MoonAdjustmentY());
     }
 
     #endregion
@@ -78,6 +79,8 @@ public sealed class RedSunSystem : ModSystem
                 PatchSunAndMoonDrawing = new(changePositionAndDrawDayMoon,
                     ModifyDrawing);
         });
+
+        FlipSunAndMoon = ModContent.GetInstance<ClientConfig>().FlipSunAndMoon;
     }
 
     public override void Unload() =>

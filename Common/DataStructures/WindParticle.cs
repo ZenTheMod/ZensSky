@@ -22,7 +22,7 @@ public record struct WindParticle
 
     private const float SinAmplitude = .1f;
 
-    private const float LoopRange = 0.03f;
+    private const float LoopRange = .06f;
 
     private const float Magnitude = 13f;
 
