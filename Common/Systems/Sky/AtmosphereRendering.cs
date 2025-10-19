@@ -34,7 +34,9 @@ public static class AtmosphereRendering
     #region Private Methods
 
     private static Color GetColor() =>
-        (SkyConfig.Instance.SkyGradient.GetColor(Utilities.TimeRatio) * Easings.InCubic(Main.atmo)) with { A = 0 };
+        (SkyConfig.Instance.SkyGradient.GetColor(Utilities.TimeRatio) *
+        Easings.InCubic(Main.atmo))
+        with { A = 0 };
 
     #endregion
 }

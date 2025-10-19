@@ -12,10 +12,13 @@ using Terraria.GameContent.Animations;
 using Terraria.GameContent.Skies;
 using Terraria.Graphics.Effects;
 using Terraria.ModLoader;
+using ZensSky.Common.Config;
 using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
+using static ZensSky.Common.Systems.Sky.Lighting.SkyLightingSystem;
+using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Menu;
 
@@ -23,10 +26,11 @@ namespace ZensSky.Common.Systems.Menu;
 /// Edits and Hooks:
 /// <list type="bullet">
 ///     <item>
-///         <see cref="DrawAfterLogo"/><br/>
-///         Forces the credits to draw after <see cref="ModMenu.PreDrawLogo"/>.<br/>
-///         The above fixes a bug where credits are hidden on mods that have <a href="https://i.imgur.com/IqsIGYT.png">obnoxious</a> menu backkgrounds;
-///         see <a href="https://github.com/tModLoader/tModLoader/pull/4716#issuecomment-3146423549">this comment</a> for more details.
+///         <see cref="LogoDrawing"/><br/>
+///         Forces the credits to draw after <see cref="ModMenu.PreDrawLogo"/>, and draws a lighting effect over the logo.<br/>
+///         The former fixes a bug where credits are hidden on mods that have <a href="https://i.imgur.com/IqsIGYT.png">obnoxious</a> menu backkgrounds;
+///         see <a href="https://github.com/tModLoader/tModLoader/pull/4716#issuecomment-3146423549">this comment</a> for more details.<br/>
+///         The latter only works on the default logo (tModLoader's.)
 ///     </item>
 ///     <item>
 ///         <see cref="UncapMoonTextures"/><br/>
@@ -39,13 +43,13 @@ namespace ZensSky.Common.Systems.Menu;
 /// </list>
 /// </summary>
 [Autoload(Side = ModSide.Client)]
-public sealed class MiscMenuChangesSystem : ModSystem
+public sealed class ModMenuSystem : ModSystem
 {
     #region Private Fields
 
-    private static ILHook? RelocateCreditsDrawing;
+    private static ILHook? PatchUpdateAndDrawModMenuInner;
 
-    private static ILHook? PatchMoonTextures;
+    private static ILHook? PatchGetMoonTexture;
 
     #endregion
 
@@ -58,13 +62,13 @@ public sealed class MiscMenuChangesSystem : ModSystem
             MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod(nameof(MenuLoader.UpdateAndDrawModMenuInner), NonPublic | Static);
 
             if (updateAndDrawModMenuInner is not null)
-                RelocateCreditsDrawing = new(updateAndDrawModMenuInner,
-                    DrawAfterLogo);
+                PatchUpdateAndDrawModMenuInner = new(updateAndDrawModMenuInner,
+                    LogoDrawing);
 
             MethodInfo? getMoonTexture = typeof(ModMenu).GetProperty(nameof(ModMenu.MoonTexture), Public | Instance)?.GetGetMethod();
 
             if (getMoonTexture is not null)
-                PatchMoonTextures = new(getMoonTexture,
+                PatchGetMoonTexture = new(getMoonTexture,
                     UncapMoonTextures);
         });
 
@@ -75,9 +79,9 @@ public sealed class MiscMenuChangesSystem : ModSystem
     {
         MainThreadSystem.Enqueue(() =>
         {
-            RelocateCreditsDrawing?.Dispose();
+            PatchUpdateAndDrawModMenuInner?.Dispose();
 
-            PatchMoonTextures?.Dispose();
+            PatchGetMoonTexture?.Dispose();
         });
 
         On_CreditsRollSky.Draw -= HideCredits;
@@ -85,27 +89,56 @@ public sealed class MiscMenuChangesSystem : ModSystem
 
     #endregion
 
-    #region Credits
+    #region Logo
 
-    private void DrawAfterLogo(ILContext il)
+    private void LogoDrawing(ILContext il)
     {
         try
         {
             ILCursor c = new(il);
 
             int spriteBatchIndex = -1;
+            int logoDrawCenterIndex = -1;
+            int colorIndex = -1; // arg
+            int logoRotationIndex = -1; // arg
+            int logoScale2Index = -1;
+
+            c.GotoNext(
+                i => i.MatchCallvirt<ModMenu>(nameof(ModMenu.PreDrawLogo)));
+
+                // Pull indicies from the instructions of the SpriteBatch.Draw call.
+            c.GotoNext(
+                i => i.MatchLdloc(out logoDrawCenterIndex),
+                i => i.MatchLdcI4(out _),
+                i => i.MatchLdcI4(out _));
+
+            c.GotoNext(
+                i => i.MatchNewobj<Rectangle?>(),
+                i => i.MatchLdarg(out colorIndex),
+                i => i.MatchLdarg(out logoRotationIndex));
+
+            c.GotoNext(
+               i => i.MatchNewobj<Vector2>(),
+               i => i.MatchLdloc(out logoScale2Index));
 
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdsfld(typeof(MenuLoader).FullName ?? "Terraria.ModLoader.MenuLoader", nameof(MenuLoader.currentMenu)),
-                i => i.MatchLdarg(out spriteBatchIndex),
-                i => i.MatchLdloc(out _),
-                i => i.MatchLdarg(out _),
-                i => i.MatchLdloc(out _),
-                i => i.MatchLdarg(out _),
-                i => i.MatchCallvirt<ModMenu>(nameof(ModMenu.PostDrawLogo)));
+                i => i.MatchLdarg(out spriteBatchIndex));
+
+            c.MoveBeforeLabels();
+
+            c.EmitLdarg(spriteBatchIndex);
+
+            c.EmitLdloc(logoDrawCenterIndex);
+            c.EmitLdarg(colorIndex);
+            c.EmitLdarg(logoRotationIndex);
+            c.EmitLdloc(logoScale2Index);
+
+            c.EmitDelegate(DrawLighting);
 
             c.MoveAfterLabels();
 
+                // Draw credits outside of the jump.
             c.EmitLdarg(spriteBatchIndex);
 
             c.EmitDelegate(DrawCredits);
@@ -115,6 +148,56 @@ public sealed class MiscMenuChangesSystem : ModSystem
             throw new ILEditException(Mod, il, e);
         }
     }
+
+    #endregion
+
+    #region Lighting
+
+    private static void DrawLighting(SpriteBatch spriteBatch, Vector2 logoDrawCenter, Color color, float logoRotation, float logoScale2)
+    {
+        if (MenuLoader.currentMenu.Logo.Value != ModMenu.modLoaderLogo.Value || !UIEffects.LogoNormals.IsReady)
+            return;
+
+        spriteBatch.End(out var snapshot);
+        spriteBatch.Begin(SpriteSortMode.Immediate, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, snapshot.TransformMatrix);
+
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
+        Viewport viewport = device.Viewport;
+
+        Vector2 viewportSize = viewport.Bounds.Size();
+
+        UIEffects.LogoNormals.ScreenSize = viewportSize;
+
+        Texture2D normal = MiscTextures.ModLoaderLogoNormals;
+        Vector2 normalOrigin = normal.Size() * .5f;
+
+        InvokeForActiveLights((light) =>
+        {
+            UIEffects.LogoNormals.LightPosition = light.Position;
+            UIEffects.LogoNormals.LightColor = light.Color.ToVector4();
+            
+            UIEffects.LogoNormals.UseTexture = false;
+
+            if (light.Texture is not null)
+            {
+                UIEffects.LogoNormals.UseTexture = true;
+                device.Textures[1] = light.Texture.Value;
+            }
+
+            UIEffects.LogoNormals.Rotation = logoRotation;
+
+            UIEffects.LogoNormals.Apply();
+
+            spriteBatch.Draw(normal, logoDrawCenter, null, color, logoRotation, normalOrigin, logoScale2, SpriteEffects.None, 0f);
+        });
+
+        spriteBatch.Restart(in snapshot);
+    }
+
+    #endregion
+
+    #region Credits
 
     private void HideCredits(On_CreditsRollSky.orig_Draw orig, CreditsRollSky self, SpriteBatch spriteBatch, float minDepth, float maxDepth)
     {

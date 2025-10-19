@@ -13,7 +13,7 @@ namespace ZensSky.Common.Config;
 
 public sealed class SkyConfig : ModConfig
 {
-    // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
+        // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
     public static SkyConfig Instance;
 
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -89,7 +89,7 @@ public sealed class SkyConfig : ModConfig
     [CustomModConfigItem(typeof(SkyGradientElement))]
     public Gradient SkyGradient = new(32)
     {
-        new(.15f, new(14, 14, 75)),
+        new(.15f, new(13, 13, 70)),
         new(.195f, new(197, 101, 192)),
         new(.21f, new(255, 151, 125)),
         new(.25f, new(219, 188, 126)),
@@ -97,6 +97,6 @@ public sealed class SkyConfig : ModConfig
         new(.6f, new(74, 111, 137)),
         new(.7f, new(211, 200, 144)),
         new(.75f, new(255, 109, 182)),
-        new(.82f, new(14, 14, 75))
+        new(.82f, new(13, 13, 70))
     };
 }

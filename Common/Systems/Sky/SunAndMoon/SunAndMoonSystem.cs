@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using ReLogic.Content;
 using System;
@@ -10,6 +11,7 @@ using ZensSky.Common.Systems.Menu;
 using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.ModCall;
+using ZensSky.Core.Utils;
 using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonHooks;
 
 namespace ZensSky.Common.Systems.Sky.SunAndMoon;
@@ -27,6 +29,15 @@ namespace ZensSky.Common.Systems.Sky.SunAndMoon;
 public sealed class SunAndMoonSystem : ModSystem
 {
     #region Private Fields
+
+    private const float FlareEdgeFallOffStart = 1f;
+    private const float FlareEdgeFallOffEnd = 1.11f;
+
+    private const float SunNoonAlpha = .082f;
+
+    private static readonly Color SunMultiplier = new(255, 245, 225);
+
+    private static readonly Color MoonMultiplier = new(50, 50, 55);
 
     private const int SunMoonY = -80;
 
@@ -289,6 +300,31 @@ public sealed class SunAndMoonSystem : ModSystem
         InvokeModifyMoonTexture(ref ret, EventMoon);
 
         return ret;
+    }
+
+    public static Color GetLightColor(bool day)
+    {
+        Vector2 position = day ? Info.SunPosition : Info.MoonPosition;
+        float centerX = Utilities.HalfScreenSize.X;
+
+        float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
+
+        Color color = day ? Info.SunColor : Info.MoonColor;
+        color = color.MultiplyRGB(day ? SunMultiplier : MoonMultiplier);
+
+            // Add a fadeinout effect so the color doesnt just suddenly pop up.
+        color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
+
+            // Decrease the intensity at noon to make the clouds not just be pure white.
+            // And alter the intensity depending on the moon phase, where a new moon would cast no light.
+        if (day)
+            color *= MathHelper.Lerp(SunNoonAlpha, 1f, Easings.InQuart(distanceFromCenter));
+        else
+            color *= MathF.Abs(4 - Main.moonPhase) * .25f;
+
+        color.A = 255;
+
+        return color;
     }
 
     /// <summary>

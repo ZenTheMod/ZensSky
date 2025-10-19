@@ -1,5 +1,4 @@
 ﻿using Daybreak.Common.Rendering;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MonoMod.Cil;
 using System;
@@ -7,13 +6,12 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.Systems.Compat;
 using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.ModCall;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
+using static ZensSky.Common.Systems.Sky.Lighting.SkyLightingSystem;
 
 namespace ZensSky.Common.Systems.Background;
 
@@ -30,17 +28,6 @@ namespace ZensSky.Common.Systems.Background;
 public sealed class CloudsSystem : ModSystem
 {
     #region Private Fields
-
-    private const float FlareEdgeFallOffStart = 1f;
-    private const float FlareEdgeFallOffEnd = 1.11f;
-
-    private const float SunNoonAlpha = .082f;
-
-    private static readonly Color SunMultiplier = new(255, 245, 225);
-    private const float SunSize = 4.4f;
-
-    private static readonly Color MoonMultiplier = new(50, 50, 55);
-    private const float MoonSize = 1.2f;
 
     private static RenderTarget2D? BackgroundTarget;
     private static RenderTarget2D? OccludersTarget;
@@ -285,7 +272,7 @@ public sealed class CloudsSystem : ModSystem
             // Only draw clouds to the background as they should not be occluding light.
         device.SetRenderTarget(BackgroundTarget);
 
-        Effect cloudLighting = ApplyCloudLighting(device);
+        Effect cloudLighting = ApplyCloudLighting();
 
         spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, cloudLighting, snapshot.TransformMatrix);
 
@@ -334,69 +321,37 @@ public sealed class CloudsSystem : ModSystem
 
         Vector2 viewportSize = viewport.Bounds.Size();
 
-        Vector2 sunPosition = Info.SunPosition;
-        Vector2 moonPosition = Info.MoonPosition;
-
-        if (Main.BackgroundViewMatrix.Effects.HasFlag(SpriteEffects.FlipVertically))
-        {
-            sunPosition.Y = viewportSize.Y - sunPosition.Y;
-            moonPosition.Y = viewportSize.Y - moonPosition.Y;
-        }
-
-        Color sunColor = GetLightColor(true);
-        Color moonColor = GetLightColor(false);
-
-        float sunSize = Info.SunScale * SunSize;
-        float moonSize = Info.MoonScale * MoonSize;
-
-        bool showSun = ShowSun &&
-            Main.dayTime;
-
-        bool showMoon = ShowMoon &&
-            (RedSunSystem.IsEnabled || !Main.dayTime) &&
-            moonColor != Color.Black;
-
-        Texture2D? moonTexture =
-            SkyConfig.Instance.UseSunAndMoon ? MoonTexture.Value : null;
-
-        if (showSun)
-            DrawLight(spriteBatch, sunPosition, sunColor, sunSize, device);
-
-        if (showMoon)
-            DrawLight(spriteBatch, moonPosition, moonColor, moonSize, device, moonTexture);
-    }
-
-    private static void DrawLight(SpriteBatch spriteBatch, Vector2 lightPosition, Color lightColor, float lightSize, GraphicsDevice device, Texture2D? body = null)
-    {
-        Viewport viewport = device.Viewport;
-
-        Vector2 viewportSize = viewport.Bounds.Size();
-
         SkyEffects.CloudGodrays.ScreenSize = viewportSize;
 
         int sampleCount = SkyConfig.Instance.CloudLightingSamples;
 
         SkyEffects.CloudGodrays.SampleCount = sampleCount;
 
-        SkyEffects.CloudGodrays.LightPosition = lightPosition * LightTargetScale;
-        SkyEffects.CloudGodrays.LightColor = lightColor.ToVector4();
-
-        SkyEffects.CloudGodrays.LightSize = lightSize;
-
-        SkyEffects.CloudGodrays.UseTexture = false;
-
-        if (body is not null)
+        InvokeForActiveLights((light) =>
         {
-            SkyEffects.CloudGodrays.UseTexture = true;
-            device.Textures[1] = body;
-        }
+            if (light.Color == Color.Black)
+                return;
 
-        SkyEffects.CloudGodrays.Apply();
+            SkyEffects.CloudGodrays.LightPosition = light.Position * LightTargetScale;
+            SkyEffects.CloudGodrays.LightColor = light.Color.ToVector4();
 
-        spriteBatch.Draw(OccludersTarget, viewport.Bounds, Color.White);
+            SkyEffects.CloudGodrays.LightSize = light.Size;
+
+            SkyEffects.CloudGodrays.UseTexture = false;
+
+            if (light.Texture is not null)
+            {
+                SkyEffects.CloudGodrays.UseTexture = true;
+                device.Textures[1] = light.Texture.Value;
+            }
+
+            SkyEffects.CloudGodrays.Apply();
+
+            spriteBatch.Draw(OccludersTarget, viewport.Bounds, Color.White);
+        });
     }
 
-    private static Effect ApplyCloudLighting(GraphicsDevice device)
+    private static Effect ApplyCloudLighting()
     {
         Viewport viewport = Main.instance.GraphicsDevice.Viewport;
 
@@ -409,35 +364,6 @@ public sealed class CloudsSystem : ModSystem
         SkyEffects.CloudLighting.Apply();
 
         return SkyEffects.CloudLighting.Value;
-    }
-
-    #endregion
-
-    #region Private Methods
-
-    private static Color GetLightColor(bool day)
-    {
-        Vector2 position = day ? Info.SunPosition : Info.MoonPosition;
-        float centerX = Utilities.HalfScreenSize.X;
-
-        float distanceFromCenter = MathF.Abs(centerX - position.X) / centerX;
-
-        Color color = day ? Info.SunColor : Info.MoonColor;
-        color = color.MultiplyRGB(day ? SunMultiplier : MoonMultiplier);
-
-            // Add a fadeinout effect so the color doesnt just suddenly pop up.
-        color *= Utils.Remap(distanceFromCenter, FlareEdgeFallOffStart, FlareEdgeFallOffEnd, 1f, 0f);
-
-            // Decrease the intensity at noon to make the clouds not just be pure white.
-            // And alter the intensity depending on the moon phase, where a new moon would cast no light.
-        if (day)
-            color *= MathHelper.Lerp(SunNoonAlpha, 1f, Easings.InQuart(distanceFromCenter));
-        else
-            color *= MathF.Abs(4 - Main.moonPhase) * .25f;
-
-        color.A = 255;
-
-        return color;
     }
 
     #endregion

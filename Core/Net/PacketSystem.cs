@@ -14,9 +14,11 @@ public sealed class PacketSystem : ModSystem
 {
     #region Public Properties
 
-    public static PacketSystem Instance => ModContent.GetInstance<PacketSystem>();
+    public static PacketSystem Instance =>
+        ModContent.GetInstance<PacketSystem>();
 
-    public static List<IPacketHandler> Handlers { get; } = [];
+    public static List<IPacketHandler> Handlers { get; }
+        = [];
 
     #endregion
 
