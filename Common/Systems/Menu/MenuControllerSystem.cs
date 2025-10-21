@@ -15,6 +15,7 @@ using Terraria.ModLoader.Config;
 using Terraria.UI;
 using Terraria.UI.Chat;
 using ZensSky.Common.Config;
+using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Menu.Elements;
 using ZensSky.Core;
 using ZensSky.Core.Exceptions;
@@ -67,6 +68,15 @@ public sealed class MenuControllerSystem : ModSystem
 
     #endregion
 
+    #region Public Fields
+
+    public static readonly int[] AllowedMenuModes =
+        [0, CoolerMenuSystem.CoolerMenuID];
+
+    public static readonly List<MenuController> Controllers = [];
+
+    #endregion
+
     #region Public Properties
 
     public static MenuControllerState State => MenuController;
@@ -74,12 +84,6 @@ public sealed class MenuControllerSystem : ModSystem
     public static bool InUI => MenuControllerInterface?.CurrentState is not null;
 
     public static bool Hovering => InUI && MenuController?.Panel?.IsMouseHovering is true;
-
-    #endregion
-
-    #region Public Fields
-
-    public static readonly List<MenuController> Controllers = [];
 
     #endregion
 
@@ -145,52 +149,70 @@ public sealed class MenuControllerSystem : ModSystem
         {
             ILCursor c = new(il);
 
+            int switchTextRectIndex = -1;
+
+            ILLabel? jumpInteractionsTarget = c.DefineLabel();
+
+                // Match to before the menu switch text is drawn.
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdloca(out switchTextRectIndex),
+                i => i.MatchLdsfld<Main>(nameof(Main.mouseX)),
+                i => i.MatchLdsfld<Main>(nameof(Main.mouseY)),
+                i => i.MatchCall<Rectangle>(nameof(Rectangle.Contains)),
+                i => i.MatchBrfalse(out jumpInteractionsTarget));
+
+            c.EmitDelegate(() => Hovering);
+
+            c.EmitBrtrue(jumpInteractionsTarget);
+
                 // Match to before the menu switch text is drawn.
             c.GotoNext(MoveType.After,
                 i => i.MatchCall(typeof(MenuLoader).FullName ?? "Terraria.ModLoader.MenuLoader", nameof(MenuLoader.OffsetModMenu)),
                 i => i.MatchLdsfld<Main>(nameof(Main.menuMode)),
                 i => i.MatchBrtrue(out _));
 
-            c.EmitLdarg0(); // SpriteBatch.
-            c.EmitLdloc(6); // Rectangle of the menu switcher.
+            c.EmitLdloc(switchTextRectIndex);
 
-                // Add our own 'popup' menu button.
-            c.EmitDelegate((SpriteBatch spriteBatch, Rectangle switchTextRect) =>
-            {
-                Vector2 position = switchTextRect.TopRight();
-                position.X += HorizontalPadding;
-
-                DynamicSpriteFont font = FontAssets.MouseText.Value;
-                string text = InUI ? "▼" : "▲";
-
-                Vector2 size = ChatManager.GetStringSize(font, text, Vector2.One);
-
-                Rectangle popupRect = new((int)position.X, (int)position.Y,
-                    (int)size.X, (int)size.Y);
-
-                bool hovering = popupRect.Contains(Main.mouseX, Main.mouseY) && !Main.alreadyGrabbingSunOrMoon;
-
-                Color color = hovering ? Main.OurFavoriteColor : NotHovered;
-
-                ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, position, color, 0f, Vector2.Zero, Vector2.One);
-
-                if (hovering && Main.mouseLeft && Main.mouseLeftRelease)
-                {
-                    if (InUI)
-                        ConfigManager.Save(MenuConfig.Instance);
-
-                    MenuControllerInterface?.SetState(InUI ? null : MenuController);
-                    MenuController.Bottom = new(popupRect.Center.X, position.Y);
-
-                        // Reinit for easy debugging.
-                    MenuController?.OnInitialize();
-                    SoundEngine.PlaySound(SoundID.MenuTick);
-                }
-            });
+                // Add our dropdown menu button.
+            c.EmitDelegate(DrawToggle);
         }
         catch (Exception e)
         {
             throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    public static void DrawToggle(Rectangle switchTextRect)
+    {
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        Vector2 position = switchTextRect.TopRight();
+        position.X += HorizontalPadding;
+
+        DynamicSpriteFont font = FontAssets.MouseText.Value;
+        string text = InUI ? "▼" : "▲";
+
+        Vector2 size = ChatManager.GetStringSize(font, text, Vector2.One);
+
+        Rectangle popupRect = new((int)position.X, (int)position.Y,
+            (int)size.X, (int)size.Y);
+
+        bool hovering = popupRect.Contains(Main.mouseX, Main.mouseY) && !Main.alreadyGrabbingSunOrMoon;
+
+        Color color = hovering ? Main.OurFavoriteColor : NotHovered;
+
+        ChatManager.DrawColorCodedStringWithShadow(spriteBatch, font, text, position, color, 0f, Vector2.Zero, Vector2.One);
+
+        if (hovering && Main.mouseLeft && Main.mouseLeftRelease)
+        {
+            if (InUI)
+                ConfigManager.Save(MenuConfig.Instance);
+
+            MenuControllerInterface?.SetState(InUI ? null : MenuController);
+            MenuController.Bottom = new(popupRect.Center.X, position.Y);
+
+            MenuController?.OnInitialize();
+            SoundEngine.PlaySound(SoundID.MenuTick);
         }
     }
 
@@ -212,14 +234,17 @@ public sealed class MenuControllerSystem : ModSystem
             }
 
                 // Have our popup draw.
-            c.TryGotoNext(MoveType.AfterLabel,
+            c.GotoNext(MoveType.After,
                 i => i.MatchLdloc(out _),
                 i => i.MatchLdloc(out _),
                 i => i.MatchCall<Main>(nameof(Main.DrawtModLoaderSocialMediaButtons)));
 
+            c.MoveAfterLabels();
+            
             c.EmitDelegate(() =>
             {
-                if (InUI)
+                if (InUI &&
+                    AllowedMenuModes.Contains(Main.menuMode))
                     MenuControllerInterface?.Draw(Main.spriteBatch, new GameTime());
             });
         }
@@ -229,11 +254,15 @@ public sealed class MenuControllerSystem : ModSystem
         }
     }
 
+    #endregion
+
+    #region Updating
+
     private void UpdateInterface(On_Main.orig_UpdateUIStates orig, GameTime gameTime)
     {
         if (InUI)
         {
-            if (Main.menuMode == 0)
+            if (AllowedMenuModes.Contains(Main.menuMode))
                 MenuControllerInterface?.Update(gameTime);
             else
             {

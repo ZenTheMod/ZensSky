@@ -26,6 +26,9 @@
 		<Reference Include="BetterNightSky"> <!-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy -->
 			<HintPath>.\lib\BetterNightSky.dll</HintPath>
 		</Reference>
+		<Reference Include="CoolerMenu"> <!-- 'Sam's Cooler Menu Screen' by Sasamuel -->
+			<HintPath>.\lib\CoolerMenu.dll</HintPath>
+		</Reference>
 		<Reference Include="FancyLighting"> <!-- 'Fancy Lighting' by Rex -->
 			<HintPath>.\lib\FancyLighting.dll</HintPath>
 		</Reference>
@@ -70,6 +73,8 @@
 
 		<!-- Include mods with difficult to access types -->
 		<Publicize Include="BetterNightSky" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+
+		<Publicize Include="CoolerMenu" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		
 		<Publicize Include="FancyLighting" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
 		

@@ -70,7 +70,7 @@ public class InputField : UIPanel
         Hint = hint;
         MaxChars = maxChars;
 
-        _backgroundTexture = UITextures.TextPanel;
+        _backgroundTexture = UITextures.EmptyPanel;
         _borderTexture = MiscTextures.Invis;
 
         Height.Set(26f, 0f);

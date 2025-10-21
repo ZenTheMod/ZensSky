@@ -1,20 +1,21 @@
 DisplayName: Sky Config
 
 Headers: {
-	SunMoon: Sun and Moon
+	SunAndMoon: Sun and Moon
 	Stars: Stars
+	Weather: Weather
+	Background: Background
 	Clouds: Clouds
-	Ambient: Ambient Effects
 	Pixelation: Pixelation
 }
 
 UseSunAndMoon: {
-	Label: "[i:237] Sun And Moon Overhaul"
+	Label: "[i:4736] Sun And Moon Overhaul"
 	Tooltip: If the visual overhaul of the sun and moon is enabled or not.
 }
 
 TransparentMoonShadow: {
-	Label: "[i:485] Transparent Moon Shadow"
+	Label: "[i:2801] Transparent Moon Shadow"
 	Tooltip: If the moon's shadow is transparent to replicate the look of the current Terraria moon sprites.
 	LockReason: Requires 'Sun And Moon Overhaul' to be enabled!
 }
@@ -40,28 +41,38 @@ DrawRealisticStars: {
 	LockReason: Requires 'Realistic Sky' by Lucille Karma to be enabled!
 }
 
-UsePixelatedSky: {
-	Label: "[i:3725] Pixelated Sky"
-	Tooltip:
-		'''
-		Pixelates the Stars, Sun, and Moon.
-		(Can be less performant, due to extra reasources being used!)
-		'''
+PitchBlackBackground: {
+	Label: "[i:237] Pitch Black Background"
+	Tooltip: If the background should be pitch black during night.
+	LockReason: The mod 'Dark Surface' is enabled!
 }
 
-ColorSteps: {
-	Label: "[i:1067] Color Steps"
-	Tooltip: How many colors are used for the pixelation effect.
-	LockReason: Requires 'Pixelated Sky' to be enabled!
+SkyGradient: {
+	Label: "[i:314] Atmosphere Gradient"
+	Tooltip:
+		'''
+		The color of the 'Atmosphere' effect over time.
+		Click to expand this panel.
+		'''
 }
 
 UseCloudLighting: {
-	Label: "[i:751] Fancy Cloud Lighting"
-	Tooltip: If clouds have added lighting.
+	Label: "[i:751] Cloud Lighting"
+	Tooltip: If clouds have added lighting in the style of the upcoming Terraria update.
 }
 
-CloudLightingSamples: {
-	Label: "[i:752] Cloud Lighting Quality"
+UseCloudGodrays: {
+	Label: "[i:765] Fancy Cloud Lighting"
+	Tooltip:
+		'''
+		If clouds use a higher quality system for lighting.
+		(Can be less performant, due to extra reasources being used!)
+		'''
+	LockReason: Requires 'Cloud Lighting' to be enabled!
+}
+
+CloudGodraysSamples: {
+	Label: "[i:752] Fancy Cloud Lighting Quality"
 	Tooltip:
 		'''
 		The quality of the lighting effect used for clouds;
@@ -69,7 +80,7 @@ CloudLightingSamples: {
 		Higher Number - Slower, Higher Quality.
 		(Can be less performant, due to extra reasources being used!)
 		'''
-	LockReason: Requires 'Fancy Cloud Lighting' to be enabled!
+	LockReason: Requires 'Cloud Lighting' and 'Fancy Cloud Lighting' to be enabled!
 }
 
 UseWindParticles: {
@@ -83,17 +94,17 @@ WindOpacity: {
 	LockReason: Requires 'Wind Particles' to be enabled!
 }
 
-PitchBlackBackground: {
-	Label: "[i:237] Pitch Black Background"
-	Tooltip: Makes the background pitch black during night.
-	LockReason: The mod 'Dark Surface' is enabled!
-}
-
-SkyGradient: {
-	Label: Atmosphere Gradient
+UsePixelatedSky: {
+	Label: "[i:3725] Pixelated Sky"
 	Tooltip:
 		'''
-		The color of the 'Atmosphere' effect over time.
-		Click to expand this panel.
+		Pixelates the Stars, Sun, and Moon.
+		(Can be less performant, due to extra reasources being used!)
 		'''
+}
+
+ColorSteps: {
+	Label: "[i:1067] Color Steps"
+	Tooltip: How many colors are used for the pixelation effect.
+	LockReason: Requires 'Pixelated Sky' to be enabled!
 }

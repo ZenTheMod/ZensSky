@@ -16,12 +16,17 @@ public sealed class SkyConfig : ModConfig
         // 'ConfigManager.Add' Automatically sets public fields named 'Instance' to the ModConfig's type.
     public static SkyConfig Instance;
 
-    public override ConfigScope Mode => ConfigScope.ClientSide;
+    public override ConfigScope Mode =>
+        ConfigScope.ClientSide;
 
-    [Header("SunMoon")]
+    #region SunAndMoon
+
+    [Header("SunAndMoon")]
 
     [ReloadRequired]
     [DefaultValue(true)]
+        // Notably don't decorate this member with the LockedElement attribute, this is just to fix the offset on boolean elements.
+    [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool UseSunAndMoon;
 
     [DefaultValue(false)]
@@ -34,6 +39,10 @@ public sealed class SkyConfig : ModConfig
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool RealisticSun;
 
+    #endregion
+
+    #region Stars
+
     [Header("Stars")]
 
     [DefaultValue(StarVisual.Vanilla)]
@@ -45,41 +54,11 @@ public sealed class SkyConfig : ModConfig
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool DrawRealisticStars;
 
-    [Header("Pixelation")]
+    #endregion
 
-    [DefaultValue(false)]
-    public bool UsePixelatedSky;
+    #region Background
 
-    [DefaultValue(16)]
-    [LockedElement(typeof(SkyConfig), nameof(UsePixelatedSky), false)]
-    [CustomModConfigItem(typeof(LockedIntSlider))]
-    [SliderColor(240, 103, 135)]
-    [Range(8, 256)]
-    public int ColorSteps;
-
-    [Header("Clouds")]
-
-    [DefaultValue(true)]
-    public bool UseCloudLighting;
-
-    [DefaultValue(32)]
-    [LockedElement(typeof(SkyConfig), nameof(UseCloudLighting), false)]
-    [CustomModConfigItem(typeof(LockedIntSlider))]
-    [SliderColor(240, 103, 135)]
-    [Range(4, 64)]
-    public int CloudLightingSamples;
-
-    [Header("Ambient")]
-
-    [DefaultValue(true)]
-    public bool UseWindParticles;
-
-    [DefaultValue(.85f)]
-    [LockedElement(typeof(SkyConfig), nameof(UseWindParticles), false)]
-    [CustomModConfigItem(typeof(LockedFloatSlider))]
-    [SliderColor(148, 203, 227)]
-    [Range(0f, 1f)]
-    public float WindOpacity;
+    [Header("Background")]
 
     [DefaultValue(true)]
     [LockedElement(typeof(DarkSurfaceSystem), nameof(DarkSurfaceSystem.IsEnabled), true)]
@@ -99,4 +78,65 @@ public sealed class SkyConfig : ModConfig
         new(.75f, new(255, 109, 182)),
         new(.82f, new(13, 13, 70))
     };
+
+    #endregion
+
+    #region Clouds
+
+    [Header("Clouds")]
+
+    [DefaultValue(true)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
+    public bool UseCloudLighting;
+
+    [DefaultValue(true)]
+    [LockedElement(typeof(SkyConfig), nameof(UseCloudLighting), false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
+    public bool UseCloudGodrays;
+
+    private bool CloudGodraysSamplesLocked =>
+        UseCloudLighting && UseCloudGodrays;
+
+    [DefaultValue(32)]
+    [LockedElement(typeof(SkyConfig), nameof(CloudGodraysSamplesLocked), false)]
+    [CustomModConfigItem(typeof(LockedIntSlider))]
+    [SliderColor(240, 103, 135)]
+    [Range(4, 64)]
+    public int CloudGodraysSamples;
+
+    #endregion
+
+    #region Weather
+
+    [Header("Weather")]
+
+    [DefaultValue(true)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
+    public bool UseWindParticles;
+
+    [DefaultValue(.85f)]
+    [LockedElement(typeof(SkyConfig), nameof(UseWindParticles), false)]
+    [CustomModConfigItem(typeof(LockedFloatSlider))]
+    [SliderColor(148, 203, 227)]
+    [Range(0f, 1f)]
+    public float WindOpacity;
+
+    #endregion
+
+    #region Pixelation
+
+    [Header("Pixelation")]
+
+    [DefaultValue(false)]
+    [CustomModConfigItem(typeof(LockedBoolElement))]
+    public bool UsePixelatedSky;
+
+    [DefaultValue(16)]
+    [LockedElement(typeof(SkyConfig), nameof(UsePixelatedSky), false)]
+    [CustomModConfigItem(typeof(LockedIntSlider))]
+    [SliderColor(240, 103, 135)]
+    [Range(8, 256)]
+    public int ColorSteps;
+
+    #endregion
 }

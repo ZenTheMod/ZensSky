@@ -67,17 +67,31 @@ public class GradientElement : DropDownConfigElement<Gradient>
 
         Append(Picker);
 
-        UIPanel test = new();
+        UIPanel easingPanel =
+            new(UITextures.EmptyPanel, MiscTextures.Invis, 6);
 
-        test.Top.Set(BaseHeight + 36, 0f);
+        easingPanel.Top.Set(BaseHeight + 36, 0f);
 
-        test.Left.Set(315f, 0f);
+        easingPanel.Left.Set(315f, 0f);
 
-        test.Width.Set(-325f, 1f);
+        easingPanel.Width.Set(-325f, 1f);
 
-        test.Height.Set(-BaseHeight - 46, 1f);
+        easingPanel.Height.Set(-BaseHeight - 46, 1f);
 
-        Append(test);
+        easingPanel.BackgroundColor = backgroundColor;
+
+        UIPanel inner =
+            new(UITextures.FullPanel, MiscTextures.Invis, 6);
+
+        inner.Width.Set(0f, 1f);
+
+        inner.Height.Set(30, 1f);
+
+        inner.BackgroundColor = backgroundColor;
+
+        easingPanel.Append(inner);
+
+        Append(easingPanel);
     }
 
     #endregion

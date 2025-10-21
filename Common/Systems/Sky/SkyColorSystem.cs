@@ -3,6 +3,8 @@ using MonoMod.RuntimeDetour;
 using System;
 using System.Reflection;
 using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameContent.Drawing;
 using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
@@ -25,6 +27,10 @@ namespace ZensSky.Common.Systems.Sky;
 ///     <item>
 ///         <see cref="PreventDrawBlackOverAir"/><br/>
 ///         Fixes an issue where DrawBlack would could air as solid(?) and would draw over it, hiding the background.
+///     </item>
+///     <item>
+///         <see cref="DrawNonSolidTiles"/><br/>
+///         Forces non-solid tiles to draw regardless of low light.
 ///     </item>
 /// </list>
 /// </summary>
@@ -61,6 +67,8 @@ public sealed class SkyColorSystem : ModSystem
         ModifyInMenu += ModifySunLightColor;
 
         IL_Main.DrawBlack += PreventDrawBlackOverAir;
+
+        IL_TileDrawing.DrawSingleTile += DrawNonSolidTiles;
     }
 
     public override void Unload()
@@ -71,6 +79,8 @@ public sealed class SkyColorSystem : ModSystem
         ModifyInMenu = null;
 
         IL_Main.DrawBlack -= PreventDrawBlackOverAir;
+
+        IL_TileDrawing.DrawSingleTile -= DrawNonSolidTiles;
     }
 
     #endregion
@@ -114,11 +124,45 @@ public sealed class SkyColorSystem : ModSystem
 
             c.EmitLdloc(tileIndex);
 
-                // If there is no tile then break.
             c.EmitDelegate((Tile tile) =>
-                !tile.HasTile && tile.WallType == WallID.None);
+                tile.BlocksLight);
 
-            c.EmitBrtrue(breakTarget);
+            c.EmitBrfalse(breakTarget);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    #endregion
+
+    #region TileDrawing Fixes
+
+    private void DrawNonSolidTiles(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            int drawDataIndex = -1; // arg
+
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdarg(out drawDataIndex),
+                i => i.MatchLdflda<TileDrawInfo>(nameof(TileDrawInfo.tileLight)),
+                i => i.MatchCall<Color>($"get_{nameof(Color.R)}"),
+                i => i.MatchLdcI4(1),
+                i => i.MatchBge(out _));
+
+            c.GotoPrev(MoveType.Before,
+                i => i.MatchStloc(out _));
+
+            c.EmitPop();
+
+            c.EmitLdarg(drawDataIndex);
+
+            c.EmitDelegate((TileDrawInfo drawData) =>
+                !drawData.tileCache.BlocksLight);
         }
         catch (Exception e)
         {

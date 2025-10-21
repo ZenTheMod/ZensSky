@@ -11,6 +11,10 @@ float2 screenSize;
 
 int sampleCount;
 
+    // Lazy hack to get around having to rewrite my cloud lighting yet again.
+        // TODO: Not this!
+bool useSampling;
+
 float blur(float2 uv, float2 lightuv, int samples)
 {
     float2 screen = screenSize / min(screenSize.x, screenSize.y);
@@ -45,7 +49,23 @@ float blur(float2 uv, float2 lightuv, int samples)
     return occ;
 }
 
-float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR0, float2 screenCoords : SV_POSITION) : COLOR0
+float light(float2 uv, float2 lightuv)
+{
+    float2 screen = screenSize / min(screenSize.x, screenSize.y);
+    
+    float2 dir = (lightuv - uv) * screen;
+    
+    float size = 3.9 / max(lightSize, .001);
+    
+    float light = saturate(length((lightuv - uv) * screen) * size);
+    
+    light *= light;
+    light = 1 - light;
+    
+    return light;
+}
+
+float4 SampledGodrays(float2 coords : TEXCOORD0, float4 sampleColor : COLOR0, float2 screenCoords : SV_POSITION) : COLOR0
 {
     float2 bayeruv = frac(screenCoords.xy * .25) * 4;
     
@@ -62,10 +82,32 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 sampleColor : COLOR
     return color;
 }
 
+float4 SimpleLight(float2 coords : TEXCOORD0, float4 sampleColor : COLOR0, float2 screenCoords : SV_POSITION) : COLOR0
+{
+    float2 bayeruv = frac(screenCoords.xy * .25) * 4;
+    
+    float4 color = lightColor;
+    
+    float2 lightuv = lightPosition / screenSize;
+    float2 uv = coords;
+    
+    color.a *= light(uv, lightuv);
+    
+    if (useTexture)
+        color *= tex2D(Body, .5);
+    
+    return color;
+}
+
 technique Technique1
 {
-    pass Pass1
+    pass Godrays
     {
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        PixelShader = compile ps_3_0 SampledGodrays();
+    }
+
+    pass Light
+    {
+        PixelShader = compile ps_3_0 SimpleLight();
     }
 }

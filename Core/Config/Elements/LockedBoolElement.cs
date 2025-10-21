@@ -35,7 +35,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
     public bool Mode { get; private set; } = false;
 
     public bool IsLocked =>
-        (bool)(TargetMember?.GetValue(TargetInstance) ?? false) == Mode;
+        (bool?)TargetMember?.GetValue(TargetInstance) ?? true == Mode;
 
     #endregion
 
@@ -53,15 +53,15 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
         LockedElementAttribute? attri = ConfigManager.GetCustomAttributeFromMemberThenMemberType<LockedElementAttribute>(MemberInfo, Item, List);
 
-        Type? type = attri?.TargetConfig;
-
-        string? name = attri?.MemberName;
-
-        bool? mode = attri?.Mode;
-
-        if (type is null || string.IsNullOrEmpty(name) || mode is null)
+        if (attri is null)
             return;
-        
+
+        Type type = attri.TargetConfig;
+
+        string name = attri.MemberName;
+
+        Mode = attri.Mode;
+
             // TODO: Switch to using a MemberInfo based impl.
         FieldInfo? field = type.GetField(name, Static | Instance | Public | NonPublic);
         PropertyInfo? property = type.GetProperty(name, Static | Instance | Public | NonPublic);
@@ -75,8 +75,6 @@ public sealed class LockedBoolElement : ConfigElement<bool>
             TargetInstance = value.Find(c => c.Name == type.Name);
         else
             TargetInstance = null;
-
-        Mode = mode ?? false;
 
         string tooltip = ConfigManager.GetLocalizedTooltip(MemberInfo);
         string? lockReason = ConfigManager.GetLocalizedText<LockedKeyAttribute, LockedArgsAttribute>(MemberInfo, LockTooltipKey);

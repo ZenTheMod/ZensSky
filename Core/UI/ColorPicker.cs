@@ -62,7 +62,7 @@ public sealed class ColorPicker : UIElement
 
     #region Constructor
 
-    public ColorPicker() : base()
+    public ColorPicker(Color? panelColor = null) : base()
     {
         Width.Set(0f, 1f);
 
@@ -99,6 +99,8 @@ public sealed class ColorPicker : UIElement
 
         HexInput.OnEnter += AcceptHex;
 
+        HexInput.BackgroundColor = panelColor ?? HexInput.BackgroundColor;
+
         Append(HexInput);
 
         #endregion
@@ -108,7 +110,7 @@ public sealed class ColorPicker : UIElement
         RGBInputs = new InputField[3];
 
         for (int i = 0; i < RGBInputs.Length; i++)
-            CreateRGBInput(i);
+            CreateRGBInput(i, panelColor);
 
         #endregion
     }
@@ -158,7 +160,7 @@ public sealed class ColorPicker : UIElement
         OnAcceptInput?.Invoke(this);
     }
 
-    private void CreateRGBInput(int i)
+    private void CreateRGBInput(int i, Color? panelColor = null)
     {
         UIText label = new(RGBLabels[i]);
 
@@ -178,6 +180,8 @@ public sealed class ColorPicker : UIElement
 
         RGBInputs[i].OnEnter +=
             (f) => AcceptRGB(f, i);
+
+        RGBInputs[i].BackgroundColor = panelColor ?? RGBInputs[i].BackgroundColor;
 
         Append(RGBInputs[i]);
     }

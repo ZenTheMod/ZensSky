@@ -455,12 +455,17 @@ public static class SunAndMoonRendering
 
     private static void DrawSunAndMoonToSky(On_Main.orig_DrawSunAndMoon orig, Main self, Main.SceneArea sceneArea, Color moonColor, Color sunColor, float tempMushroomInfluence)
     {
+        if (!ZensSky.CanDrawSky)
+        {
+            orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);
+            return;
+        }
+
         SpriteBatch spriteBatch = Main.spriteBatch;
 
         MoonTexture = GetBaseMoonTexture();
 
-        if (!ZensSky.CanDrawSky || 
-            !SkyConfig.Instance.UseSunAndMoon)
+        if (!SkyConfig.Instance.UseSunAndMoon)
         {
             if (InvokePreDrawSunAndMoon(spriteBatch))
                 orig(self, sceneArea, moonColor, sunColor, tempMushroomInfluence);

@@ -18,7 +18,6 @@ using ZensSky.Core.Exceptions;
 using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.Sky.Lighting.SkyLightingSystem;
-using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Menu;
 
@@ -155,7 +154,9 @@ public sealed class ModMenuSystem : ModSystem
 
     private static void DrawLighting(SpriteBatch spriteBatch, Vector2 logoDrawCenter, Color color, float logoRotation, float logoScale2)
     {
-        if (MenuLoader.currentMenu.Logo.Value != ModMenu.modLoaderLogo.Value || !UIEffects.LogoNormals.IsReady)
+        if (!ZensSky.CanDrawSky ||
+            MenuLoader.currentMenu.Logo.Value != ModMenu.modLoaderLogo.Value ||
+            !UIEffects.LogoNormals.IsReady)
             return;
 
         spriteBatch.End(out var snapshot);

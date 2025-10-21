@@ -67,9 +67,11 @@ public sealed class TimeController : SliderController
             c.MarkLabel(skipRandomMoonType);
 
                 // Handle negative time.
-            c.GotoNext(MoveType.AfterLabel,
+            c.GotoNext(MoveType.After,
                 i => i.MatchBrfalse(out _),
                 i => i.MatchRet());
+
+            c.MoveAfterLabels();
 
             c.EmitDelegate(() =>
             {

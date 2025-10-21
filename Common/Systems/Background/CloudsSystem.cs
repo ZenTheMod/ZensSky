@@ -99,6 +99,7 @@ public sealed class CloudsSystem : ModSystem
             c.EmitDelegate((bool canDrawClouds) =>
             {
                 CanDrawClouds =
+                    ZensSky.CanDrawSky &&
                     canDrawClouds &&
                     (Main.numClouds > 0 || Main.cloudBGAlpha > 0) &&
                     Main.screenPosition.Y < Main.worldSurface * 16 + 16 &&
@@ -323,7 +324,7 @@ public sealed class CloudsSystem : ModSystem
 
         SkyEffects.CloudGodrays.ScreenSize = viewportSize;
 
-        int sampleCount = SkyConfig.Instance.CloudLightingSamples;
+        int sampleCount = SkyConfig.Instance.CloudGodraysSamples;
 
         SkyEffects.CloudGodrays.SampleCount = sampleCount;
 
@@ -345,7 +346,11 @@ public sealed class CloudsSystem : ModSystem
                 device.Textures[1] = light.Texture.Value;
             }
 
-            SkyEffects.CloudGodrays.Apply();
+                // TODO: Not this!
+            if (SkyConfig.Instance.UseCloudGodrays)
+                SkyEffects.CloudGodrays.ApplyGodrays();
+            else
+                SkyEffects.CloudGodrays.ApplyLight();
 
             spriteBatch.Draw(OccludersTarget, viewport.Bounds, Color.White);
         });

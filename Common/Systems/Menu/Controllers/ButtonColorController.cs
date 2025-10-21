@@ -41,11 +41,12 @@ public sealed class ButtonColorController : MenuController
     
     private static readonly Color Outline = new(215, 215, 215);
 
-    private static readonly Color DefaultColor = Color.Gray;
-    private static readonly Color DefaultHover = new(255, 215, 0);
+    #endregion
 
-    private static Color ButtonColor;
-    private static Color ButtonHoverColor;
+    #region Public Fields
+
+    public static readonly Color DefaultColor = Color.Gray;
+    public static readonly Color DefaultHover = new(255, 215, 0);
 
     #endregion
 
@@ -96,6 +97,9 @@ public sealed class ButtonColorController : MenuController
     public override int Index => 7;
 
     public override string Name => "Mods.ZensSky.MenuController.ButtonColor";
+
+    public static Color ButtonColor { get; set; }
+    public static Color ButtonHoverColor { get; set; }
 
     #endregion
 
@@ -182,7 +186,7 @@ public sealed class ButtonColorController : MenuController
 
                 c.EmitLdcR4(0f);
 
-                c.EmitDelegate(ModifyColor);
+                c.EmitDelegate(ModifyColorRGBA);
 
                 c.EmitPop();
             }
@@ -227,7 +231,7 @@ public sealed class ButtonColorController : MenuController
                 if (i != 4)
                     return false;
 
-                return ModifyColor(ref color, r, g, b, a, hovered == j ? interpolator / 255f : 0);
+                return ModifyColorRGBA(ref color, r, g, b, a, hovered == j ? interpolator / 255f : 0);
             });
 
             c.EmitBrtrue(jumpColorCtorTarget);
@@ -238,11 +242,13 @@ public sealed class ButtonColorController : MenuController
         }
     }
 
-    private static bool ModifyColor(ref Color color, int r, int g, int b, int a, float interpolator)
+    private static bool ModifyColorRGBA(ref Color color, int r, int g, int b, int a, float interpolator)
+        => ModifyColor(ref color, new(r, g, b, a), interpolator);
+
+    public static bool ModifyColor(ref Color color, Color baseColor, float interpolator)
     {
         MenuConfig config = MenuConfig.Instance;
 
-            // TODO: More accurate impl that uses r g b a inputs.
         if (!config.UseMenuButtonColor)
             ButtonColor = DefaultColor;
         if (!config.UseMenuButtonHoverColor)
@@ -251,7 +257,7 @@ public sealed class ButtonColorController : MenuController
         if (!config.UseMenuButtonColor && !config.UseMenuButtonHoverColor)
             return false;
 
-        Color normalColor = config.UseMenuButtonColor ? ButtonColor : new(r, g, b, a);
+        Color normalColor = config.UseMenuButtonColor ? ButtonColor : baseColor;
         Color hoverColor = ButtonHoverColor;
 
         color = Color.Lerp(normalColor, hoverColor, interpolator);

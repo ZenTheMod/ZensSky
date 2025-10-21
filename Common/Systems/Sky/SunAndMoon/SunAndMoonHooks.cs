@@ -69,7 +69,7 @@ public static class SunAndMoonHooks
     /// Used for adding details outside of the base moon style, above — and overriding if <paramref name="drawExtras"/> is false — <see cref="PreDrawMoonExtras"/>.
     /// </summary>
     /// <param name="moon">The high res moon texture to be used. If indended to be modified without custom drawing return <see cref="true"/></param>
-    /// <param name="drawExtras">Weither or not base moon details (<see cref="PreDrawMoonExtras"/>/<see cref="PostDrawMoonExtras"/>) should be drawn.</param>
+    /// <param name="drawExtras">Whether or not base moon details (<see cref="PreDrawMoonExtras"/>/<see cref="PostDrawMoonExtras"/>) should be drawn.</param>
     /// <param name="eventMoon">If a vanilla moon change (e.g. Frost Moon, Drunk World Moon) is active.</param>
     /// <returns><see cref="true"/> if the normal moon drawing should be used.</returns>
     public delegate bool hook_PreDrawMoon(

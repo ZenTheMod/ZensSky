@@ -71,10 +71,10 @@ public sealed class RedSunSystem : ModSystem
     {
         IsEnabled = true;
 
-        MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod(nameof(GeneralLightingIL.ChangePositionAndDrawDayMoon), NonPublic | Instance);
-
         MainThreadSystem.Enqueue(() =>
         {
+            MethodInfo? changePositionAndDrawDayMoon = typeof(GeneralLightingIL).GetMethod(nameof(GeneralLightingIL.ChangePositionAndDrawDayMoon), NonPublic | Instance);
+
             if (changePositionAndDrawDayMoon is not null)
                 PatchSunAndMoonDrawing = new(changePositionAndDrawDayMoon,
                     ModifyDrawing);
