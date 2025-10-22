@@ -133,14 +133,14 @@ public sealed class ModMenuSystem : ModSystem
             c.EmitLdarg(logoRotationIndex);
             c.EmitLdloc(logoScale2Index);
 
-            c.EmitDelegate(DrawLighting);
+            c.EmitCall(DrawLighting);
 
             c.MoveAfterLabels();
 
                 // Draw credits outside of the jump.
             c.EmitLdarg(spriteBatchIndex);
 
-            c.EmitDelegate(DrawCredits);
+            c.EmitCall(DrawCredits);
         }
         catch (Exception e)
         {

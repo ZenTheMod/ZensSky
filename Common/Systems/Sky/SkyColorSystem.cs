@@ -5,7 +5,6 @@ using System.Reflection;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.GameContent.Drawing;
-using Terraria.ID;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
@@ -25,12 +24,16 @@ namespace ZensSky.Common.Systems.Sky;
 ///         Allows <see cref="ModSystem.ModifySunLightColor"/> to run on the main menu using <see cref="ModifyInMenu"/>.
 ///     </item>
 ///     <item>
-///         <see cref="PreventDrawBlackOverAir"/><br/>
-///         Fixes an issue where DrawBlack would could air as solid(?) and would draw over it, hiding the background.
+///         <see cref="DrawBlackNonSolid"/><br/>
+///         Fixes multiple issues where DrawBlack would render over non-solid/edge tiles/walls.
 ///     </item>
 ///     <item>
-///         <see cref="DrawNonSolidTiles"/><br/>
-///         Forces non-solid tiles to draw regardless of low light.
+///         <see cref="DrawTilesNonSolid"/><br/>
+///         Forces non-solid/edge tiles to draw regardless of low light.
+///     </item>
+///     <item>
+///         <see cref="DrawWallsNonSolid"/><br/>
+///         Forces non-solid/edge walls to draw regardless of low light.
 ///     </item>
 /// </list>
 /// </summary>
@@ -66,9 +69,11 @@ public sealed class SkyColorSystem : ModSystem
 
         ModifyInMenu += ModifySunLightColor;
 
-        IL_Main.DrawBlack += PreventDrawBlackOverAir;
+        IL_Main.DrawBlack += DrawBlackNonSolid;
 
-        IL_TileDrawing.DrawSingleTile += DrawNonSolidTiles;
+        IL_TileDrawing.DrawSingleTile += DrawTilesNonSolid;
+
+        IL_WallDrawing.DrawWalls += DrawWallsNonSolid;
     }
 
     public override void Unload()
@@ -78,9 +83,11 @@ public sealed class SkyColorSystem : ModSystem
 
         ModifyInMenu = null;
 
-        IL_Main.DrawBlack -= PreventDrawBlackOverAir;
+        IL_Main.DrawBlack -= DrawBlackNonSolid;
 
-        IL_TileDrawing.DrawSingleTile -= DrawNonSolidTiles;
+        IL_TileDrawing.DrawSingleTile -= DrawTilesNonSolid;
+
+        IL_WallDrawing.DrawWalls -= DrawWallsNonSolid;
     }
 
     #endregion
@@ -99,7 +106,7 @@ public sealed class SkyColorSystem : ModSystem
 
     #region DrawBlack Fixes
 
-    private void PreventDrawBlackOverAir(ILContext il)
+    private void DrawBlackNonSolid(ILContext il)
     {
         try
         {
@@ -107,7 +114,8 @@ public sealed class SkyColorSystem : ModSystem
 
             ILLabel? breakTarget = c.DefineLabel();
 
-            int tileIndex = -1;
+            int tileXIndex = -1;
+            int tileYIndex = -1;
 
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdloc(out _),
@@ -117,17 +125,18 @@ public sealed class SkyColorSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.drawToScreen)));
 
             c.GotoPrev(MoveType.After,
-                i => i.MatchLdloc(out _),
-                i => i.MatchLdloc(out _),
+                i => i.MatchLdsflda<Main>(nameof(Main.tile)),
+                i => i.MatchLdloc(out tileXIndex),
+                i => i.MatchLdloc(out tileYIndex),
                 i => i.MatchCall<Tilemap>("get_Item"),
-                i => i.MatchStloc(out tileIndex));
+                i => i.MatchStloc(out _));
 
-            c.EmitLdloc(tileIndex);
+            c.EmitLdloc(tileXIndex);
+            c.EmitLdloc(tileYIndex);
 
-            c.EmitDelegate((Tile tile) =>
-                tile.BlocksLight);
+            c.EmitCall(Utilities.IgnoresDrawBlack);
 
-            c.EmitBrfalse(breakTarget);
+            c.EmitBrtrue(breakTarget);
         }
         catch (Exception e)
         {
@@ -139,16 +148,23 @@ public sealed class SkyColorSystem : ModSystem
 
     #region TileDrawing Fixes
 
-    private void DrawNonSolidTiles(ILContext il)
+    private void DrawTilesNonSolid(ILContext il)
     {
         try
         {
             ILCursor c = new(il);
 
-            int drawDataIndex = -1; // arg
+            int tileXIndex = -1; // arg
+            int tileYIndex = -1; // arg
 
-            c.GotoNext(MoveType.After,
-                i => i.MatchLdarg(out drawDataIndex),
+            c.GotoNext(
+                i => i.MatchLdsflda<Main>(nameof(Main.tile)),
+                i => i.MatchLdarg(out tileXIndex),
+                i => i.MatchLdarg(out tileYIndex),
+                i => i.MatchCall<Tilemap>("get_Item"));
+
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdarg(out _),
                 i => i.MatchLdflda<TileDrawInfo>(nameof(TileDrawInfo.tileLight)),
                 i => i.MatchCall<Color>($"get_{nameof(Color.R)}"),
                 i => i.MatchLdcI4(1),
@@ -159,10 +175,53 @@ public sealed class SkyColorSystem : ModSystem
 
             c.EmitPop();
 
-            c.EmitLdarg(drawDataIndex);
+            c.EmitLdarg(tileXIndex);
+            c.EmitLdarg(tileYIndex);
 
-            c.EmitDelegate((TileDrawInfo drawData) =>
-                !drawData.tileCache.BlocksLight);
+            c.EmitCall(Utilities.IgnoresDrawBlack);
+        }
+        catch (Exception e)
+        {
+            throw new ILEditException(Mod, il, e);
+        }
+    }
+
+    #endregion
+
+    #region WallDrawing Fixes
+
+    private void DrawWallsNonSolid(ILContext il)
+    {
+        try
+        {
+            ILCursor c = new(il);
+
+            ILLabel? jumpColorCheckTarget = c.DefineLabel();
+
+            int tileXIndex = -1;
+            int tileYIndex = -1;
+
+            int colorIndex = -1;
+
+            c.GotoNext(
+                i => i.MatchLdloc(out tileXIndex),
+                i => i.MatchLdloc(out tileYIndex),
+                i => i.MatchCall<Terraria.Lighting>(nameof(Terraria.Lighting.GetColor)),
+                i => i.MatchStloc(out colorIndex));
+
+            c.GotoNext(MoveType.Before,
+                i => i.MatchLdloca(colorIndex),
+                i => i.MatchCall<Color>($"get_{nameof(Color.R)}"),
+                i => i.MatchBrtrue(out jumpColorCheckTarget));
+
+            c.MoveAfterLabels();
+
+            c.EmitLdloc(tileXIndex);
+            c.EmitLdloc(tileYIndex);
+
+            c.EmitCall(Utilities.IgnoresDrawBlack);
+
+            c.EmitBrtrue(jumpColorCheckTarget);
         }
         catch (Exception e)
         {

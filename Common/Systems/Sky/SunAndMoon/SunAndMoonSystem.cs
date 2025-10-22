@@ -132,7 +132,9 @@ public sealed class SunAndMoonSystem : ModSystem
                 i => i.MatchStloc(out sunAlpha));
 
             c.EmitLdloca(sunAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
+
+            c.EmitDelegate((ref float mult) =>
+                { mult = MathF.Max(mult, MinSunBrightness); });
 
             int sunPosition = -1;
             int sunColor = -1;
@@ -192,7 +194,9 @@ public sealed class SunAndMoonSystem : ModSystem
                 i => i.MatchStloc(out moonAlpha));
 
             c.EmitLdloca(moonAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
+
+            c.EmitDelegate((ref float mult) =>
+                { mult = MathF.Max(mult, MinMoonBrightness); });
 
             int moonPosition = -1;
             int moonColor = -1;
@@ -257,7 +261,7 @@ public sealed class SunAndMoonSystem : ModSystem
 
             c.EmitLdcI4(0); // This info is not forced.
 
-            c.EmitDelegate<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
+            c.EmitCall<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
 
             #region Misc
 

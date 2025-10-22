@@ -117,7 +117,7 @@ public sealed class CloudsSystem : ModSystem
                     i => i.MatchLdelemRef(),
                     i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
 
-            c.EmitDelegate(ClearTargets);
+            c.EmitCall(ClearTargets);
 
             #endregion
 
@@ -136,7 +136,7 @@ public sealed class CloudsSystem : ModSystem
                     i => i.MatchLdfld<Cloud>(nameof(Cloud.active)));
 
                     // Begin capturing clouds.
-                c.EmitDelegate(BeginCapturingClouds);
+                c.EmitCall(BeginCapturingClouds);
 
                     // Match to after the loop ends.
                 c.GotoNext(MoveType.After,
@@ -151,7 +151,7 @@ public sealed class CloudsSystem : ModSystem
                     // 0/false is used to tell EndCapturingClouds to continue capturing to OccludersTarget.
                     // 1/true is used to tell EndCapturingClouds to swap back to PreviousTargets.
                 c.EmitLdcI4(i == 2 ? 1 : 0);
-                c.EmitDelegate(EndCapturingClouds);
+                c.EmitCall(EndCapturingClouds);
             }
 
             #endregion
@@ -168,7 +168,7 @@ public sealed class CloudsSystem : ModSystem
                 i => i.MatchLdelemI4());
 
                 // Begin capturing clouds.
-            c.EmitDelegate(BeginCapturingClouds);
+            c.EmitCall(BeginCapturingClouds);
 
                 // Match to after the loop of the other drawn cloud background.
             c.GotoNext(MoveType.After,
@@ -182,7 +182,7 @@ public sealed class CloudsSystem : ModSystem
                 i => i.MatchBlt(out _));
 
             c.EmitLdcI4(0);
-            c.EmitDelegate(EndCapturingClouds);
+            c.EmitCall(EndCapturingClouds);
 
             #endregion
 

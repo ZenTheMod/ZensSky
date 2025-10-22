@@ -18,6 +18,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Common.Systems.Menu.Elements;
 using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 
@@ -174,7 +175,7 @@ public sealed class MenuControllerSystem : ModSystem
             c.EmitLdloc(switchTextRectIndex);
 
                 // Add our dropdown menu button.
-            c.EmitDelegate(DrawToggle);
+            c.EmitCall(DrawToggle);
         }
         catch (Exception e)
         {

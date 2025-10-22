@@ -6,7 +6,7 @@ using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.Menu.Controllers.ButtonColorController;
@@ -129,7 +129,7 @@ public sealed class CoolerMenuSystem : ModSystem
             c.EmitLdloc(switchTextRectIndex);
 
                 // Add our dropdown menu button.
-            c.EmitDelegate(DrawToggle);
+            c.EmitCall(DrawToggle);
         }
         catch (Exception e)
         {

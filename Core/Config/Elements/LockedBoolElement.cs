@@ -35,7 +35,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
     public bool Mode { get; private set; } = false;
 
     public bool IsLocked =>
-        (bool?)TargetMember?.GetValue(TargetInstance) ?? true == Mode;
+        ((bool?)TargetMember?.GetValue(TargetInstance) ?? true) == Mode;
 
     #endregion
 

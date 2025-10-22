@@ -220,6 +220,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchCgtUn());
 
             c.EmitLdarg0();
+
             c.EmitDelegate((bool reloadRequired, ConfigElement element) =>
             {
                 if (element.MemberInfo.IsField &&
@@ -253,6 +254,7 @@ public sealed class BetterNightSkySystem : ModSystem
                 i => i.MatchStloc(out memberInfoIndex));
 
             c.EmitLdloc(memberInfoIndex);
+
             c.EmitDelegate((PropertyFieldWrapper memberInfo) =>
             {
                 if (memberInfo.IsField &&

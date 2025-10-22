@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using System.Linq;
+using Terraria;
 using Terraria.ID;
 
 namespace ZensSky.Core.Utils;
@@ -10,6 +11,22 @@ public static partial class Utilities
 {
     public static bool ShowInvisibleTiles =>
         Main.instance.TilesRenderer._shouldShowInvisibleBlocks;
+
+    public static bool IgnoresDrawBlack(int i, int j)
+    {
+        Tile center = Main.tile[i, j];
+
+        if (!center.BlocksLight)
+            return true;
+
+        Tile[] neighbors =
+            [Main.tile[i + 1, j],
+            Main.tile[i - 1, j],
+            Main.tile[i, j + 1],
+            Main.tile[i, j - 1]];
+
+        return neighbors.Any(t => !t.BlocksLight);
+    }
 
     extension(Tile tile)
     {

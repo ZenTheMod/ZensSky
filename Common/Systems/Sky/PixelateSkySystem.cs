@@ -69,7 +69,7 @@ public sealed class PixelateSkySystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
 
-            c.EmitDelegate(PrepareTarget);
+            c.EmitCall(PrepareTarget);
 
                 // Fix the ugly background sampling.
             c.GotoNext(MoveType.After,
@@ -91,7 +91,7 @@ public sealed class PixelateSkySystem : ModSystem
                 i => i.MatchLdarg(out _),
                 i => i.MatchCall<Main>(nameof(Main.DrawBG)));
 
-            c.EmitDelegate(DrawTarget);
+            c.EmitCall(DrawTarget);
         }
         catch (Exception e)
         {
@@ -115,7 +115,7 @@ public sealed class PixelateSkySystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.tileBatch)),
                 i => i.MatchCallvirt<TileBatch>(nameof(TileBatch.End)));
 
-            c.EmitDelegate(PrepareTarget);
+            c.EmitCall(PrepareTarget);
 
                 // Draw our pixelation target.
             c.GotoNext(MoveType.After,
@@ -123,7 +123,7 @@ public sealed class PixelateSkySystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.spriteBatch)),
                 i => i.MatchCallvirt<SpriteBatch>(nameof(SpriteBatch.End)));
 
-            c.EmitDelegate(DrawTarget);
+            c.EmitCall(DrawTarget);
         }
         catch (Exception e)
         {

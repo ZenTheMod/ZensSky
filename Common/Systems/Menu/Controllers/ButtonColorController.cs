@@ -186,7 +186,7 @@ public sealed class ButtonColorController : MenuController
 
                 c.EmitLdcR4(0f);
 
-                c.EmitDelegate(ModifyColorRGBA);
+                c.EmitCall(ModifyColorRGBA);
 
                 c.EmitPop();
             }

@@ -39,7 +39,7 @@ public abstract class LockedSliderElement<T> : PrimitiveRangeElement<T> where T 
     public bool Mode { get; private set; } = false;
 
     public bool IsLocked =>
-        (bool?)TargetMember?.GetValue(TargetInstance) ?? true == Mode;
+        ((bool?)TargetMember?.GetValue(TargetInstance) ?? true) == Mode;
 
     #endregion
 

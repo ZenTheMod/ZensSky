@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.Default;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core;
+using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
 
 namespace ZensSky.Common.Systems.Weather;
@@ -151,7 +152,7 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchBrfalse(out jumpMenuCheck),
                 i => i.MatchLdcR4(0));
 
-            c.EmitDelegate(UsingModdedMenu);
+            c.EmitCall(UsingModdedMenu);
             c.EmitBrfalse(jumpMenuCheck);
 
                 // Wind.
@@ -161,7 +162,7 @@ public sealed class RainSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.gameMenu)));
 
             c.EmitPop();
-            c.EmitDelegate(UsingModdedMenu);
+            c.EmitCall(UsingModdedMenu);
         }
         catch (Exception e)
         {

@@ -78,7 +78,9 @@ public sealed class CaptureInMenuSystem : ModSystem
 
             c.MoveAfterLabels();
 
-            c.EmitDelegate(() => ZensSky.Unloading);
+            c.EmitDelegate(() =>
+                ZensSky.Unloading);
+
             c.EmitStloc(menuCaptureFlagIndex);
 
                 // Grab flag2's index.
@@ -98,6 +100,7 @@ public sealed class CaptureInMenuSystem : ModSystem
             c.MoveAfterLabels();
 
             c.EmitLdloc(shouldCaptureIndex);
+
             c.EmitDelegate((bool capture) =>
             {
                 if (!capture)

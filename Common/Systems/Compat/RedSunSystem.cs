@@ -15,6 +15,7 @@ using ZensSky.Common.Systems.Sky;
 using ZensSky.Common.Systems.Sky.SunAndMoon;
 using ZensSky.Core;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
@@ -122,7 +123,8 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out sunAlpha));
 
             c.EmitLdloca(sunAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinSunBrightness); });
+            c.EmitDelegate((ref float mult) =>
+                { mult = MathF.Max(mult, MinSunBrightness); });
 
             int sunPosition = -1;
             int sunColor = -1;
@@ -184,11 +186,13 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchStloc(out moonAlpha));
 
             c.EmitLdloca(moonAlpha);
-            c.EmitDelegate((ref float mult) => { mult = MathF.Max(mult, MinMoonBrightness); });
+            c.EmitDelegate((ref float mult) =>
+                { mult = MathF.Max(mult, MinMoonBrightness); });
 
                 // With the 'FancyLighting' mod enabled the game will attempt to render the moon here with the shader used for the sun.
             if (FancyLightingSystem.IsEnabled)
-                c.EmitDelegate(() => { Main.pixelShader.CurrentTechnique.Passes[0].Apply(); });
+                c.EmitDelegate(() =>
+                    { Main.pixelShader.CurrentTechnique.Passes[0].Apply(); });
 
             int moonPosition = -1;
             int moonColor = -1;
@@ -254,7 +258,7 @@ public sealed class RedSunSystem : ModSystem
 
             c.EmitLdcI4(0); // This info is not forced.
 
-            c.EmitDelegate<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
+            c.EmitCall<Action<Vector2, Color, float, float, Vector2, Color, float, float, bool>>(SetInfo);
 
             #region Misc
 
@@ -263,7 +267,8 @@ public sealed class RedSunSystem : ModSystem
                 i => i.MatchLdsfld<Main>(nameof(Main.hasFocus)),
                 i => i.MatchBrfalse(out jumpSunOrMoonGrabbing));
 
-            c.EmitDelegate(() => MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
+            c.EmitDelegate(() =>
+                MenuControllerSystem.Hovering && !Main.alreadyGrabbingSunOrMoon);
 
             c.EmitBrtrue(jumpSunOrMoonGrabbing);
 
@@ -276,7 +281,7 @@ public sealed class RedSunSystem : ModSystem
 
                 c.EmitLdloca(moonScale);
 
-                c.EmitDelegate(BetterNightSkySystem.ModifyMoonScale);
+                c.EmitCall(BetterNightSkySystem.ModifyMoonScale);
             }
 
             #endregion
