@@ -144,7 +144,7 @@ public static class SunAndMoonRendering
 
             #region Bloom
 
-            Texture2D bloom = SkyTextures.SunBloom.Value;
+            Texture2D bloom = SkyTextures.SunBloom;
             Vector2 bloomOrigin = bloom.Size() * 0.5f;
 
             Color outerGlowColor = color * SunOuterGlowOpacity;
