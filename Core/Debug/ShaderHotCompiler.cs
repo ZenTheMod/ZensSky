@@ -95,7 +95,8 @@ public sealed class ShaderHotCompiler : ModSystem
 
     private async Task CompileShaderTask(string effectCompilerPath, string effectPath, string shortPath)
     {
-        await Task.Yield();
+            // Prevent alledged issues with temp files.
+        await Task.Delay(10);
 
         string outputEffect = Path.ChangeExtension(effectPath, ".fxc");
 
@@ -103,7 +104,6 @@ public sealed class ShaderHotCompiler : ModSystem
         {
             FileName = effectCompilerPath,
             Arguments = $"\"{effectPath}\" /T fx_2_0 /nologo /O2 /Fo \"{outputEffect}\"",
-            RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
             CreateNoWindow = true
@@ -114,7 +114,7 @@ public sealed class ShaderHotCompiler : ModSystem
         process.StartInfo = pInfo;
 
         process.ErrorDataReceived += (_, e) =>
-            LogShaderCompilationError(e.Data ?? string.Empty);
+            LogShaderCompilationError(e.Data ?? string.Empty, effectPath, shortPath);
 
         process.Start();
 
@@ -132,15 +132,17 @@ public sealed class ShaderHotCompiler : ModSystem
 
     #region Logging
 
-    private void LogShaderCompilationError(string error)
+    private void LogShaderCompilationError(string error, string effectPath, string shortPath)
     {
         if (error.Length <= 0)
             return;
 
+        error = error.Replace(effectPath, string.Empty);
+
         if (!error.Contains("error"))
             return;
 
-        Mod.Logger.Warn(error);
+        Mod.Logger.Warn($"{shortPath}: {error}");
     }
 
     #endregion

@@ -11,10 +11,6 @@ float2 screenSize;
 
 int sampleCount;
 
-    // Lazy hack to get around having to rewrite my cloud lighting yet again.
-        // TODO: Not this!
-bool useSampling;
-
 float blur(float2 uv, float2 lightuv, int samples)
 {
     float2 screen = screenSize / min(screenSize.x, screenSize.y);
