@@ -100,8 +100,8 @@ public static class Easings
         1 - InPolynomial(1 - t, e);
     public static float InOutPolynomial(float t, float e) =>
         t < .5 ?
-            (1 - InPolynomial((1 - t) * 2, e) * .5f) :
-            (InPolynomial(t * 2, e) * .5f);
+            InPolynomial(t * 2, e) * .5f :
+            1 - InPolynomial((1 - t) * 2, e) * .5f;
 
     #endregion
 
