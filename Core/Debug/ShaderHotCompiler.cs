@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Terraria.ModLoader;
@@ -26,8 +25,7 @@ public sealed class ShaderHotCompiler : ModSystem
 
     private static readonly string[] EffectExtensions = [".fx", ".hlsl"];
 
-    [NotNull]
-    private static string? EffectCompilerPath = "";
+    private static string EffectCompilerPath = "";
 
     private static FileSystemWatcher? EffectWatcher;
 
@@ -41,15 +39,15 @@ public sealed class ShaderHotCompiler : ModSystem
     {
         ModSource = Mod.SourceFolder.Replace('\\', '/');
 
-        EffectCompilerPath = Directory.GetFiles(ModSource, "*fxc.exe", SearchOption.AllDirectories)?[0];
+        string[] paths = Directory.GetFiles(ModSource, "*fxc.exe", SearchOption.AllDirectories);
 
-        if (string.IsNullOrEmpty(EffectCompilerPath))
+        if (paths.Length <= 0)
         {
             Mod.Logger.Info("'fxc.exe' not found! Effects will not be compiled!");
             return;
         }
 
-        EffectCompilerPath = EffectCompilerPath.Replace('\\', '/');
+        EffectCompilerPath = paths[0].Replace('\\', '/');
 
         EffectWatcher = new(ModSource);
 
