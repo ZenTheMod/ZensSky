@@ -4,23 +4,29 @@ using Terraria.ModLoader.Config;
 namespace ZensSky.Core.Config.Elements;
 
 /// <summary>
-/// To be used with <see cref="CustomModConfigItemAttribute"/> for locking an element based on another config member.
+/// "Locks" a config from being changed if the type's target member is true (target member MUST be of type <see cref="bool"/>!)<br/>
+/// Requires a corresponding <see cref="ILockedConfigElement"/> config element.<br/>
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public sealed class LockedElementAttribute : Attribute
+public sealed class LockedElementAttribute : CustomModConfigItemAttribute
 {
-    public Type TargetConfig;
+    #region Public Properties
 
-    public string MemberName { get; }
+    public Type TargetType { get; init; }
 
-    public bool Mode { get; }
+    public string MemberName { get; init; }
 
-    public LockedElementAttribute(Type targetConfig, string memberName, bool mode)
+    #endregion
+
+    #region Public Constructors
+
+    public LockedElementAttribute(Type configType, Type targetType, string memberName)
+        : base(configType)
     {
-        TargetConfig = targetConfig;
+        TargetType = targetType;
 
         MemberName = memberName;
-
-        Mode = mode;
     }
+
+    #endregion
 }

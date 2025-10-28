@@ -26,17 +26,16 @@ public sealed class SkyConfig : ModConfig
     [ReloadRequired]
     [DefaultValue(true)]
         // Notably don't decorate this member with the LockedElement attribute, this is just to fix the offset on boolean elements.
+            // TODO: Force this fix for vanilla.
     [CustomModConfigItem(typeof(LockedBoolElement))]
     public bool UseSunAndMoon;
 
     [DefaultValue(false)]
-    [LockedElement(typeof(SkyConfig), nameof(UseSunAndMoon), false)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
+    [LockedElement(typeof(LockedBoolElement), typeof(SkyConfig), nameof(TransparentMoonShadowLocked))]
     public bool TransparentMoonShadow;
 
     [DefaultValue(false)]
-    [LockedElement(typeof(RealisticSkySystem), nameof(RealisticSkySystem.IsEnabled), false)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
+    [LockedElement(typeof(LockedBoolElement), typeof(SkyConfig), nameof(RealisticSunLocked))]
     public bool RealisticSun;
 
     #endregion
@@ -50,8 +49,7 @@ public sealed class SkyConfig : ModConfig
     public StarVisual StarStyle;
 
     [DefaultValue(true)]
-    [LockedElement(typeof(RealisticSkySystem), nameof(RealisticSkySystem.IsEnabled), false)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
+    [LockedElement(typeof(LockedBoolElement), typeof(SkyConfig), nameof(DrawRealisticStarsLocked))]
     public bool DrawRealisticStars;
 
     #endregion
@@ -61,8 +59,7 @@ public sealed class SkyConfig : ModConfig
     [Header("Background")]
 
     [DefaultValue(true)]
-    [LockedElement(typeof(DarkSurfaceSystem), nameof(DarkSurfaceSystem.IsEnabled), true)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
+    [LockedElement(typeof(LockedBoolElement), typeof(SkyConfig), nameof(PitchBlackBackgroundLocked))]
     public bool PitchBlackBackground;
 
     [CustomModConfigItem(typeof(SkyGradientElement))]
@@ -90,16 +87,11 @@ public sealed class SkyConfig : ModConfig
     public bool UseCloudLighting;
 
     [DefaultValue(true)]
-    [LockedElement(typeof(SkyConfig), nameof(UseCloudLighting), false)]
-    [CustomModConfigItem(typeof(LockedBoolElement))]
+    [LockedElement(typeof(LockedBoolElement), typeof(SkyConfig), nameof(UseCloudGodraysLocked))]
     public bool UseCloudGodrays;
 
-    private bool CloudGodraysSamplesLocked =>
-        UseCloudLighting && UseCloudGodrays;
-
     [DefaultValue(32)]
-    [LockedElement(typeof(SkyConfig), nameof(CloudGodraysSamplesLocked), false)]
-    [CustomModConfigItem(typeof(LockedIntSlider))]
+    [LockedElement(typeof(LockedIntSlider), typeof(SkyConfig), nameof(CloudGodraysSamplesLocked))]
     [SliderColor(240, 103, 135)]
     [Range(4, 64)]
     public int CloudGodraysSamples;
@@ -115,8 +107,7 @@ public sealed class SkyConfig : ModConfig
     public bool UseWindParticles;
 
     [DefaultValue(.85f)]
-    [LockedElement(typeof(SkyConfig), nameof(UseWindParticles), false)]
-    [CustomModConfigItem(typeof(LockedFloatSlider))]
+    [LockedElement(typeof(LockedFloatSlider), typeof(SkyConfig), nameof(WindOpacityLocked))]
     [SliderColor(148, 203, 227)]
     [Range(0f, 1f)]
     public float WindOpacity;
@@ -132,11 +123,46 @@ public sealed class SkyConfig : ModConfig
     public bool UsePixelatedSky;
 
     [DefaultValue(16)]
-    [LockedElement(typeof(SkyConfig), nameof(UsePixelatedSky), false)]
-    [CustomModConfigItem(typeof(LockedIntSlider))]
+    [LockedElement(typeof(LockedIntSlider), typeof(SkyConfig), nameof(ColorStepsLocked))]
     [SliderColor(240, 103, 135)]
     [Range(8, 256)]
     public int ColorSteps;
+
+    #endregion
+
+#pragma warning disable
+
+    #region Locked Properties
+
+        // -- SunAndMoon --
+    private bool TransparentMoonShadowLocked =>
+        !UseSunAndMoon;
+
+    private bool RealisticSunLocked =>
+        !RealisticSkySystem.IsEnabled || !UseSunAndMoon;
+
+        // -- Stars --
+    private bool DrawRealisticStarsLocked =>
+        !RealisticSkySystem.IsEnabled;
+
+        // -- Background --
+    private bool PitchBlackBackgroundLocked =>
+        DarkSurfaceSystem.IsEnabled;
+
+        // -- Clouds --
+    private bool UseCloudGodraysLocked =>
+        !UseCloudLighting;
+
+    private bool CloudGodraysSamplesLocked =>
+        !UseCloudLighting || !UseCloudGodrays;
+
+        // -- Weather --
+    private bool WindOpacityLocked =>
+        !UseWindParticles;
+
+        // -- Pixelation --
+    private bool ColorStepsLocked =>
+        !UsePixelatedSky;
 
     #endregion
 }

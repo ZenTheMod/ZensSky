@@ -1,22 +1,16 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
-using Terraria.ModLoader;
-using Terraria.ModLoader.Config;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.UI;
 using Terraria.UI.Chat;
 using ZensSky.Core.Utils;
-using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Config.Elements;
 
-public sealed class LockedBoolElement : ConfigElement<bool>
+public sealed class LockedBoolElement : ConfigElement<bool>, ILockedConfigElement
 {
     #region Private Fields
 
@@ -26,16 +20,18 @@ public sealed class LockedBoolElement : ConfigElement<bool>
 
     #endregion
 
-    #region Properties
+    #region Private Properties
 
-    public object? TargetInstance { get; private set; }
+    object? ILockedConfigElement.TargetInstance { get; set; }
 
-    public PropertyFieldWrapper? TargetMember { get; private set; }
+    PropertyFieldWrapper? ILockedConfigElement.TargetMember { get; set; }
 
-    public bool Mode { get; private set; } = false;
+    #endregion
+
+    #region Public Properties
 
     public bool IsLocked =>
-        ((bool?)TargetMember?.GetValue(TargetInstance) ?? true) == Mode;
+        this.As<ILockedConfigElement>().IsLocked;
 
     #endregion
 
@@ -51,39 +47,7 @@ public sealed class LockedBoolElement : ConfigElement<bool>
                 Value = !Value;
         };
 
-        LockedElementAttribute? attri = ConfigManager.GetCustomAttributeFromMemberThenMemberType<LockedElementAttribute>(MemberInfo, Item, List);
-
-        if (attri is null)
-            return;
-
-        Type type = attri.TargetConfig;
-
-        string name = attri.MemberName;
-
-        Mode = attri.Mode;
-
-            // TODO: Switch to using a MemberInfo based impl.
-        FieldInfo? field = type.GetField(name, Static | Instance | Public | NonPublic);
-        PropertyInfo? property = type.GetProperty(name, Static | Instance | Public | NonPublic);
-
-        if (field is not null)
-            TargetMember = new(field);
-        else
-            TargetMember = new(property);
-
-        if (ConfigManager.Configs.TryGetValue(ModContent.GetInstance<ZensSky>(), out List<ModConfig>? value))
-            TargetInstance = value.Find(c => c.Name == type.Name);
-        else
-            TargetInstance = null;
-
-        string tooltip = ConfigManager.GetLocalizedTooltip(MemberInfo);
-        string? lockReason = ConfigManager.GetLocalizedText<LockedKeyAttribute, LockedArgsAttribute>(MemberInfo, LockTooltipKey);
-
-        TooltipFunction = () =>
-            tooltip +
-            (IsLocked && lockReason is not null ?
-            (string.IsNullOrEmpty(tooltip) ? string.Empty : "\n") + $"[c/{Color.Red.Hex3()}:" + lockReason + "]" :
-            string.Empty);
+        this.As<ILockedConfigElement>().InitializeLockedElement(this);
     }
 
     #endregion

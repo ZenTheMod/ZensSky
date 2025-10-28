@@ -1,17 +1,23 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Config.UI;
 using Terraria.UI;
 using static System.Reflection.BindingFlags;
 
 namespace ZensSky.Core.Utils;
+
+    // The C# 14.0 'extension' block seems to still be a little buggy.
+#pragma warning disable CA1822 // Member does not access instance data and can be marked as static.
 
 public static partial class Utilities
 {
@@ -135,10 +141,38 @@ public static partial class Utilities
 
     #endregion
 
+    #region Singleton Instances
+
     /// <inheritdoc cref="ModContent.GetInstance"/>
     /// <returns>The singleton instance of <paramref name="type"/>.</returns>
     public static object GetInstance(Type type) =>
         ContentInstance.contentByType[type].instance;
+
+    public static bool TryGetInstance(Type type, [NotNullWhen(true)] out object? obj)
+    {
+        obj = null;
+
+        if (!ContentInstance.contentByType.TryGetValue(type, out ContentInstance.ContentEntry? entry) ||
+            entry is null)
+            return false;
+
+        obj = entry.instance;
+
+        return true;
+    }
+
+    #endregion
+
+    #region PropertyFieldWrapper
+
+    extension(PropertyFieldWrapper member)
+    {
+        public bool IsStatic =>
+            member.fieldInfo?.IsStatic ??
+            member.propertyInfo.GetAccessors(true)[0].IsStatic;
+    }
+
+    #endregion
 
     #endregion
 
@@ -206,4 +240,8 @@ public static partial class Utilities
         Enumerable.Range(start, end - start + 1).Select(i => (char)i);
 
     #endregion
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static T As<T>(this object @this) where T : class =>
+        (T)@this;
 }

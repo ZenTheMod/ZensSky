@@ -6,7 +6,7 @@ side = NoSync
 sortAfter = FancyLighting, RedSunAndRealisticSky
 sortBefore = BetterNightSky, CoolerMenu, FancyLighting, Lights, RealisticSky
 
-weakReferences = BetterNightSky@1.24, CoolerMenu@1.20, FancyLighting@1.0.0, Lights@1.4.2, Macrocosm@0.1.0.11, RainOverhaul@1.7, RealisticSky@1.0.24, RedSunAndRealisticSky@1.0.2, Sloprain@1.3.0.0, SubworldLibrary@2.2.3.1
+weakReferences = BetterNightSky@1.24, CoolerMenu@1.31, FancyLighting@1.0.0, Lights@1.4.2, Macrocosm@0.1.0.11, RainOverhaul@1.7, RealisticSky@1.0.24, RedSunAndRealisticSky@1.0.2, Sloprain@1.3.0.0, SubworldLibrary@2.2.3.1
 
 modReferences = Daybreak@2.0.0
 

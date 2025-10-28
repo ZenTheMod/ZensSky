@@ -1,4 +1,5 @@
-﻿using MonoMod.Cil;
+﻿using CoolerMenu.Common.Menu;
+using MonoMod.Cil;
 using MonoMod.RuntimeDetour;
 using System;
 using System.Linq;
@@ -6,8 +7,8 @@ using System.Reflection;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
-using ZensSky.Core.Utils;
 using ZensSky.Core.Exceptions;
+using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
 using static ZensSky.Common.Systems.Menu.Controllers.ButtonColorController;
 using static ZensSky.Common.Systems.Menu.MenuControllerSystem;
@@ -43,7 +44,7 @@ public sealed class CoolerMenuSystem : ModSystem
 
     private static ILHook? PatchRenderCoreMenuToggle;
 
-    private static ILHook? PatchDrawFloatingButton;
+    private static ILHook? PatchDrawButton;
 
     #endregion
 
@@ -66,22 +67,22 @@ public sealed class CoolerMenuSystem : ModSystem
     {
         IsEnabled = true;
 
-        MethodInfo? renderVanillaMenuToggle = typeof(CoolerMenu.CoolerMenu).GetMethod(nameof(CoolerMenu.CoolerMenu.RenderVanillaMenuToggle), NonPublic | Instance);
+        MethodInfo? renderVanillaMenuToggle = typeof(MenuSystem).GetMethod(nameof(MenuSystem.RenderVanillaMenuToggle), NonPublic | Static);
 
         if (renderVanillaMenuToggle is not null)
             PatchRenderVanillaMenuToggle = new(renderVanillaMenuToggle,
                 AddToggle);
 
-        MethodInfo? renderCoreMenuToggle = typeof(CoolerMenu.CoolerMenu).GetMethod(nameof(CoolerMenu.CoolerMenu.RenderCoreMenuToggle), NonPublic | Instance);
+        MethodInfo? renderCoreMenuToggle = typeof(MenuSystem).GetMethod(nameof(MenuSystem.RenderCoreMenuToggle), NonPublic | Static);
 
         if (renderCoreMenuToggle is not null)
             PatchRenderCoreMenuToggle = new(renderCoreMenuToggle,
                 ModifyCoreToggle);
 
-        MethodInfo? drawFloatingButton = typeof(CoolerMenu.CoolerMenu).GetMethod(nameof(CoolerMenu.CoolerMenu.DrawFloatingButton), NonPublic | Instance);
+        MethodInfo? drawButton = typeof(MenuSystem).GetMethod(nameof(MenuSystem.DrawButton), NonPublic | Static);
 
-        if (drawFloatingButton is not null)
-            PatchDrawFloatingButton = new(drawFloatingButton,
+        if (drawButton is not null)
+            PatchDrawButton = new(drawButton,
                 ModifyButtons);
     }
 
@@ -90,7 +91,7 @@ public sealed class CoolerMenuSystem : ModSystem
         PatchRenderVanillaMenuToggle?.Dispose();
         PatchRenderCoreMenuToggle?.Dispose();
 
-        PatchDrawFloatingButton?.Dispose();
+        PatchDrawButton?.Dispose();
     }
 
     #endregion
@@ -115,6 +116,7 @@ public sealed class CoolerMenuSystem : ModSystem
                 i => i.MatchCall<Rectangle>(nameof(Rectangle.Contains)),
                 i => i.MatchBrfalse(out jumpInteractionsTarget));
 
+                // Likely unecessary.
             c.EmitDelegate(() => Hovering);
 
             c.EmitBrtrue(jumpInteractionsTarget);
@@ -145,7 +147,16 @@ public sealed class CoolerMenuSystem : ModSystem
 
             ILLabel? jumpInteractionsTarget = c.DefineLabel();
 
-                // Match to before the menu switch text is drawn.
+                // Match to the color of the menu switch text.
+            c.GotoNext(MoveType.After,
+                i => i.MatchLdloca(out _),
+                i => i.MatchLdsfld<Main>(nameof(Main.mouseX)),
+                i => i.MatchLdsfld<Main>(nameof(Main.mouseY)),
+                i => i.MatchCall<Rectangle>(nameof(Rectangle.Contains)));
+
+            c.EmitDelegate((bool hovering) => hovering && !Hovering);
+
+                // Match to after the menu switch text is drawn.
             c.GotoNext(MoveType.Before,
                 i => i.MatchLdloca(out _),
                 i => i.MatchLdsfld<Main>(nameof(Main.mouseX)),
@@ -173,30 +184,36 @@ public sealed class CoolerMenuSystem : ModSystem
         {
             ILCursor c = new(il);
 
-            int hoveringIndex = -1;
+            int hoveringIndex = -1; // arg-intpointer
 
             int colorIndex = -1;
 
             c.GotoNext(MoveType.After,
+                i => i.MatchLdarg(out hoveringIndex),
+                i => i.MatchLdloca(out _),
+                i => i.MatchCall<Main>($"get_{nameof(Main.MouseScreen)}"),
                 i => i.MatchCall(typeof(Utils).FullName ?? "Terraria.Utils", nameof(Utils.ToPoint)),
                 i => i.MatchCall<Rectangle>(nameof(Rectangle.Contains)),
-                i => i.MatchStloc(out hoveringIndex));
+                i => i.MatchStindI1());
 
-            c.EmitLdloca(hoveringIndex);
+            c.EmitLdarg(hoveringIndex);
 
-            c.EmitDelegate((ref bool hovering) =>
-                { hovering &= !Hovering; });
+            c.EmitLdarg(hoveringIndex);
+            c.EmitLdindI1();
+
+            c.EmitDelegate((bool hovering) =>
+                hovering && !Hovering);
+
+            c.EmitStindI1();
 
             c.GotoNext(MoveType.After,
-                i => i.MatchLdcI4(out _),
-                i => i.MatchLdcI4(out _),
-                i => i.MatchLdcI4(out _),
-                i => i.MatchNewobj<Color>(),
+                i => i.MatchLdsfld<Main>(nameof(Main.OurFavoriteColor)),
                 i => i.MatchStloc(out colorIndex));
 
             c.MoveAfterLabels();
 
-            c.EmitLdloc(hoveringIndex);
+            c.EmitLdarg(hoveringIndex);
+            c.EmitLdindI1();
 
             c.EmitLdloca(colorIndex);
 

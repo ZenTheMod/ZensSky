@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Terraria.ModLoader;
@@ -37,29 +38,36 @@ public sealed class ShaderHotCompiler : ModSystem
 
     public override void Load()
     {
-        ModSource = Mod.SourceFolder.Replace('\\', '/');
-
-        string[] paths = Directory.GetFiles(ModSource, "*fxc.exe", SearchOption.AllDirectories);
-
-        if (paths.Length <= 0)
+        try
         {
-            Mod.Logger.Info("'fxc.exe' not found! Effects will not be compiled!");
-            return;
+            ModSource = Mod.SourceFolder.Replace('\\', '/');
+
+            string[] paths = Directory.GetFiles(ModSource, "*fxc.exe", SearchOption.AllDirectories);
+
+            if (paths.Length <= 0)
+            {
+                Mod.Logger.Info("'fxc.exe' not found! Effects will not be compiled!");
+                return;
+            }
+
+            EffectCompilerPath = paths[0].Replace('\\', '/');
+
+            EffectWatcher = new(ModSource);
+
+            foreach (string e in EffectExtensions)
+                EffectWatcher.Filters.Add($"*{e}");
+
+            EffectWatcher.Changed += EffectChanged;
+
+            EffectWatcher.NotifyFilter = AllFilters;
+
+            EffectWatcher.IncludeSubdirectories = true;
+            EffectWatcher.EnableRaisingEvents = true;
         }
-
-        EffectCompilerPath = paths[0].Replace('\\', '/');
-
-        EffectWatcher = new(ModSource);
-
-        foreach (string e in EffectExtensions)
-            EffectWatcher.Filters.Add($"*{e}");
-
-        EffectWatcher.Changed += EffectChanged;
-
-        EffectWatcher.NotifyFilter = AllFilters;
-
-        EffectWatcher.IncludeSubdirectories = true;
-        EffectWatcher.EnableRaisingEvents = true;
+        catch (Exception e)
+        {
+            Mod.Logger.Warn($"Unable to load Shader Hot-Compiler! - {e}");
+        }
     }
 
     public override void Unload() =>
