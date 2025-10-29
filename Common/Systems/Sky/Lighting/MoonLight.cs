@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using ZensSky.Common.Config;
 using ZensSky.Common.Systems.Compat;
@@ -7,7 +6,7 @@ using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Sky.Lighting;
 
-public sealed class MoonLight : ISkyLight
+public sealed class MoonLight : SkyLight
 {
     #region Private Fields
 
@@ -17,15 +16,15 @@ public sealed class MoonLight : ISkyLight
 
     #region Public Properties
 
-    public bool Active =>
+    public override bool Active =>
         ShowMoon &&
         (RedSunSystem.IsEnabled ||
         !Main.dayTime);
 
-    public Color Color =>
+    protected override Color Color =>
         GetLightColor(false);
 
-    public Vector2 Position
+    protected override Vector2 Position
     {
         get
         {
@@ -42,11 +41,11 @@ public sealed class MoonLight : ISkyLight
         }
     }
 
-    public float Size =>
+    protected override float Size =>
         Info.MoonScale * MoonSize;
 
-    public Asset<Texture2D>? Texture =>
-        SkyConfig.Instance.UseSunAndMoon ? MoonTexture : null;
+    protected override Texture2D? Texture =>
+        SkyConfig.Instance.UseSunAndMoon ? MoonTexture.Value : null;
 
     #endregion
 }

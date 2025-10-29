@@ -11,7 +11,7 @@ using ZensSky.Core.DataStructures;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.ModCall;
 using ZensSky.Core.Utils;
-using static ZensSky.Common.Systems.Sky.Lighting.SkyLightingSystem;
+using static ZensSky.Common.Systems.Sky.Lighting.SkyLightSystem;
 
 namespace ZensSky.Common.Systems.Background;
 
@@ -270,7 +270,7 @@ public sealed class CloudsSystem : ModSystem
             spriteBatch.End();
         }
 
-            // Only draw clouds to the background as they should not be occluding light.
+            // Only draw clouds to the background as they should not be occluding info.
         device.SetRenderTarget(BackgroundTarget);
 
         Effect cloudLighting = ApplyCloudLighting();
@@ -328,22 +328,22 @@ public sealed class CloudsSystem : ModSystem
 
         SkyEffects.CloudGodrays.SampleCount = sampleCount;
 
-        InvokeForActiveLights((light) =>
+        InvokeForActiveLights((info) =>
         {
-            if (light.Color == Color.Black)
+            if (info.Color == Color.Black)
                 return;
 
-            SkyEffects.CloudGodrays.LightPosition = light.Position * LightTargetScale;
-            SkyEffects.CloudGodrays.LightColor = light.Color.ToVector4();
+            SkyEffects.CloudGodrays.LightPosition = info.Position * LightTargetScale;
+            SkyEffects.CloudGodrays.LightColor = info.Color.ToVector4();
 
-            SkyEffects.CloudGodrays.LightSize = light.Size;
+            SkyEffects.CloudGodrays.LightSize = info.Size;
 
             SkyEffects.CloudGodrays.UseTexture = false;
 
-            if (light.Texture is not null)
+            if (info.Texture is not null)
             {
                 SkyEffects.CloudGodrays.UseTexture = true;
-                device.Textures[1] = light.Texture.Value;
+                device.Textures[1] = info.Texture;
             }
 
                 // TODO: Not this!

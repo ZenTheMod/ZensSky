@@ -161,6 +161,24 @@ public static partial class Utilities
         return true;
     }
 
+    /// <summary>
+    /// Gets, or creates the singleton instance of all classes that inherit from <typeparamref name="T"/>.
+    /// </summary>
+    public static IEnumerable<T> GetAllInstancesOf<T>(Assembly assembly) where T : class =>
+        assembly.GetTypes()
+        .Where(
+            p => p.IsAssignableTo(typeof(T)) &&
+            p.IsClass &&
+            !p.IsAbstract &&
+            p != typeof(T))
+        .Select(t =>
+        {
+            if (TryGetInstance(t, out object? instance))
+                return (T)instance;
+            else
+                return (T)Activator.CreateInstance(t)!;
+        });
+
     #endregion
 
     #region PropertyFieldWrapper

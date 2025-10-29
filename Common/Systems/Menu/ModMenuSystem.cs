@@ -17,7 +17,7 @@ using ZensSky.Core;
 using ZensSky.Core.Exceptions;
 using ZensSky.Core.Utils;
 using static System.Reflection.BindingFlags;
-using static ZensSky.Common.Systems.Sky.Lighting.SkyLightingSystem;
+using static ZensSky.Common.Systems.Sky.Lighting.SkyLightSystem;
 
 namespace ZensSky.Common.Systems.Menu;
 
@@ -173,17 +173,17 @@ public sealed class ModMenuSystem : ModSystem
         Texture2D normal = MiscTextures.ModLoaderLogoNormals;
         Vector2 normalOrigin = normal.Size() * .5f;
 
-        InvokeForActiveLights((light) =>
+        InvokeForActiveLights((info) =>
         {
-            UIEffects.LogoNormals.LightPosition = light.Position;
-            UIEffects.LogoNormals.LightColor = light.Color.ToVector4();
+            UIEffects.LogoNormals.LightPosition = info.Position;
+            UIEffects.LogoNormals.LightColor = info.Color.ToVector4();
             
             UIEffects.LogoNormals.UseTexture = false;
 
-            if (light.Texture is not null)
+            if (info.Texture is not null)
             {
                 UIEffects.LogoNormals.UseTexture = true;
-                device.Textures[1] = light.Texture.Value;
+                device.Textures[1] = info.Texture;
             }
 
             UIEffects.LogoNormals.Rotation = logoRotation;

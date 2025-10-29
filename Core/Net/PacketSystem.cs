@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -24,18 +21,8 @@ public sealed class PacketSystem : ModSystem
 
     #region Loading
 
-    public override void PostSetupContent()
-    {
-        Assembly assembly = Mod.Code;
-
-        Type[] types = [.. assembly.GetTypes()
-            .Where(p => p.IsAssignableTo(typeof(IPacketHandler)) &&
-            p.IsClass &&
-            p != typeof(IPacketHandler))];
-
-        foreach (Type type in types)
-            Handlers.Add((IPacketHandler)Utilities.GetInstance(type));
-    }
+    public override void PostSetupContent() =>
+        Handlers.AddRange(Utilities.GetAllInstancesOf<IPacketHandler>(Mod.Code));
 
     #endregion
 

@@ -4,7 +4,7 @@ using static ZensSky.Common.Systems.Sky.SunAndMoon.SunAndMoonSystem;
 
 namespace ZensSky.Common.Systems.Sky.Lighting;
 
-public sealed class SunLight : ISkyLight
+public sealed class SunLight : SkyLight
 {
     #region Private Fields
 
@@ -14,14 +14,14 @@ public sealed class SunLight : ISkyLight
 
     #region Public Properties
 
-    public bool Active =>
+    public override bool Active =>
         ShowSun &&
         Main.dayTime;
 
-    public Color Color =>
+    protected override Color Color =>
         GetLightColor(true);
 
-    public Vector2 Position
+    protected override Vector2 Position
     {
         get
         {
@@ -38,7 +38,7 @@ public sealed class SunLight : ISkyLight
         }
     }
 
-    public float Size =>
+    protected override float Size =>
         Info.SunScale * SunSize;
 
     #endregion
