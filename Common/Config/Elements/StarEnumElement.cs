@@ -27,7 +27,7 @@ public sealed class StarEnumElement : ConfigElement<StarVisual>
         Scale = 2f,
         Style = 0,
         Rotation = 0,
-        Twinkle = 1f,
+        TwinklePhase = 1f,
         IsActive = true
     };
 

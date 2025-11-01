@@ -15,6 +15,6 @@ global using StarTextures = ZensSky.GeneratedAssets.Textures.Sky.StarStyles.Text
 
 global using UITextures = ZensSky.GeneratedAssets.Textures.UI.Textures;
 global using ButtonTextures = ZensSky.GeneratedAssets.Textures.UI.Buttons.Textures;
-global using PanelTextures = ZensSky.GeneratedAssets.Textures.UI.PanelStyle.Textures;
+global using PanelStyleTextures = ZensSky.GeneratedAssets.Textures.UI.PanelStyle.Textures;
 
 global using MiscTextures = ZensSky.GeneratedAssets.Textures.Textures;

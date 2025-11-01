@@ -20,6 +20,8 @@ public sealed class StarSystem : ModSystem, IPacketHandler
 {
     #region Private Fields
 
+    private const float CircularRadius = 1200f;
+
     private const float DawnTime = 6700f;
     private const float DuskStartTime = 48000f;
     private const float DayLength = 54000f;
@@ -279,7 +281,7 @@ public sealed class StarSystem : ModSystem, IPacketHandler
         StarRotation = 0f;
 
         for (int i = 0; i < StarCount; i++)
-            Stars[i] = new(rand);
+            Stars[i] = new(rand, CircularRadius);
 
         StarHooks.InvokeGenerateStars(rand, seed);
     }

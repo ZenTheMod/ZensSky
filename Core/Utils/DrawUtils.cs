@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.GameContent;
@@ -23,7 +24,9 @@ public static partial class Utilities
     /// <summary>
     /// Reinitializes <paramref name="target"/> if needed.
     /// </summary>
-    public static void ReintializeTarget(ref RenderTarget2D? target, 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ReintializeTarget(
+        [NotNull] ref RenderTarget2D? target, 
         GraphicsDevice device,
         int width,
         int height,

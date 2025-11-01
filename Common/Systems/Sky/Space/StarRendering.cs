@@ -181,7 +181,7 @@ public static class StarRendering
 
         if (InvokePreDrawStars(spriteBatch, in snapshot, ref alpha, ref transform))
         {
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearWrap, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), transform);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp, snapshot.DepthStencilState, snapshot.RasterizerState, RealisticSkySystem.ApplyStarShader(), transform);
 
             if (alpha > 0)
                 DrawStars(spriteBatch, alpha);

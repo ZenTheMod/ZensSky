@@ -2,12 +2,9 @@
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using ZensSky.Common.Config;
-using ZensSky.Common.DataStructures;
 using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 
@@ -49,58 +46,67 @@ public static class WindRendering
     {
         orig(self);
 
-        if (!Main.gameMenu || !SkyConfig.Instance.UseWindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        if (!Main.gameMenu ||
+            !SkyConfig.Instance.UseWindParticles ||
+            SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        if (SkyConfig.Instance.UsePixelatedSky)
-            DrawPixelated();
-        else
-            DrawWind();
+        Draw();
     }
 
     private static void InGameDraw(On_Main.orig_DrawInfernoRings orig, Main self)
     {
         orig(self);
 
-        if (Main.gameMenu || !SkyConfig.Instance.UseWindParticles || SkyConfig.Instance.WindOpacity <= 0)
+        if (Main.gameMenu ||
+            !SkyConfig.Instance.UseWindParticles ||
+            SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        if (SkyConfig.Instance.UsePixelatedSky)
-            DrawPixelated();
-        else
-            DrawWind();
+        Draw();
     }
 
     #endregion
 
     #region Drawing
 
-    private static void DrawPixelated()
+    private static void Draw()
+    {
+        SpriteBatch spriteBatch = Main.spriteBatch;
+
+        GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+        if (SkyConfig.Instance.UsePixelatedSky)
+            DrawPixelated(spriteBatch, device);
+        else
+        {
+            spriteBatch.End(out var snapshot);
+
+            DrawWinds(spriteBatch, device, snapshot);
+
+            spriteBatch.Begin(in snapshot);
+        }
+    }
+
+    private static void DrawPixelated(SpriteBatch spriteBatch, GraphicsDevice device)
     {
         if (!SkyConfig.Instance.UsePixelatedSky || 
             !SkyEffects.PixelateAndQuantize.IsReady || 
             Main.mapFullscreen)
             return;
 
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
-
         Viewport viewport = device.Viewport;
-
-        SpriteBatch spriteBatch = Main.spriteBatch;
 
         spriteBatch.End(out var snapshot);
 
         using (new RenderTargetSwap(ref WindTarget, viewport.Width, viewport.Height))
         {
             device.Clear(Color.Transparent);
-            spriteBatch.Begin(in snapshot);
 
-            DrawWind();
-
-            spriteBatch.End();
+            DrawWinds(spriteBatch, device, snapshot);
         }
 
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, Matrix.Identity);
+        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Matrix.Identity);
 
         Vector2 screenSize = new(viewport.Width, viewport.Height);
 
@@ -118,16 +124,17 @@ public static class WindRendering
         spriteBatch.Restart(in snapshot);
     }
 
-    private static void DrawWind()
+    private static void DrawWinds(SpriteBatch spriteBatch, GraphicsDevice device, SpriteBatchSnapshot snapshot)
     {
-        GraphicsDevice device = Main.graphics.GraphicsDevice;
+        Matrix matrix = snapshot.TransformMatrix * Matrix.CreateTranslation(new(-Main.screenPosition, 0));
+
+        spriteBatch.Begin(snapshot.SortMode, snapshot.BlendState, snapshot.SamplerState, snapshot.DepthStencilState, snapshot.RasterizerState, null, matrix);
 
         device.Textures[0] = SkyTextures.SunBloom;
 
-        ReadOnlySpan<WindParticle> activeWind = [.. WindSystem.Winds.Where(w => w.IsActive)];
+        WindSystem.Winds.Draw(spriteBatch, device);
 
-        for (int i = 0; i < activeWind.Length; i++)
-            activeWind[i].Draw(device);
+        spriteBatch.End();
     }
 
     #endregion

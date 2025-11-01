@@ -1,8 +1,11 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
+using System.Diagnostics.CodeAnalysis;
 using Terraria;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Core.DataStructures;
+
+#pragma warning disable CS8777
 
 /// <summary>
 /// Wraps <see cref="RenderTarget2D"/> application with a disposable pattern for use with a <see cref="using"/> statement.<br/><br/>
@@ -61,7 +64,7 @@ public readonly ref struct RenderTargetSwap
     }
 
     public RenderTargetSwap(
-        ref RenderTarget2D? target,
+        [NotNull] ref RenderTarget2D? target,
         int width,
         int height,
         bool mipMap = false,

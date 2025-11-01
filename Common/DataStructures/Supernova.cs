@@ -4,12 +4,6 @@ using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.DataStructures;
 
-public enum SupernovaState : byte
-{
-    Contracting,
-    Expanding
-}
-
 /// <summary>
 /// Structure that contains data pertaining to a <see cref="Star"/>'s supernova.
 /// </summary>
@@ -91,6 +85,58 @@ public struct Supernova
 
     #endregion
 
+    #region Updating
+
+    public void Update()
+    {
+        switch (State)
+        {
+            case SupernovaState.Contracting:
+                unsafe
+                {
+                    if (!UpdateContracting())
+                        return;
+
+                    State = SupernovaState.Expanding;
+                    Target->IsActive = false;
+                }
+                return;
+
+            default:
+                if (UpdateExpanding())
+                    IsActive = false;
+                return;
+        }
+    }
+
+    private unsafe bool UpdateContracting()
+    {
+        Contract += Increment * ContractMultiplier * Multiplier;
+        Contract = Utilities.Saturate(Contract);
+
+        float colorInterpolator = Easings.OutQuint(Contract);
+        Target->Color = Color.Lerp(StartingColor, EndingColor, colorInterpolator);
+
+        // Have the star increase in scale slightly before shrinking.
+        float scaleMultiplier = Easings.OutBack(1 - Contract, 7);
+        Target->Scale = StartingScale * scaleMultiplier;
+
+        return Contract >= 1f;
+    }
+
+    private bool UpdateExpanding()
+    {
+        Expand += Increment * ExpandMultiplier * Multiplier;
+        Expand = Utilities.Saturate(Expand);
+
+        Decay += Increment * DecayMultiplier * Multiplier;
+        Decay = Utilities.Saturate(Decay);
+
+        return Expand >= 1f && Decay >= 1f;
+    }
+
+    #endregion
+
     #region Drawing
 
     public readonly void Draw(SpriteBatch spriteBatch, GraphicsDevice device, float alpha, float rotation)
@@ -129,58 +175,6 @@ public struct Supernova
         float scale = Scale * StartingScale;
 
         spriteBatch.Draw(texture, position, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
-    }
-
-    #endregion
-
-    #region Updating
-
-    public void Update()
-    {
-        switch (State)
-        {
-            case SupernovaState.Contracting:
-                unsafe
-                {
-                    if (!UpdateContracting())
-                        return;
-
-                    State = SupernovaState.Expanding;
-                    Target->IsActive = false;
-                }
-                return;
-
-            default:
-                if (UpdateExpanding())
-                    IsActive = false;
-                return;
-        }
-    }
-
-    private unsafe bool UpdateContracting()
-    {
-        Contract += Increment * ContractMultiplier * Multiplier;
-        Contract = Utilities.Saturate(Contract);
-
-        float colorInterpolator = Easings.OutQuint(Contract);
-        Target->Color = Color.Lerp(StartingColor, EndingColor, colorInterpolator);
-
-            // Have the star increase in scale slightly before shrinking.
-        float scaleMultiplier = Easings.OutBack(1 - Contract, 7);
-        Target->Scale = StartingScale * scaleMultiplier;
-
-        return Contract >= 1f;
-    }
-
-    private bool UpdateExpanding()
-    {
-        Expand += Increment * ExpandMultiplier * Multiplier;
-        Expand = Utilities.Saturate(Expand);
-
-        Decay += Increment * DecayMultiplier * Multiplier;
-        Decay = Utilities.Saturate(Decay);
-
-        return Expand >= 1f && Decay >= 1f;
     }
 
     #endregion

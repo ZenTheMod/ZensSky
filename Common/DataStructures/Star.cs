@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Runtime.CompilerServices;
 using Terraria;
@@ -7,15 +8,6 @@ using Terraria.Utilities;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.DataStructures;
-
-public enum StarVisual : byte
-{
-    Vanilla,
-    Diamond,
-    FourPointed,
-    OuterWilds,
-    Random
-}
 
     // Thanks to jupiter.ryo for early help with this.
 /// <summary>
@@ -32,25 +24,34 @@ public record struct Star
 
     private const float MinScale = .3f;
     private const float MaxScale = 1.25f;
-    private const float MaxTwinkle = 2f;
+
+    private const float MaxTwinkle = MathHelper.TwoPi;
+
     private const int StarStyles = 4;
-    private const float CircularRadius = 1200f;
+
     private const float LowTempThreshold = .4f;
     private const float HighTempThreshold = .6f;
 
-    private const float VanillaStyleScale = .95f;
+    private const float TwinkleTimeMultiplier = 1.45f;
 
-    private const float TwinkleTimeMultiplier = .35f;
-    private const float TwinkleMinScale = .65f;
+    private const float VanillaScale = .95f;
+    private const float VanillaTwinkleMin = .75f;
+    private const float VanillaTwinkleMax = 1.03f;
 
     private const float DiamondSize = .124f;
     private const float DiamondAlpha = .75f;
+    private const float DiamondTwinkleMin = .8f;
+    private const float DiamondTwinkleMax = 1.20f;
 
     private const float FlareSize = .14f;
     private const float FlareInnerSize = .03f;
+    private const float FlareTwinkleMin = .85f;
+    private const float FlareTwinkleMax = 1.45f;
 
     private const float CircleSize = .3f;
     private const float CircleAlpha = .67f;
+    private const float CircleTwinkleMin = .85f;
+    private const float CircleTwinkleMax = 1.3f;
 
     #endregion
 
@@ -64,7 +65,7 @@ public record struct Star
 
     public float Rotation { get; init; }
 
-    public float Twinkle { get; init; }
+    public float TwinklePhase { get; init; }
 
     public int Style { get; init; }
 
@@ -74,14 +75,24 @@ public record struct Star
 
     #region Public Constructors
 
-    public Star(UnifiedRandom rand)
+    public Star(UnifiedRandom rand, float circularRadius)
     {
-        Position = rand.NextUniformVector2Circular(CircularRadius);
+        Position = rand.NextUniformVector2Circular(circularRadius);
         Color = GenerateColor(rand.NextFloat(1));
         Scale = rand.NextFloat(MinScale, MaxScale);
         Style = rand.Next(0, StarStyles);
         Rotation = rand.NextFloatDirection();
-        Twinkle = rand.NextFloat(MaxTwinkle);
+        TwinklePhase = rand.NextFloat(MaxTwinkle);
+    }
+
+    public Star(UnifiedRandom rand, Rectangle rectangle)
+    {
+        Position = rand.NextVector2FromRectangle(rectangle);
+        Color = GenerateColor(rand.NextFloat(1));
+        Scale = rand.NextFloat(MinScale, MaxScale);
+        Style = rand.Next(0, StarStyles);
+        Rotation = rand.NextFloatDirection();
+        TwinklePhase = rand.NextFloat(MaxTwinkle);
     }
 
     #endregion
@@ -97,12 +108,11 @@ public record struct Star
 
         Color color = Color * GetAlpha(alpha);
 
-        float twinklePhase = Twinkle + (Main.GlobalTimeWrappedHourly * TwinkleTimeMultiplier);
-        float twinkle = Utils.Remap(MathF.Sin(twinklePhase), -1, 1, TwinkleMinScale, 1f);
+        float twinkle = TwinkleScale(VanillaTwinkleMin, VanillaTwinkleMax);
 
-        float scale = Scale * VanillaStyleScale * twinkle;
+        float scale = Scale * VanillaScale * twinkle;
 
-        float rotation = (Main.GlobalTimeWrappedHourly * .1f * Twinkle) + Rotation;
+        float rotation = (Main.GlobalTimeWrappedHourly * .1f * TwinklePhase) + Rotation;
 
         spriteBatch.Draw(texture, position, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
     }
@@ -114,8 +124,7 @@ public record struct Star
         Color color = Color * GetAlpha(alpha) * DiamondAlpha;
         color.A = 0;
 
-        float twinklePhase = Twinkle + (Main.GlobalTimeWrappedHourly * TwinkleTimeMultiplier);
-        float twinkle = Utils.Remap(MathF.Sin(twinklePhase), -1, 1, 0.8f, 1.2f);
+        float twinkle = TwinkleScale(DiamondTwinkleMin, DiamondTwinkleMax);
 
         float scale = twinkle * Scale * DiamondSize;
 
@@ -129,7 +138,9 @@ public record struct Star
         Color color = Color * GetAlpha(alpha);
         color.A = 0;
 
-        float scale = Scale * FlareSize;
+        float twinkle = TwinkleScale(FlareTwinkleMin, FlareTwinkleMax);
+
+        float scale = twinkle * Scale * FlareSize;
 
         spriteBatch.Draw(texture, position, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
 
@@ -148,7 +159,9 @@ public record struct Star
         Color color = Color * GetAlpha(alpha) * CircleAlpha;
         color.A = 0;
 
-        float scale = Scale * CircleSize;
+        float twinkle = TwinkleScale(CircleTwinkleMin, CircleTwinkleMax);
+
+        float scale = twinkle * Scale * CircleSize;
 
         spriteBatch.Draw(texture, position, null, color, rotation, origin, scale, SpriteEffects.None, 0f);
     }
@@ -165,6 +178,10 @@ public record struct Star
             <= HighTempThreshold => Color.Lerp(LowTemperature, HighTemperature, Utils.Remap(temperature, LowTempThreshold, HighTempThreshold, 0f, 1f)),
             _ => Color.Lerp(HighTemperature, HighestTemperature, Utils.Remap(temperature, HighTempThreshold, 1f, 0f, 1f))
         };
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private readonly float TwinkleScale(float min, float max) =>
+        Utils.Remap(MathF.Sin(TwinklePhase + (Main.GlobalTimeWrappedHourly * TwinkleTimeMultiplier)), -1, 1, min, max);
 
     #endregion
 

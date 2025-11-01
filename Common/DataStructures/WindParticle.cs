@@ -4,10 +4,11 @@ using System;
 using System.Linq;
 using Terraria;
 using ZensSky.Common.Config;
+using ZensSky.Core.Particles;
 
 namespace ZensSky.Common.DataStructures;
 
-public record struct WindParticle
+public record struct WindParticle : IParticle
 {
     #region Private Fields
 
@@ -36,6 +37,8 @@ public record struct WindParticle
 
     public Vector2 Velocity { get; set; }
 
+    public float Wind { get; init; }
+
     public bool ShouldLoop { get; init; }
 
     public float LifeTime { get; set; }
@@ -46,11 +49,12 @@ public record struct WindParticle
 
     #region Public Constructors
 
-    public WindParticle(Vector2 position, bool shouldLoop)
+    public WindParticle(Vector2 position, float wind, bool shouldLoop)
     {
         Position = position;
         OldPositions = new Vector2[MaxOldPositions];
         Velocity = Vector2.Zero;
+        Wind = wind;
         ShouldLoop = shouldLoop;
         LifeTime = 0f;
         IsActive = true;
@@ -58,70 +62,30 @@ public record struct WindParticle
 
     #endregion
 
-    #region Drawing
-
-        // TODO: Generic util method for primslop.
-    public readonly void Draw(GraphicsDevice device)
-    {
-        Vector2[] positions = [.. OldPositions.Where(pos => pos != default)];
-
-        if (positions.Length <= 2)
-            return;
-
-        VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[(positions.Length - 1) * 2];
-
-        float brightness = MathF.Sin(LifeTime * MathHelper.Pi) * Main.atmo * MathF.Abs(Main.WindForVisuals);
-
-        float alpha = SkyConfig.Instance.WindOpacity;
-
-        for (int i = 0; i < positions.Length - 1; i++)
-        {
-            float progress = (float)i / positions.Length;
-            float width = MathF.Sin(progress * MathHelper.Pi) * brightness * WidthAmplitude;
-
-            Vector2 position = positions[i] - Main.screenPosition;
-
-            float direction = (positions[i] - positions[i + 1]).ToRotation();
-            Vector2 offset = new Vector2(width, 0).RotatedBy(direction + MathHelper.PiOver2);
-
-            Color color = Lighting.GetColor(positions[i].ToTileCoordinates()).MultiplyRGB(Main.ColorOfTheSkies) * brightness * alpha;
-            color.A = 0;
-
-            vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));
-            vertices[i * 2 + 1] = new(new(position + offset, 0), color, new(progress, 1f));
-        }
-
-        if (vertices.Length > 3)
-            device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, vertices.Length - 2);
-    }
-
-    #endregion
-
     #region Updating
 
-    public void Update()
+    void IParticle.Update()
     {
-        float wind = Main.WindForVisuals;
-        float increment = LifeTimeIncrement * MathF.Abs(wind);
+        float increment = LifeTimeIncrement * MathF.Abs(Wind);
 
         LifeTime += increment;
         if (LifeTime > 1f)
             IsActive = false;
 
-        Vector2 newVelocity = new(wind, 
+        Vector2 newVelocity = new(Wind, 
             MathF.Sin((LifeTime * SinLifeTimeFrequency + Main.GlobalTimeWrappedHourly) * SinGlobalTimeFrequency) * SinAmplitude);
 
         if (ShouldLoop)
         {
-            float range = LoopRange / MathHelper.Clamp(MathF.Abs(wind), .01f, 1);
+            float range = LoopRange / MathHelper.Clamp(MathF.Abs(Wind), .01f, 1);
             range *= .5f;
 
             float interpolator = Utils.Remap(LifeTime, .5f - range, .5f + range, 0f, 1f);
 
-            newVelocity = newVelocity.RotatedBy(MathHelper.TwoPi * interpolator * -MathF.Sign(wind));
+            newVelocity = newVelocity.RotatedBy(MathHelper.TwoPi * interpolator * -MathF.Sign(Wind));
         }
 
-        Velocity = newVelocity.SafeNormalize(Vector2.UnitY) * Magnitude * MathF.Abs(wind);
+        Velocity = newVelocity.SafeNormalize(Vector2.UnitY) * Magnitude * MathF.Abs(Wind);
 
         Position += Velocity;
 
@@ -130,6 +94,46 @@ public record struct WindParticle
             OldPositions[i + 1] = OldPositions[i];
 
         OldPositions[0] = Position;
+    }
+
+    #endregion
+
+    #region Drawing
+
+    readonly void IParticle.Draw(SpriteBatch spriteBatch, GraphicsDevice device)
+    {
+        Vector2[] positions = [.. OldPositions.Where(pos => pos != default)];
+
+        if (positions.Length <= 2)
+            return;
+
+        VertexPositionColorTexture[] vertices = new VertexPositionColorTexture[(positions.Length - 1) * 2];
+
+        float brightness = MathF.Sin(LifeTime * MathHelper.Pi) * Main.atmo * MathF.Abs(Wind);
+
+        float alpha = SkyConfig.Instance.WindOpacity;
+
+        for (int i = 0; i < positions.Length - 1; i++)
+        {
+            float progress = (float)i / positions.Length;
+            float width = MathF.Sin(progress * MathHelper.Pi) * brightness * WidthAmplitude;
+
+            Vector2 position = Vector2.Transform(positions[i], spriteBatch.transformMatrix);
+
+            float direction = (positions[i] - positions[i + 1]).ToRotation();
+            Vector2 offset = new Vector2(width, 0).RotatedBy(direction + MathHelper.PiOver2);
+
+            Point tilePosition = (position - Main.screenPosition).ToTileCoordinates();
+
+            Color color = Lighting.GetColor(tilePosition).MultiplyRGB(Main.ColorOfTheSkies) * brightness * alpha;
+            color.A = 0;
+
+            vertices[i * 2] = new(new(position - offset, 0), color, new(progress, 0f));
+            vertices[i * 2 + 1] = new(new(position + offset, 0), color, new(progress, 1f));
+        }
+
+        if (vertices.Length > 3)
+            device.DrawUserPrimitives(PrimitiveType.TriangleStrip, vertices, 0, vertices.Length - 2);
     }
 
     #endregion

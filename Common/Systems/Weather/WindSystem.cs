@@ -6,6 +6,7 @@ using ZensSky.Common.Config;
 using ZensSky.Common.DataStructures;
 using ZensSky.Common.Systems.Compat;
 using ZensSky.Core;
+using ZensSky.Core.Particles;
 using ZensSky.Core.Utils;
 
 namespace ZensSky.Common.Systems.Weather;
@@ -25,18 +26,15 @@ public sealed class WindSystem : ModSystem
 
     #region Public Fields
 
-    public const int WindCount = 45;
-    public static readonly WindParticle[] Winds = new WindParticle[WindCount];
+    public const int WindCount = 65;
+    public static readonly ParticleHandler<WindParticle> Winds = new(WindCount);
 
     #endregion
 
     #region Loading
 
-    public override void Load() 
-    { 
-        Array.Clear(Winds);
+    public override void Load() =>
         MainThreadSystem.Enqueue(() => On_Main.DoUpdate += UpdateWind);
-    }
 
     public override void Unload() => 
         MainThreadSystem.Enqueue(() => On_Main.DoUpdate -= UpdateWind);
@@ -56,9 +54,7 @@ public sealed class WindSystem : ModSystem
             SkyConfig.Instance.WindOpacity <= 0)
             return;
 
-        for (int i = 0; i < WindCount; i++)
-            if (Winds[i].IsActive)
-                Winds[i].Update();
+        Winds.Update();
 
         if (MathF.Abs(Main.WindForVisuals) < MinWind)
             return;
@@ -73,11 +69,6 @@ public sealed class WindSystem : ModSystem
         if (!Main.rand.NextBool((int)spawnChance))
             return;
 
-        int index = Array.FindIndex(Winds, w => !w.IsActive);
-
-        if (index == -1)
-            return;
-
         Vector2 screensize = Utilities.ScreenSize;
 
         Rectangle spawn = new((int)(Main.screenPosition.X - screensize.X * Main.WindForVisuals * .5f), (int)Main.screenPosition.Y,
@@ -90,7 +81,7 @@ public sealed class WindSystem : ModSystem
         if (!Main.gameMenu && (position.Y > Main.worldSurface * 16f || Collision.SolidCollision(position, 1, 1)))
             return;
 
-        Winds[index] = new(position, Main.rand.NextBool(WindLoopChance));
+        Winds.Spawn(new(position, Main.WindForVisuals, Main.rand.NextBool(WindLoopChance)));
     }
 
     #endregion
