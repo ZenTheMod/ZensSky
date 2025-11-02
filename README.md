@@ -68,7 +68,7 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
 - Zoey (`@z_e_n_.`)
 
 ### Help with Development
-- www.sprunolia.com
+- www​.sprunolia.com
 - tomat
 - Ebonfly
 - Roton
@@ -81,7 +81,7 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
 - dreitone
 
 ### Textures
-- www.sprunolia.com
+- www​.sprunolia.com
 - [​Space Engine](https://spaceengine.org/)
 - [​Solar System Scope Textures](https://www.solarsystemscope.com/textures/)
 - [​USGS](https://www.usgs.gov/)
@@ -89,7 +89,7 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
 - Ebonfly
 
 ### 3D Modeling
-- www.sprunolia.com
+- www​.sprunolia.com
 - Zoey
 - Yonmaruyon
 
