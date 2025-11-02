@@ -81,11 +81,11 @@ public record struct SakuraLeafParticle : IParticle
 
         if (newVelocity.Y < 0f)
         {
-            Vector2 vector3 = new(newVelocity.X, -0.2f);
+            Vector2 vector3 = new(newVelocity.X, -.2f);
 
-            newVelocity.Y = 0.1f;
+            newVelocity.Y = .1f;
 
-            vector3.X *= 0.94f;
+            vector3.X *= .94f;
 
             newVelocity.X = vector3.X;
             newPosition.X += newVelocity.X;

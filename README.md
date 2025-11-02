@@ -1,26 +1,35 @@
 ﻿# Zen Skies
 This mod aims to overhaul Terraria's sky with a number of highly customizable visuals changes; some of which mirror the upcoming Terraria 1.4.5 update's visuals.
 
-## Current Planned Features
+## Features
 Checkbox shown next to currently complete features.
-- [x] Complete star overhaul including supernovae, and shooting stars.
-    - Supernovae are very-much WIP.
-- [x] Sun and moon overhaul that completely replaces the vanilla visuals.
-    - Including support for all [Moon Styles](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
-- [x] Minor ambience changes e.g. wind particles.
-- [x] Panel for configuring the titlescreen.
-- [x] Configuration to pixelate the sky.
-- [x] Dynamic cloud lighting in the style of the Terraria 1.4.5 update.
-- [x] Darker night sky.
-- [ ] Overhauled shimmer biome visuals.
-- [ ] Overhauled background meteor visuals.
-- [ ] Lightning visual rework.
-- [ ] Aurora borealis while in cold biomes.
+- Complete star overhaul.
+    - [x] Shooting stars.
+    - [x] Unique star visual styles.
+    - [ ] Supernovae.
+    - [ ] Shimmer visuals.
+- Sun and moon overhaul.
+    - [x] Variations for all [Moon Styles](https://terraria.wiki.gg/wiki/Moon_phase#Notes).
+    - [ ] Variations for all\* modded moon styles.
+    - [ ] Certain atmospheric phenomena, (e.g. 22° halo/Sun dogs.)
+-  Ambience/weather changes/additions.
+    - [x] Wind particles.
+    - [ ] Rain particles.
+    - [ ] Lightning overhaul\*, (Potentally void over the Terraria 1.4.5 update.)
+    - [x] Customizable 'atmosphere' effect.
+    - [ ] Rainbows.
+    - [ ] Aurora borealis.
+    - [x] Darker night sky.
+- Cloud lighting similar to Terraria 1.4.5's.
+    - [x] Dynamic lighting system.
+- Misc
+    - [ ] Lunar event backgrounds.
+    - [ ] Meteor changes.
+    - [x] Pixelation config.
+    - [x] Main menu config dropdown.
 
 ## Compatiblity
-
 ### Current Compat
-
 This mod features cross compatibility with a large amount of popular mods that may tweak or otherwise interact with the visuals of the sky.
 
 - 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy\*[^BetterNightSky]
@@ -40,7 +49,6 @@ This mod features cross compatibility with a large amount of popular mods that m
 If any issues arise with any mods, including the above; please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 
 ### Adding Compat
-
 This mod allows for other mod creators to easily include their own compat with 'Mod Calls.'
 
 Example:
@@ -56,32 +64,32 @@ A full list of the available methods and their aliases can be found [here](https
 If you feel any feature lacks certain cross compatibility that you'd like, please bring up an issue [here](https://github.com/ZenTheMod/ZensSky/issues).
 
 ## Credits
-
-### Developer 
+### Developer(s)
 - Zoey (`@z_e_n_.`)
 
-### Help with Development 
-- Sprunolia
-- Tomat
+### Help with Development
+- www.sprunolia.com
+- tomat
 - Ebonfly
 - Roton
-- Lion8Cake
+- Lion8cake
 - jupiter.ryo
 - Azathoth
 - Plushie
 - Tuna
 - Oli
+- dreitone
 
-### Textures 
-- Sprunolia
+### Textures
+- www.sprunolia.com
 - [​Space Engine](https://spaceengine.org/)
 - [​Solar System Scope Textures](https://www.solarsystemscope.com/textures/)
 - [​USGS](https://www.usgs.gov/)
 - ​[Björn Jónsson's Planetary Maps](https://bjj.mmedia.is/)
 - Ebonfly
 
-### 3D Modeling 
-- Sprunolia
+### 3D Modeling
+- www.sprunolia.com
 - Zoey
 - Yonmaruyon
 

@@ -24,34 +24,34 @@
 		<!-- Include various mods to make cross-modding easier;
 			Additionally listed is the mods full name and author -->
 		<Reference Include="BetterNightSky"> <!-- 'IDG's Better Night Sky' by IDGCaptainRussia and Trivaxy -->
-			<HintPath>.\lib\BetterNightSky.dll</HintPath>
+			<HintPath>.\lib\weak\BetterNightSky.dll</HintPath>
 		</Reference>
 		<Reference Include="CoolerMenu"> <!-- 'Sam's Cooler Menu Screen' by Sasamuel -->
-			<HintPath>.\lib\CoolerMenu.dll</HintPath>
+			<HintPath>.\lib\weak\CoolerMenu.dll</HintPath>
 		</Reference>
 		<Reference Include="FancyLighting"> <!-- 'Fancy Lighting' by Rex -->
-			<HintPath>.\lib\FancyLighting.dll</HintPath>
+			<HintPath>.\lib\weak\FancyLighting.dll</HintPath>
 		</Reference>
 		<Reference Include="Lights"> <!-- 'Lights And Shadows' by yiyang233 -->
-			<HintPath>.\lib\Lights.dll</HintPath>
+			<HintPath>.\lib\weak\Lights.dll</HintPath>
 		</Reference>
 		<Reference Include="Macrocosm"> <!-- 'Macrocosm [BETA]' by MechanicPluto24 -->
-			<HintPath>.\lib\Macrocosm.dll</HintPath>
+			<HintPath>.\lib\weak\Macrocosm.dll</HintPath>
 		</Reference>
 		<Reference Include="RainOverhaul"> <!-- 'Rain Overhaul' by supchyan -->
-			<HintPath>.\lib\RainOverhaul.dll</HintPath>
+			<HintPath>.\lib\weak\RainOverhaul.dll</HintPath>
 		</Reference>
 		<Reference Include="RealisticSky"> <!-- 'Realistic Sky' by Lucille Karma -->
-			<HintPath>.\lib\RealisticSky.dll</HintPath>
+			<HintPath>.\lib\weak\RealisticSky.dll</HintPath>
 		</Reference>
 		<Reference Include="RedSunAndRealisticSky"> <!-- 'Red Sun and Realistic Sky' by Waffles22 -->
-			<HintPath>.\lib\RedSunAndRealisticSky.dll</HintPath>
+			<HintPath>.\lib\weak\RedSunAndRealisticSky.dll</HintPath>
 		</Reference>
 		<Reference Include="Sloprain"> <!-- 'Rain++' by shrek -->
-			<HintPath>.\lib\Sloprain.dll</HintPath>
+			<HintPath>.\lib\weak\Sloprain.dll</HintPath>
 		</Reference>
 		<Reference Include="SubworldLibrary"> <!-- 'Subworld Library' by John Snail -->
-			<HintPath>.\lib\SubworldLibrary.dll</HintPath>
+			<HintPath>.\lib\weak\SubworldLibrary.dll</HintPath>
 		</Reference>
 		
 		<!-- Include necessary libraries -->

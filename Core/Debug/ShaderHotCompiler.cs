@@ -26,7 +26,7 @@ public sealed class ShaderHotCompiler : ModSystem
 
     private static readonly string[] EffectExtensions = [".fx", ".hlsl"];
 
-    private static string EffectCompilerPath = "";
+    private static string FXCPath = "";
 
     private static FileSystemWatcher? EffectWatcher;
 
@@ -50,7 +50,7 @@ public sealed class ShaderHotCompiler : ModSystem
                 return;
             }
 
-            EffectCompilerPath = paths[0].Replace('\\', '/');
+            FXCPath = paths[0].Replace('\\', '/');
 
             EffectWatcher = new(ModSource);
 
@@ -96,23 +96,29 @@ public sealed class ShaderHotCompiler : ModSystem
         }
 
         Task.Run(() =>
-            CompileShaderTask(EffectCompilerPath, effectPath, shortPath));
+            CompileShaderTask(FXCPath, effectPath, shortPath));
     }
 
-    private async Task CompileShaderTask(string effectCompilerPath, string effectPath, string shortPath)
+    private async Task CompileShaderTask(string executable, string effectPath, string shortPath)
     {
             // Prevent alledged issues with temp files.
         await Task.Delay(10);
 
+        string wineArgument = "";
+
         string outputEffect = Path.ChangeExtension(effectPath, ".fxc");
+
+            // TODO: Properly test the below.
+        if (OperatingSystem.IsLinux())
+            HandleWineCompilation(ref executable, ref wineArgument, ref effectPath, ref outputEffect);
 
         ProcessStartInfo pInfo = new()
         {
-            FileName = effectCompilerPath,
-            Arguments = $"\"{effectPath}\" /T fx_2_0 /nologo /O2 /Fo \"{outputEffect}\"",
+            WindowStyle = ProcessWindowStyle.Hidden,
+            FileName = executable,
+            Arguments = $"{wineArgument} \"{effectPath}\" /T fx_2_0 /nologo /O2 /Fo \"{outputEffect}\"",
             RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
+            UseShellExecute = false
         };
 
         using Process process = new();
@@ -132,6 +138,73 @@ public sealed class ShaderHotCompiler : ModSystem
             return;
 
         Mod.Logger.Warn($"Effect at {shortPath} could not be compiled! Exit code: {process.ExitCode}");
+    }
+
+    #endregion
+
+    #region Linux
+
+    private void HandleWineCompilation(ref string executable, ref string wineArgument, ref string effectPath, ref string outputEffect)
+    {
+        ProcessStartInfo pInfo = new()
+        {
+            WindowStyle = ProcessWindowStyle.Hidden,
+            FileName = "/bin/bash",
+            Arguments = "-c \"command -v wine\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+
+        using Process process = new();
+
+        process.StartInfo = pInfo;
+        process.Start();
+
+        process.WaitForExit();
+
+        string error = process.StandardError.ReadToEnd();
+        string output = process.StandardOutput.ReadToEnd();
+
+        if (!string.IsNullOrEmpty(error))
+            Mod.Logger.Warn($"Error during WINE call converting {error}");
+
+        if (string.IsNullOrEmpty(output))
+            Mod.Logger.Warn($"Could not find WINE; maybe try installing it from your package manager?");
+
+        wineArgument = executable;
+        executable = output.Trim();
+
+        WinePathConversion(ref effectPath);
+        WinePathConversion(ref outputEffect);
+    }
+
+    private void WinePathConversion(ref string path)
+    {
+        ProcessStartInfo pInfo = new()
+        {
+            WindowStyle = ProcessWindowStyle.Hidden,
+            FileName = "/bin/bash",
+            Arguments = $"-c \"winepath --windows '{path}'\"",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false
+        };
+
+        using Process process = new();
+
+        process.StartInfo = pInfo;
+        process.Start();
+
+        process.WaitForExit();
+
+        string error = process.StandardError.ReadToEnd();
+        string output = process.StandardOutput.ReadToEnd();
+
+        if (string.IsNullOrEmpty(output))
+            Mod.Logger.Warn($"Error converting path \"{path}\" using WINE; {error}");
+
+        path = output.Trim();
     }
 
     #endregion

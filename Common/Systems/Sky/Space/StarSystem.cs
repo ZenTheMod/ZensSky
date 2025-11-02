@@ -231,6 +231,37 @@ public sealed class StarSystem : ModSystem, IPacketHandler
 
     #endregion
 
+    #region Public Methods
+
+    [ModCall("RegenStars", "RegenerateStars")]
+    public static void GenerateStars(int seed = DefaultStarGenerationSeed)
+    {
+        if (Main.dedServ)
+        {
+            Array.Clear(Stars);
+            return;
+        }
+
+        UnifiedRandom rand = new(seed);
+
+        StarRotation = 0f;
+
+        for (int i = 0; i < StarCount; i++)
+            Stars[i] = new(rand, CircularRadius);
+
+        StarHooks.InvokeGenerateStars(rand, seed);
+    }
+
+    public static void UpdateStarAlpha()
+    {
+        StarAlpha = StarAlphaOverride == -1 ?
+            CalculateStarAlpha() : StarAlphaOverride;
+
+        StarAlphaOverride = -1;
+    }
+
+    #endregion
+
     #region Private Methods
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -261,37 +292,6 @@ public sealed class StarSystem : ModSystem, IPacketHandler
         float atmosphericBoost = Easings.InCubic(1f - Main.atmo);
 
         return Utilities.Saturate(Easings.InCubic(alpha + atmosphericBoost));
-    }
-
-    #endregion
-
-    #region Public Methods
-
-    [ModCall("RegenStars", "RegenerateStars")]
-    public static void GenerateStars(int seed = DefaultStarGenerationSeed)
-    {
-        if (Main.dedServ)
-        {
-            Array.Clear(Stars);
-            return; 
-        }
-
-        UnifiedRandom rand = new(seed);
-
-        StarRotation = 0f;
-
-        for (int i = 0; i < StarCount; i++)
-            Stars[i] = new(rand, CircularRadius);
-
-        StarHooks.InvokeGenerateStars(rand, seed);
-    }
-
-    public static void UpdateStarAlpha()
-    {
-        StarAlpha = StarAlphaOverride == -1 ?
-            CalculateStarAlpha() : StarAlphaOverride;
-
-        StarAlphaOverride = -1;
     }
 
     #endregion

@@ -18,3 +18,5 @@ global using ButtonTextures = ZensSky.GeneratedAssets.Textures.UI.Buttons.Textur
 global using PanelStyleTextures = ZensSky.GeneratedAssets.Textures.UI.PanelStyle.Textures;
 
 global using MiscTextures = ZensSky.GeneratedAssets.Textures.Textures;
+
+global using AuthorshipTextures = ZensSky.GeneratedAssets.Textures.Authorship.Textures;

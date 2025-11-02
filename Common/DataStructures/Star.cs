@@ -32,16 +32,16 @@ public record struct Star
     private const float LowTempThreshold = .4f;
     private const float HighTempThreshold = .6f;
 
-    private const float TwinkleTimeMultiplier = 1.45f;
+    private const float TwinkleTimeMultiplier = MathHelper.TwoPi * .35f;
 
     private const float VanillaScale = .95f;
-    private const float VanillaTwinkleMin = .75f;
+    private const float VanillaTwinkleMin = .73f;
     private const float VanillaTwinkleMax = 1.03f;
 
     private const float DiamondSize = .124f;
     private const float DiamondAlpha = .75f;
     private const float DiamondTwinkleMin = .8f;
-    private const float DiamondTwinkleMax = 1.20f;
+    private const float DiamondTwinkleMax = 1.2f;
 
     private const float FlareSize = .14f;
     private const float FlareInnerSize = .03f;

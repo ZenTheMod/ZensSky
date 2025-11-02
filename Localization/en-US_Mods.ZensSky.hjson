@@ -2,11 +2,31 @@ Configs: {
 	Locked: - Locked
 
 	StarVisual: {
-		Vanilla.Label: Vanilla
-		Diamond.Label: Diamond
-		FourPointed.Label: Four Pointed
-		OuterWilds.Label: Circle
-		Random.Label: Random
+		Vanilla: {
+			Label: Vanilla
+			Tooltip: ""
+		}
+
+		Diamond: {
+			Label: Diamond
+			Tooltip: ""
+		}
+
+		FourPointed: {
+			Label: Four Pointed
+			Tooltip: ""
+		}
+
+		OuterWilds: {
+			Label: Circle
+			Tooltip: ""
+		}
+
+		Random: {
+			Label: Random
+			Tooltip: ""
+		}
+
 		Tooltip: ""
 	}
 

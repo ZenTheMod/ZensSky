@@ -46,7 +46,8 @@ public static class WindRendering
     {
         orig(self);
 
-        if (!Main.gameMenu ||
+        if (!ZensSky.CanDrawSky ||
+            !Main.gameMenu ||
             !SkyConfig.Instance.UseWindParticles ||
             SkyConfig.Instance.WindOpacity <= 0)
             return;
@@ -58,7 +59,8 @@ public static class WindRendering
     {
         orig(self);
 
-        if (Main.gameMenu ||
+        if (!ZensSky.CanDrawSky ||
+            Main.gameMenu ||
             !SkyConfig.Instance.UseWindParticles ||
             SkyConfig.Instance.WindOpacity <= 0)
             return;

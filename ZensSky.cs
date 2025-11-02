@@ -1,21 +1,23 @@
+﻿using Daybreak.Common.Features.Authorship;
+using Daybreak.Common.Features.ModPanel;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content.Sources;
 using System;
 using System.IO;
 using System.Linq;
 using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader;
-using ZensSky.GeneratedAssets.AssetReaders;
 using ZensSky.Core;
-using ZensSky.Core.Net;
 using ZensSky.Core.ModCall;
-
+using ZensSky.Core.Net;
+using ZensSky.GeneratedAssets.AssetReaders;
 
 #pragma warning disable CS8603 // Possible null reference return.
 
 namespace ZensSky;
 
-public sealed class ZensSky : Mod
+public sealed class ZensSky : Mod, IHasCustomAuthorMessage
 {
     #region Public Properties
 
@@ -91,6 +93,8 @@ public sealed class ZensSky : Mod
 
     #endregion
 
+    #region Content
+
     public override IContentSource CreateDefaultContentSource()
     {
         if (!Main.dedServ)
@@ -98,6 +102,17 @@ public sealed class ZensSky : Mod
 
         return base.CreateDefaultContentSource();
     }
+
+    #endregion
+
+    #region Authorshp
+
+    private const string AuthorshipHeaderKey = "Mods.ZensSky.AuthorTags.Header";
+
+    string IHasCustomAuthorMessage.GetAuthorText() =>
+        AuthorText.GetAuthorTooltip(this, Language.GetTextValue(AuthorshipHeaderKey));
+
+    #endregion
 
     #region Packets
 

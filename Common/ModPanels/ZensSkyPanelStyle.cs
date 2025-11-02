@@ -5,10 +5,8 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
-using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
 using ZensSky.Common.Config;
@@ -31,8 +29,8 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
     private static readonly Color PanelOutlineColor = new(76, 76, 76, 76);
     private static readonly Color PanelHoverOutlineColor = new(100, 80, 90, 0);
 
-    private static readonly Color BackgroundColor = Color.DarkBlue;
-    private static readonly Color BackgroundGradientColor = new(168, 108, 39, 0);
+    private static readonly Color BackgroundColor = new(78, 62, 130);
+    private static readonly Color BackgroundGradientColor = new(64, 48, 22, 0);
 
     private static readonly Vector2 BranchPosition = new(-14, 10);
     private static readonly Vector2 BranchOrigin = new(-12, 47);
@@ -40,7 +38,7 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
     private const float BranchRotationFrequency = 2.1f;
     private const float BranchRotationAmplitude = .06f;
 
-    private static readonly Color ForegroundGradientColor = new(50, 30, 7, 0);
+    private static readonly Color ForegroundGradientColor = new(117, 81, 47, 0);
 
     private const int LeafCount = 55;
     private static readonly ParticleHandler<SakuraLeafParticle> Leaves = new(LeafCount);
@@ -57,10 +55,13 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
     private const float WindSpawnOffsetXMin = -1000f;
     private const float WindSpawnOffsetXMax = -400f;
 
-    private const int StarCount = 40;
+    private const int StarCount = 240;
     private static readonly Star[] Stars = new Star[StarCount];
 
     private static bool GeneratedStars = false;
+
+    private const float StarRotationIncrement = .00045f;
+    private static float StarRotation;
 
     #endregion
 
@@ -109,16 +110,10 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
         UpdateLeafs(size);
         UpdateWinds(size);
 
-        if (GeneratedStars)
-            return;
-
-        GeneratedStars = true;
-
-        Rectangle rectangle = new(0, 0, (int)size.X, (int)size.Y);
-
-        for (int i = 0; i < StarCount; i++)
-            Stars[i] = new(Main.rand, rectangle);
+        UpdateStars(size);
     }
+
+    #region Particles
 
     private static void UpdateLeafs(Vector2 size)
     {
@@ -144,6 +139,27 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
             Main.rand.NextFloat(-size.Y * .1f, size.Y * 1.1f));
 
         Winds.Spawn(new(position, .6f, false));
+    }
+
+    #endregion
+
+    private static void UpdateStars(Vector2 size)
+    {
+        StarRotation += StarRotationIncrement;
+        StarRotation %= MathHelper.TwoPi;
+
+            // Regenerate stars if applicable.
+        if (GeneratedStars)
+            return;
+
+        GeneratedStars = true;
+
+        Vector2 center = new(size.X * .5f, size.Y);
+
+        float radius = center.Length();
+
+        for (int i = 0; i < StarCount; i++)
+            Stars[i] = new(Main.rand, radius);
     }
 
     #endregion
@@ -198,7 +214,7 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
             // Additional border that stands out more.
         element.DrawPanel(spriteBatch, element._borderTexture.Value, element.IsMouseHovering ? PanelHoverOutlineColor : PanelOutlineColor);
 
-            // Draw our custom faded divider.
+            // Draw our faded divider.
         drawDivider = false;
 
         Rectangle innerDimensions = element.InnerDimensions;
@@ -221,10 +237,12 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
         spriteBatch.Draw(SkyTextures.SkyGradient, background, BackgroundGradientColor);
 
             // Draw background stars.
-        StarRendering.DrawStars(spriteBatch, .2f, 0f, Stars, SkyConfig.Instance.StarStyle);
-
         spriteBatch.End(out var snapshot);
-        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
+        spriteBatch.Begin(snapshot with { TransformMatrix = RotationMatrix(size) });
+
+        StarRendering.DrawStars(spriteBatch, .2f, -StarRotation, Stars, SkyConfig.Instance.StarStyle);
+
+        spriteBatch.Restart(snapshot with { SamplerState = SamplerState.PointClamp });
 
             // Branch that rotates around an origin out of frame.
         Vector2 branchPosition = BranchPosition + (Vector2.UnitY * size.Y * .5f);
@@ -252,10 +270,22 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
         spriteBatch.Begin(in snapshot);
 
-            // Vauge light above the background.
+            // Vauge foreground light.
         spriteBatch.Draw(SkyTextures.SkyGradient, background, ForegroundGradientColor);
 
         spriteBatch.End();
+    }
+
+    #endregion
+
+    #region Private Methods
+
+    private static Matrix RotationMatrix(Vector2 size)
+    {
+        Matrix rotation = Matrix.CreateRotationZ(StarRotation);
+        Matrix offset = Matrix.CreateTranslation(new(size.X * .5f, size.Y, 0f));
+
+        return Matrix.Identity * rotation * offset;
     }
 
     #endregion
