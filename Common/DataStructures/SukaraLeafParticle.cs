@@ -13,7 +13,7 @@ public record struct SakuraLeafParticle : IParticle
     private const int FrameTime = 8;
     private const int Frames = 4;
 
-    private const float LifeTimeIncrement = .0033f;
+    private const float LifeTimeIncrement = .003f;
 
     private const float WindX = 6.5f;
 
@@ -39,10 +39,10 @@ public record struct SakuraLeafParticle : IParticle
 
     #region Public Constructors
 
-    public SakuraLeafParticle(Vector2 position)
+    public SakuraLeafParticle(Vector2 position, Vector2? velocity = null)
     {
         Position = position;
-        Velocity = Vector2.Zero;
+        Velocity = velocity ?? Vector2.Zero;
         FrameTimer = 0;
         Frame = 0;
         LifeTime = 0f;

@@ -2,9 +2,11 @@
 using Daybreak.Common.Rendering;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoMod.RuntimeDetour;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Terraria;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader.UI;
@@ -16,13 +18,26 @@ using ZensSky.Core;
 using ZensSky.Core.DataStructures;
 using ZensSky.Core.Particles;
 using ZensSky.Core.Utils;
+using static System.Reflection.BindingFlags;
 using Star = ZensSky.Common.DataStructures.Star;
 
 namespace ZensSky.Common.ModPanels;
 
+/// <summary>
+/// Edits and Hooks:
+/// <list type="bullet">
+///     <item>
+///         <see cref="ReorderUIModList"/><br/>
+///         Reorders <see cref="UIMods.modList"/> to be placed after all buttons.
+///     </item>
+/// </list>
+/// </summary>
 public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 {
     #region Private Fields
+
+    private delegate void orig_OnInitialize(UIMods self);
+    private static Hook? PatchOnInitialize;
 
     private static RenderTarget2D? PanelTarget;
 
@@ -40,13 +55,27 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     private static readonly Color ForegroundGradientColor = new(117, 81, 47, 0);
 
+    #region Particles
+
+        // Leaves.
     private const int LeafCount = 55;
     private static readonly ParticleHandler<SakuraLeafParticle> Leaves = new(LeafCount);
 
     private const int LeafSpawnChance = 30;
 
-    private const float LeafSpawnOffsetX = -15f;
+    private const float LeafSpawnOffsetXMin = -100f;
+    private const float LeafSpawnOffsetXMax = -13f;
 
+        // Hover Leaves.
+    private const int LeafHoverTime = 135;
+    private static int LeafHoverTimer;
+
+    private const int LeafHoverCountMin = 4;
+    private const int LeafHoverCountMax = 12;
+
+    private static readonly Vector2 LeafHoverVelocity = new(28, 0);
+
+        // Wind.
     private const int WindCount = 45;
     private static readonly ParticleHandler<WindParticle> Winds = new(WindCount);
 
@@ -54,6 +83,10 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     private const float WindSpawnOffsetXMin = -1000f;
     private const float WindSpawnOffsetXMax = -400f;
+
+    #endregion
+
+    #region Stars
 
     private const int StarCount = 240;
     private static readonly Star[] Stars = new Star[StarCount];
@@ -65,10 +98,58 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     #endregion
 
+    #region Bird
+
+    private static BirdState BirdState;
+
+    private static readonly Vector2 BirdBranchOffset = new(35, 44);
+    private static readonly Vector2 BirdOrigin = new(15, 22);
+
+    private static Vector2 BirdPosition;
+
+    private const float BirdVelocityMultiplier = 1.07f;
+    private const float BirdMaxVelocitySqr = 12f * 12f;
+    private static readonly Vector2 BirdDirection = new(.9f, -1.5f);
+    private static Vector2 BirdVelocity;
+
+    private const int BirdFrames = 5;
+    private const int BirdFlyingFrames = 4;
+    private const int BirdFrameTime = 6;
+    private static int BirdFrame;
+    private static int BirdFrameTimer;
+
+    #endregion
+
+    #endregion
+
     #region Loading
 
-    public override void Unload() => 
-        MainThreadSystem.Enqueue(() => PanelTarget?.Dispose());
+    public override void Load()
+    {
+        MethodInfo? onInitialize = typeof(UIMods).GetMethod(nameof(UIMods.OnInitialize), Instance | Public);
+
+        if (onInitialize is not null)
+            PatchOnInitialize = new(onInitialize,
+                ReorderUIModList);
+    }
+
+    public override void Unload()
+    {
+        MainThreadSystem.Enqueue(() =>
+            PanelTarget?.Dispose());
+
+        PatchOnInitialize?.Dispose();
+    }
+
+    private void ReorderUIModList(orig_OnInitialize orig, UIMods self)
+    {
+        orig(self);
+
+            // Move the mod list to the front to have it drawn after certain buttons.
+
+        self.uIPanel.RemoveChild(self.modList);
+        self.uIPanel.Append(self.modList);
+    }
 
     #endregion
 
@@ -77,8 +158,19 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
     public override void PostInitialize(UIModItem element)
     {
         element.OnUpdate += Update;
+        element.OnMouseOver += OnHover;
+
+        ResetBird();
 
         GeneratedStars = false;
+    }
+
+    private static void ResetBird()
+    {
+        BirdState = Main.rand.NextBool() ? BirdState.None : BirdState.Idle;
+        BirdVelocity = Vector2.Zero;
+        BirdFrame = BirdFrames - 1;
+        BirdFrameTimer = 0;
     }
 
     #endregion
@@ -103,7 +195,7 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     #region Updating
 
-    private void Update(UIElement element)
+    private static void Update(UIElement element)
     {
         Vector2 size = element.Dimensions.Size();
 
@@ -111,6 +203,8 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
         UpdateWinds(size);
 
         UpdateStars(size);
+
+        UpdateBird(element);
     }
 
     #region Particles
@@ -119,12 +213,13 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
     {
         Leaves.Update();
 
+        if (LeafHoverTimer > 0)
+            LeafHoverTimer--;
+
         if (!Main.rand.NextBool(LeafSpawnChance))
             return;
 
-        Vector2 position = new(LeafSpawnOffsetX, Main.rand.NextFloat(-size.Y * .3f, size.Y));
-
-        Leaves.Spawn(new(position));
+        SpawnLeaf(size);
     }
 
     private static void UpdateWinds(Vector2 size)
@@ -143,6 +238,8 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     #endregion
 
+    #region Stars
+
     private static void UpdateStars(Vector2 size)
     {
         StarRotation += StarRotationIncrement;
@@ -156,7 +253,7 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
         Vector2 center = new(size.X * .5f, size.Y);
 
-        float radius = center.Length();
+        float radius = center.Length() * Main.UIScale;
 
         for (int i = 0; i < StarCount; i++)
             Stars[i] = new(Main.rand, radius);
@@ -164,7 +261,123 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     #endregion
 
+    #region Bird
+
+    private static void UpdateBird(UIElement element)
+    {
+        switch (BirdState)
+        {
+            case BirdState.None:
+                return;
+
+            case BirdState.Idle:
+
+                    // Update the base position.
+                Vector2 position = element.Dimensions.Position() * Main.UIScale;
+                Vector2 size = element.Dimensions.Size() * Main.UIScale;
+
+                Vector2 branchPosition =
+                    position +
+                    BranchPosition +
+                    (Vector2.UnitY * size.Y * .5f);
+
+                float branchRotation = MathF.Sin(Main.GlobalTimeWrappedHourly * BranchRotationFrequency) * BranchRotationAmplitude;
+
+                BirdPosition = BirdBranchOffset - BranchOrigin;
+                BirdPosition = BirdPosition.RotatedBy(branchRotation);
+
+                BirdPosition += branchPosition;
+
+                    // Only allow transitioning to flying if fully on screen.
+                if (!BirdOnScreen(element) ||
+                    !element.IsMouseHovering)
+                    return;
+
+                BirdState = BirdState.Flying;
+                BirdFrame = 0;
+
+                BirdVelocity = BirdDirection;
+                
+                return;
+
+            case BirdState.Flying:
+
+                if (++BirdFrameTimer >= BirdFrameTime)
+                {
+                    BirdFrameTimer = 0;
+
+                    if (++BirdFrame >= BirdFlyingFrames)
+                        BirdFrame = 0;
+                }
+
+                    // Make the bird only move so fast
+                if (BirdVelocity.LengthSquared() <= BirdMaxVelocitySqr)
+                    BirdVelocity *= BirdVelocityMultiplier;
+
+                BirdPosition += BirdVelocity;
+
+                if (BirdPosition.Y <= 0)
+                    BirdState = BirdState.None;
+
+                return;
+        }
+    }
+
+    private static bool BirdOnScreen(UIElement element)
+    {
+        Texture2D texture = PanelStyleTextures.Bird;
+
+        Rectangle rectangle = texture.Frame(1, BirdFrames, 0, 0);
+
+        Vector2 position = BirdPosition - BirdOrigin;
+        rectangle.X += (int)position.X;
+        rectangle.Y += (int)position.Y;
+
+        UIElement? innerList = element.Parent?.Parent;
+
+        if (innerList is null)
+            return false;
+
+        Rectangle parentRectangle = innerList.DimensionsFromParent.Multiply(Main.UIScale);
+
+        return parentRectangle.Contains(rectangle);
+    }
+
+    #endregion
+
+    #endregion
+
+    #region Interactions
+
+    private static void OnHover(UIMouseEvent evt, UIElement element)
+    {
+        Vector2 size = element.Dimensions.Size();
+
+        SpawnLeavesHover(size);
+    }
+
+    #region Particles
+
+    private static void SpawnLeavesHover(Vector2 size)
+    {
+        if (LeafHoverTimer > 0)
+            return;
+
+        LeafHoverTimer = LeafHoverTime;
+
+        int count = Main.rand.Next(LeafHoverCountMin, LeafHoverCountMax);
+
+        for (int i = 0; i < count; i++)
+            SpawnLeaf(size, LeafHoverVelocity);
+    }
+
+    #endregion
+
+    #endregion
+
     #region Drawing
+
+    #region Panel
 
     public override bool PreDrawPanel(UIModItem element, SpriteBatch spriteBatch, ref bool drawDivider)
     {
@@ -177,6 +390,8 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
         if (!UIEffects.Panel.IsReady)
             return true;
 
+        GraphicsDevice device = Main.instance.GraphicsDevice;
+
         Rectangle dims = element.Dimensions;
 
             // Make sure the panel draws correctly on any scale.
@@ -188,45 +403,77 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
         spriteBatch.End(out var snapshot);
 
-        GraphicsDevice device = Main.instance.GraphicsDevice;
-
+            // Panel background (sky, branch.)
         using (new RenderTargetSwap(ref PanelTarget, (int)size.X, (int)size.Y))
         {
             device.Clear(Color.Transparent);
 
-            DrawSkyPanel(spriteBatch, device, size);
+            DrawPanelBackground(spriteBatch, size);
         }
 
-        spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.None, snapshot.RasterizerState, null, Main.UIScaleMatrix);
+        DrawAsPanel(spriteBatch, snapshot, device, PanelTarget, source, element);
 
-        UIEffects.Panel.Source = new(source.Width, source.Height, source.X, source.Y);
+            // That fucking bird that I hate.
+        DrawBird(spriteBatch, snapshot, device, element);
 
-        UIEffects.Panel.Apply();
+            // Panel foreground (particles, glow.)
+        using (new RenderTargetSwap(ref PanelTarget, (int)size.X, (int)size.Y))
+        {
+            device.Clear(Color.Transparent);
 
-        device.Textures[1] = PanelTarget;
-        device.SamplerStates[1] = SamplerState.PointClamp;
+            DrawPanelForeground(spriteBatch, device, size);
+        }
 
-        element.DrawPanel(spriteBatch, element._backgroundTexture.Value, element.BackgroundColor);
-        element.DrawPanel(spriteBatch, element._borderTexture.Value, element.BorderColor);
+            // Use transparent as the panel color to only mask PanelTarget.
+        DrawAsPanel(spriteBatch, snapshot, device, PanelTarget, source, element, Color.Transparent);
 
-        spriteBatch.Restart(snapshot);
+            // Return to the base spriteBatch context.
+        spriteBatch.Begin(in snapshot);
 
             // Additional border that stands out more.
-        element.DrawPanel(spriteBatch, element._borderTexture.Value, element.IsMouseHovering ? PanelHoverOutlineColor : PanelOutlineColor);
+        Color borderColor =
+            element.IsMouseHovering ?
+            PanelHoverOutlineColor :
+            PanelOutlineColor;
 
-            // Draw our faded divider.
+        element.DrawPanel(spriteBatch, element._borderTexture.Value, borderColor);
+
+            // Faded divider.
         drawDivider = false;
 
         Rectangle innerDimensions = element.InnerDimensions;
 
-        Rectangle dividerSize = new(innerDimensions.X + 5 + element._modIconAdjust, innerDimensions.Y + 30, innerDimensions.Width - 10 - element._modIconAdjust, 4);
+        Rectangle dividerSize = new(
+            innerDimensions.X + 5 + element._modIconAdjust, innerDimensions.Y + 30,
+            innerDimensions.Width - 10 - element._modIconAdjust, 4);
 
         spriteBatch.Draw(PanelStyleTextures.Divider, dividerSize, Color.White);
 
         return false;
     }
 
-    private static void DrawSkyPanel(SpriteBatch spriteBatch, GraphicsDevice device, Vector2 size)
+    private static void DrawAsPanel(SpriteBatch spriteBatch, SpriteBatchSnapshot snapshot, GraphicsDevice device, Texture2D texture, Rectangle frame, UIPanel element, Color? color = null)
+    {
+        spriteBatch.Begin(snapshot with { SortMode = SpriteSortMode.Immediate });
+
+        UIEffects.Panel.Source = new(frame.Width, frame.Height, frame.X, frame.Y);
+
+        UIEffects.Panel.Apply();
+
+        device.Textures[1] = texture;
+        device.SamplerStates[1] = SamplerState.PointClamp;
+
+        element.DrawPanel(spriteBatch, element._backgroundTexture.Value, color ?? element.BackgroundColor);
+        element.DrawPanel(spriteBatch, element._borderTexture.Value, color ?? element.BorderColor);
+
+        spriteBatch.End();
+    }
+
+    #endregion
+
+    #region Background
+
+    private static void DrawPanelBackground(SpriteBatch spriteBatch, Vector2 size)
     {
         spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
 
@@ -251,11 +498,22 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
         spriteBatch.Draw(PanelStyleTextures.Branch, branchPosition, null, Color.White, branchRotation, BranchOrigin, 1f, SpriteEffects.None, 0f);
 
+        spriteBatch.End();
+    }
+
+    #endregion
+
+    #region Foreground
+
+    private static void DrawPanelForeground(SpriteBatch spriteBatch, GraphicsDevice device, Vector2 size)
+    {
+        spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Matrix.Identity);
+
             // Draw the falling leaves.
         Leaves.Draw(spriteBatch, device);
 
             // And faint wind particles.
-        spriteBatch.End();
+        spriteBatch.End(out var snapshot);
 
         device.Textures[0] = SkyTextures.SunBloom;
         device.SamplerStates[0] = SamplerState.LinearClamp;
@@ -268,7 +526,9 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
         Main.ColorOfTheSkies = oldSkyColor;
 
-        spriteBatch.Begin(in snapshot);
+        spriteBatch.Begin(snapshot with { SamplerState = SamplerState.LinearClamp });
+
+        Rectangle background = new(0, 0, (int)size.X, (int)size.Y);
 
             // Vauge foreground light.
         spriteBatch.Draw(SkyTextures.SkyGradient, background, ForegroundGradientColor);
@@ -278,7 +538,50 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     #endregion
 
+    #region Bird
+
+    private static void DrawBird(SpriteBatch spriteBatch, SpriteBatchSnapshot snapshot, GraphicsDevice device, UIPanel panel)
+    {
+        if (BirdState == BirdState.None)
+            return;
+
+        Rectangle scissor = device.ScissorRectangle;
+
+        if (BirdState == BirdState.Flying)
+            device.ScissorRectangle = device.Viewport.Bounds;
+
+        spriteBatch.Begin(snapshot with
+        {
+            BlendState = BlendState.AlphaBlend,
+            SamplerState = SamplerState.PointClamp,
+            TransformMatrix = Matrix.Identity
+        });
+
+        Texture2D texture = PanelStyleTextures.Bird;
+
+        Rectangle frame = texture.Frame(1, BirdFrames, 0, BirdFrame);
+
+        spriteBatch.Draw(texture, BirdPosition, frame, Color.White, 0f, BirdOrigin, 1f, SpriteEffects.None, 0f);
+
+        spriteBatch.End();
+
+        device.ScissorRectangle = scissor;
+    }
+
+    #endregion
+
+    #endregion
+
     #region Private Methods
+
+    private static void SpawnLeaf(Vector2 size, Vector2? velocity = null)
+    {
+        Vector2 position =
+            new(Main.rand.NextFloat(LeafSpawnOffsetXMin, LeafSpawnOffsetXMax),
+            Main.rand.NextFloat(-size.Y * .3f, size.Y));
+
+        Leaves.Spawn(new(position, velocity));
+    }
 
     private static Matrix RotationMatrix(Vector2 size)
     {

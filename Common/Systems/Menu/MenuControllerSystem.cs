@@ -59,7 +59,7 @@ public sealed class MenuControllerSystem : ModSystem
     private static readonly Color NotHovered = new(120, 120, 120, 76);
     private const int HorizontalPadding = 4;
 
-    private static ILHook? AddMenuControllerToggle;
+    private static ILHook? PatchUpdateAndDrawModMenuInner;
 
     private delegate void orig_Save(ModConfig config);
     private static Hook? PatchSaveConfig;
@@ -97,7 +97,7 @@ public sealed class MenuControllerSystem : ModSystem
             MethodInfo? updateAndDrawModMenuInner = typeof(MenuLoader).GetMethod(nameof(MenuLoader.UpdateAndDrawModMenuInner), Static | NonPublic);
 
             if (updateAndDrawModMenuInner is not null)
-                AddMenuControllerToggle = new(updateAndDrawModMenuInner, 
+                PatchUpdateAndDrawModMenuInner = new(updateAndDrawModMenuInner, 
                     AddToggle);
 
             IL_Main.DrawMenu += ModifyInteraction;
@@ -118,7 +118,7 @@ public sealed class MenuControllerSystem : ModSystem
     {
         MainThreadSystem.Enqueue(() =>
         {
-            AddMenuControllerToggle?.Dispose();
+            PatchUpdateAndDrawModMenuInner?.Dispose();
 
             PatchSaveConfig?.Dispose();
 
@@ -293,7 +293,8 @@ public sealed class MenuControllerSystem : ModSystem
         ConfigManager.Save(MenuConfig.Instance);
     }
 
-    public override void OnWorldUnload() => RefreshAll();
+    public override void OnWorldUnload() =>
+        RefreshAll();
 
     #endregion
 }

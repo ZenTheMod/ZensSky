@@ -33,5 +33,13 @@ public static partial class Utilities
     public static bool Contains(this Rectangle rectangle, Vector2 position) =>
         rectangle.Contains((int)position.X, (int)position.Y);
 
+    public static Rectangle Multiply(this Rectangle rectangle, float mult)
+    {
+        Vector2 position = rectangle.Position() * mult;
+        Vector2 size = rectangle.Size() * mult;
+
+        return new((int)position.X, (int)position.Y, (int)size.X, (int)size.Y);
+    }
+
     #endregion
 }

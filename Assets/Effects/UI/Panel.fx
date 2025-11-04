@@ -18,7 +18,7 @@ float4 PixelShaderFunction(float4 sampleColor : COLOR0, float2 coords : SV_POSIT
     
     float4 panel = tex2D(Panel, textureCoords);
     
-    color.a = panel.a;
+    color *= panel.a;
     
         // Fade the color towards the right side.
     color = lerp(panel * sampleColor, color, 1 - pow(coords.x, 2));
