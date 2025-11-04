@@ -265,62 +265,42 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
 
     private static void UpdateBird(UIElement element)
     {
-        switch (BirdState)
+        BirdState = BirdState switch
         {
-            case BirdState.None:
-                return;
+            BirdState.Idle => UpdateIdle(element),
+            BirdState.Flying => UpdatingFlying(),
+            _ => BirdState.None
+        };
+    }
 
-            case BirdState.Idle:
+    private static BirdState UpdateIdle(UIElement element)
+    {
+            // Update the base position.
+        Vector2 position = element.Dimensions.Position() * Main.UIScale;
+        Vector2 size = element.Dimensions.Size() * Main.UIScale;
 
-                    // Update the base position.
-                Vector2 position = element.Dimensions.Position() * Main.UIScale;
-                Vector2 size = element.Dimensions.Size() * Main.UIScale;
+        Vector2 branchPosition =
+            position +
+            BranchPosition +
+            (Vector2.UnitY * size.Y * .5f);
 
-                Vector2 branchPosition =
-                    position +
-                    BranchPosition +
-                    (Vector2.UnitY * size.Y * .5f);
+        float branchRotation = MathF.Sin(Main.GlobalTimeWrappedHourly * BranchRotationFrequency) * BranchRotationAmplitude;
 
-                float branchRotation = MathF.Sin(Main.GlobalTimeWrappedHourly * BranchRotationFrequency) * BranchRotationAmplitude;
+        BirdPosition = BirdBranchOffset - BranchOrigin;
+        BirdPosition = BirdPosition.RotatedBy(branchRotation);
 
-                BirdPosition = BirdBranchOffset - BranchOrigin;
-                BirdPosition = BirdPosition.RotatedBy(branchRotation);
+        BirdPosition += branchPosition;
 
-                BirdPosition += branchPosition;
+            // Only allow transitioning to flying if fully on screen.
+        if (!BirdOnScreen(element) ||
+            !element.IsMouseHovering)
+            return BirdState.Idle;
 
-                    // Only allow transitioning to flying if fully on screen.
-                if (!BirdOnScreen(element) ||
-                    !element.IsMouseHovering)
-                    return;
+        BirdFrame = 0;
 
-                BirdState = BirdState.Flying;
-                BirdFrame = 0;
+        BirdVelocity = BirdDirection;
 
-                BirdVelocity = BirdDirection;
-                
-                return;
-
-            case BirdState.Flying:
-
-                if (++BirdFrameTimer >= BirdFrameTime)
-                {
-                    BirdFrameTimer = 0;
-
-                    if (++BirdFrame >= BirdFlyingFrames)
-                        BirdFrame = 0;
-                }
-
-                    // Make the bird only move so fast
-                if (BirdVelocity.LengthSquared() <= BirdMaxVelocitySqr)
-                    BirdVelocity *= BirdVelocityMultiplier;
-
-                BirdPosition += BirdVelocity;
-
-                if (BirdPosition.Y <= 0)
-                    BirdState = BirdState.None;
-
-                return;
-        }
+        return BirdState.Flying;
     }
 
     private static bool BirdOnScreen(UIElement element)
@@ -341,6 +321,28 @@ public sealed class ZensSkyPanelStyle : ModPanelStyleExt
         Rectangle parentRectangle = innerList.DimensionsFromParent.Multiply(Main.UIScale);
 
         return parentRectangle.Contains(rectangle);
+    }
+
+    private static BirdState UpdatingFlying()
+    {
+        if (++BirdFrameTimer >= BirdFrameTime)
+        {
+            BirdFrameTimer = 0;
+
+            if (++BirdFrame >= BirdFlyingFrames)
+                BirdFrame = 0;
+        }
+
+            // Make the bird only move so fast
+        if (BirdVelocity.LengthSquared() <= BirdMaxVelocitySqr)
+            BirdVelocity *= BirdVelocityMultiplier;
+
+        BirdPosition += BirdVelocity;
+
+        if (BirdPosition.Y <= 0)
+            BirdState = BirdState.None;
+
+        return BirdState.Flying;
     }
 
     #endregion
