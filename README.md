@@ -91,7 +91,6 @@ If you feel any feature lacks certain cross compatibility that you'd like, pleas
 ### 3D Modeling
 - www​.sprunolia.com
 - Zoey
-- Yonmaruyon
 
 [^BetterNightSky]: May lack support for some visuals.
 [^CalamityFables]: As of writing not all [Fables Moon Styles](https://calamityfables.wiki.gg/wiki/Vanilla_changes#Vanity_moons) have been properly accounted for; currently incomplete moons includes:
